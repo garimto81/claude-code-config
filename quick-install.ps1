@@ -1,6 +1,9 @@
 # Claude Code Project Setup Script for Windows PowerShell
 # Usage: iwr -useb https://raw.githubusercontent.com/garimto81/claude-code-config/master/quick-install.ps1 | iex
 
+# Save original location for restoration
+$OriginalLocation = Get-Location
+
 Write-Host "Starting Claude Code Project Configuration v2.1.0 setup..." -ForegroundColor Green
 Write-Host "Installing global configuration..." -ForegroundColor Blue
 
@@ -101,4 +104,7 @@ try {
 Write-Host ""
 Write-Host "To update in the future, run:" -ForegroundColor Blue
 Write-Host "iwr -useb https://raw.githubusercontent.com/garimto81/claude-code-config/master/quick-install.ps1 | iex" -ForegroundColor Cyan
+
+# Restore original location
+Set-Location $OriginalLocation
 

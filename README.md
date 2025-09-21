@@ -30,14 +30,28 @@
 
 ## 🚀 새 장비에서 설정하기
 
-### 1. 저장소 복제
+### ⚡ 원클릭 자동 설정 (권장)
+
+**macOS/Linux에서 단 한 줄로:**
+```bash
+curl -sSL https://raw.githubusercontent.com/[your-username]/claude-code-config/main/quick-install.sh | bash
+```
+
+**Windows PowerShell에서 단 한 줄로:**
+```powershell
+iwr -useb https://raw.githubusercontent.com/[your-username]/claude-code-config/main/quick-install.ps1 | iex
+```
+
+### 📋 수동 설치 (고급 사용자용)
+
+1. **저장소 복제**
 ```bash
 cd ~
 git clone https://github.com/[your-username]/claude-code-config.git
 cd claude-code-config
 ```
 
-### 2. 자동 설치 실행
+2. **자동 설치 실행**
 
 **Unix/Linux/macOS:**
 ```bash
@@ -50,7 +64,7 @@ chmod +x setup-claude.sh
 setup-claude.bat
 ```
 
-### 3. 설치 확인
+3. **설치 확인**
 ```bash
 claude config list
 ls -la ~/.claude/

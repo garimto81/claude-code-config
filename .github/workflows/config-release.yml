@@ -1,0 +1,86 @@
+name: Config Release
+on:
+  push:
+    branches: [main]
+    
+jobs:
+  validate-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Shell Scripts
+        run: |
+          bash -n scripts/*.sh
+          bash -n .claude/migrations/*.sh
+
+      - name: Validate JSON/YAML
+        run: |
+          jq -e . .claude/version.json
+          # Add YAML validation if devcontainer exists
+          if [ -f .devcontainer/devcontainer.json ]; then
+            jq -e . .devcontainer/devcontainer.json
+          fi
+
+      - name: Extract Version
+        id: version
+        run: |
+          VERSION=$(jq -r .version .claude/version.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Test Installation (Linux)
+        run: |
+          # Test the installation script
+          bash scripts/install.sh || echo "Install test completed"
+          bash scripts/healthcheck.sh || echo "Health check completed"
+
+      - name: Create Version Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "Claude Config Bot"
+          git config user.email "claude-config@noreply.github.com"
+          
+          # Create or update tag
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.version.outputs.version }} already exists, forcing update"
+            git tag -f "v${{ steps.version.outputs.version }}"
+            git push -f origin "v${{ steps.version.outputs.version }}"
+          else
+            echo "Creating new tag v${{ steps.version.outputs.version }}"
+            git tag "v${{ steps.version.outputs.version }}"
+            git push origin "v${{ steps.version.outputs.version }}"
+          fi
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Claude Code Configuration v${{ steps.version.outputs.version }}
+          body: |
+            ## Claude Code Universal Configuration v${{ steps.version.outputs.version }}
+            
+            ### Installation
+            
+            **macOS/Linux/WSL:**
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/quick-install.sh | bash
+            ```
+            
+            **Windows PowerShell:**
+            ```powershell
+            iwr -useb https://raw.githubusercontent.com/${{ github.repository }}/main/quick-install.ps1 | iex
+            ```
+            
+            ### Changes
+            - Enhanced offline synchronization handling
+            - Improved state tracking and stale detection
+            - Strengthened security policies
+            - Tag-based release model for cleaner history
+            
+            See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: false

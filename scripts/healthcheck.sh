@@ -70,6 +70,8 @@ echo -e "\n${GREEN}📋 Essential Components${NC}"
 check "Configuration directory" "[ -d ~/.claude ]"
 check "Main configuration file" "[ -f ~/.claude/claude.md ]"
 check "Version file" "[ -f ~/.claude/version.json ]"
+check "State directory" "[ -d ~/.claude/state ]"
+check "Secrets directory" "[ -d ~/.claude/secrets ]"
 check "Git installation" "command -v git"
 
 # 중요 체크 (경고 수준)
@@ -105,6 +107,30 @@ if [ -d ~/.claude-config/.git ]; then
     COMMIT_COUNT=$(git rev-list --count HEAD 2>/dev/null || echo "Unknown")
     echo "Last update: ${GREEN}$LAST_UPDATE${NC}"
     echo "Total commits: ${GREEN}$COMMIT_COUNT${NC}"
+fi
+
+# Stale 감지 및 동기화 상태
+if [ -f ~/.claude/state/last_sync ]; then
+    LAST_SYNC=$(cat ~/.claude/state/last_sync)
+    echo "Last sync: ${GREEN}$LAST_SYNC${NC}"
+    
+    HOURS_SINCE=$(( ($(date +%s) - $(date -d "$LAST_SYNC" +%s 2>/dev/null || echo 0)) / 3600 ))
+    if [ $HOURS_SINCE -gt 24 ]; then
+        echo "Sync status: ${YELLOW}STALE (${HOURS_SINCE}h old)${NC}"
+        ((WARNINGS++))
+    else
+        echo "Sync status: ${GREEN}FRESH${NC}"
+    fi
+else
+    echo "Sync status: ${RED}UNKNOWN${NC}"
+    ((WARNINGS++))
+fi
+
+if [ -f ~/.claude/state/sync_failed ]; then
+    echo "Last sync result: ${RED}FAILED${NC}"
+    ((WARNINGS++))
+else
+    echo "Last sync result: ${GREEN}SUCCESS${NC}"
 fi
 
 # Claude CLI 버전 체크

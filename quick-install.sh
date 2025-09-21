@@ -123,17 +123,35 @@ main() {
                 log "Adding shell integration to $shell_rc"
                 cat >> "$shell_rc" << 'EOF'
 
-# Claude Code Wrapper v2.0 (auto-sync)
+# Claude Code Wrapper v2.0 (auto-sync with enhanced offline handling)
 claude() {
     local CFG="$HOME/.claude"
     local LOCK="$CFG/.sync.lock"
+    local STATE_DIR="$CFG/state"
     
-    # Quick sync check (background)
+    mkdir -p "$CFG" "$STATE_DIR"
+    
+    # Check if initial setup is needed
+    if [ ! -f "$CFG/claude.md" ]; then
+        echo "⚙️ 최초 설정이 필요합니다. install.sh를 먼저 실행하세요."
+        return 1
+    fi
+    
+    # Background sync with enhanced error handling
     if [ -d "$HOME/.claude-config/.git" ]; then
         (
-            flock -n 9 || return 0
-            git -C "$HOME/.claude-config" pull --ff-only --quiet 2>/dev/null || true
-            rsync -a --quiet "$HOME/.claude-config/.claude/" "$CFG/" 2>/dev/null || true
+            flock -n 9 || { echo "⏳ 다른 동기화 진행 중"; return 0; }
+            
+            # Try to pull updates
+            if git -C "$HOME/.claude-config" pull --ff-only --quiet 2>/dev/null; then
+                rsync -a --quiet "$HOME/.claude-config/.claude/" "$CFG/" 2>/dev/null || true
+                git -C "$HOME/.claude-config" rev-parse HEAD > "$STATE_DIR/HEAD" 2>/dev/null
+                date +%FT%T > "$STATE_DIR/last_sync"
+            else
+                echo "⚠️ 동기화 실패 (오프라인 모드로 진행)"
+                # Mark as stale if sync fails
+                touch "$STATE_DIR/sync_failed"
+            fi
         ) 9>"$LOCK" &
     fi
     

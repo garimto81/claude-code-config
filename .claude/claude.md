@@ -107,13 +107,31 @@ check_required_tools
 
 ### Phase 4: 동기화 잠금 및 상태 보고
 ```bash
-# 동기화 잠금 확인
+# 동기화 잠금 및 상태 확인
 LOCK_FILE=~/.claude/.sync.lock
+STATE_DIR=~/.claude/state
+mkdir -p "$STATE_DIR"
+
 if [ -f "$LOCK_FILE" ]; then
     LOCK_AGE=$(($(date +%s) - $(stat -f %m "$LOCK_FILE" 2>/dev/null || stat -c %Y "$LOCK_FILE")))
     if [ $LOCK_AGE -gt 300 ]; then  # 5분 이상 된 잠금은 제거
         rm -f "$LOCK_FILE"
         echo "🔓 Removed stale lock file"
+    fi
+fi
+
+# 상태 파일 업데이트
+if [ -d ~/.claude-config/.git ]; then
+    git -C ~/.claude-config rev-parse HEAD > "$STATE_DIR/HEAD" 2>/dev/null || true
+    date +%FT%T > "$STATE_DIR/last_sync"
+fi
+
+# Stale 감지
+if [ -f "$STATE_DIR/last_sync" ]; then
+    LAST_SYNC=$(cat "$STATE_DIR/last_sync")
+    HOURS_SINCE=$(( ($(date +%s) - $(date -d "$LAST_SYNC" +%s 2>/dev/null || echo 0)) / 3600 ))
+    if [ $HOURS_SINCE -gt 24 ]; then
+        echo "⚠️ Configuration is $HOURS_SINCE hours old - consider updating"
     fi
 fi
 
@@ -159,8 +177,13 @@ never_commit:
   - "*.key", "*.pem", "*.cert"
   - secrets/, credentials/
   - "*.sqlite", "*.db" (unless explicitly allowed)
+  - ~/.claude/secrets/* (always local only)
 api_keys: "Use environment variables only"
-secrets_management: "HashiCorp Vault or cloud KMS"
+secrets_management: 
+  - "~/.claude/secrets/ for local secrets (Git ignored)"
+  - "OS keychain (Keychain/Credential Manager/gnome-keyring)"
+  - "HashiCorp Vault or cloud KMS for production"
+oauth_policy: "Each device requires manual 1-time authentication"
 ```
 
 ### Code Quality

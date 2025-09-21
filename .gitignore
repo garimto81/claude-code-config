@@ -4,6 +4,12 @@
 .claude-local.md
 *.local.md
 
+# State and secrets directories (never commit)
+.claude/state/
+.claude/secrets/
+state/
+secrets/
+
 # API Keys and tokens
 *.key
 *.token

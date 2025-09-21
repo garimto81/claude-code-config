@@ -42,9 +42,14 @@ try {
             & git clone "https://github.com/garimto81/claude-code-config.git" $ConfigRepoDir 2>$null
         }
         
-        # Copy .claude folder contents to user Claude directory
+        # Copy main CLAUDE.md and .claude folder contents to user Claude directory
+        if (Test-Path "$ConfigRepoDir\CLAUDE.md") {
+            Write-Host "Copying main configuration file..." -ForegroundColor Cyan
+            Copy-Item "$ConfigRepoDir\CLAUDE.md" "$ClaudeDir\CLAUDE.md" -Force
+        }
+        
         if (Test-Path "$ConfigRepoDir\.claude") {
-            Write-Host "Copying configuration files..." -ForegroundColor Cyan
+            Write-Host "Copying additional configuration files..." -ForegroundColor Cyan
             Copy-Item "$ConfigRepoDir\.claude\*" $ClaudeDir -Recurse -Force
             Write-Host "All configuration files copied successfully" -ForegroundColor Green
         }

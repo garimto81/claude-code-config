@@ -1,8 +1,8 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "schema": "2024-12",
   "release_date": "2024-12-21",
-  "release_notes": "Complete redesign with automatic synchronization and project-aware templates",
+  "release_notes": "Integrated comprehensive sub-agent system with 31 specialized agents and project management rules",
   "compatibility": {
     "min_claude_version": "1.0.0",
     "supported_platforms": ["windows", "macos", "linux"],
@@ -13,9 +13,13 @@
     "project_templates": true,
     "version_migration": true,
     "background_updates": true,
-    "shell_integration": true
+    "shell_integration": true,
+    "sub_agent_system": true,
+    "comprehensive_agents": 31,
+    "project_management_rules": true
   },
   "migration_path": {
-    "from_1.x": "migrate-1.x-to-2.x.sh"
+    "from_1.x": "migrate-1.x-to-2.x.sh",
+    "from_2.0": "migrate-2.0-to-2.1.sh"
   }
 }

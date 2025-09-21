@@ -34,7 +34,7 @@ if command -v git &> /dev/null; then
     # Update existing repository or clone new one
     if [ -d "$CONFIG_REPO_DIR/.git" ]; then
         echo "Updating existing configuration repository..."
-        cd "$CONFIG_REPO_DIR" && git pull --ff-only &> /dev/null
+        git -C "$CONFIG_REPO_DIR" pull --ff-only &> /dev/null
     else
         echo "Cloning configuration repository..."
         git clone "https://github.com/garimto81/claude-code-config.git" "$CONFIG_REPO_DIR" &> /dev/null

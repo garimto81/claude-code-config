@@ -35,8 +35,7 @@ try {
         # Update existing repository or clone new one
         if (Test-Path "$ConfigRepoDir\.git") {
             Write-Host "Updating existing configuration repository..." -ForegroundColor Cyan
-            Set-Location $ConfigRepoDir
-            & git pull --ff-only 2>$null
+            & git -C $ConfigRepoDir pull --ff-only 2>$null
         } else {
             Write-Host "Cloning configuration repository..." -ForegroundColor Cyan
             & git clone "https://github.com/garimto81/claude-code-config.git" $ConfigRepoDir 2>$null

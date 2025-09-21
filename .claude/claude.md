@@ -205,6 +205,12 @@ documentation:
   - Update README for public changes
   - Document breaking changes
   - Keep CHANGELOG.md current
+project_management:
+  - Follow semantic versioning with clear upgrade paths
+  - Update version numbers after any code changes
+  - Comprehensive README.md updates after modifications
+  - Never place project files in root working directory
+  - Use dedicated project subdirectories only
 ```
 
 ## 🔄 CONTINUOUS OPERATIONS
@@ -276,6 +282,55 @@ Refer to ~/.claude/settings/tools.md for available tools:
 - Database access (read-only by default)
 - External API calls (with rate limiting)
 - Shell command execution (sandboxed)
+
+## 🤖 Sub-Agent System
+Claude Code includes 31 specialized sub-agents for enhanced productivity:
+
+### Development Agents
+- **ai-engineer**: LLM applications, RAG systems, prompt pipelines
+- **backend-architect**: API design, microservice boundaries, database schemas
+- **frontend-developer**: React components, responsive layouts, state management
+- **code-reviewer**: Security vulnerabilities, configuration safety, production reliability
+- **architect-reviewer**: Architectural consistency and design pattern adherence
+
+### Data & Analytics
+- **data-engineer**: Data pipelines, ETL/ELT processes, data warehouses
+- **data-scientist**: SQL queries, BigQuery, statistical analysis, visualizations
+- **database-admin**: Database operations, backups, replication, monitoring
+- **database-optimizer**: Query optimization, index design, performance tuning
+
+### Infrastructure & DevOps
+- **cloud-architect**: AWS/Azure/GCP architecture, cost optimization, scalability
+- **deployment-engineer**: CI/CD pipelines, Docker containers, cloud deployment
+- **devops-troubleshooter**: Production issues, system logs, deployment failures
+- **terraform-specialist**: Infrastructure as code, Terraform modules, cloud provisioning
+
+### Quality & Testing
+- **test-automator**: Unit/integration/E2E tests, test frameworks, coverage
+- **debugger**: Error investigation, test failures, systematic debugging
+- **performance-engineer**: Performance analysis, bottleneck identification, optimization
+- **security-auditor**: Security audits, vulnerability assessments, OWASP compliance
+
+### Language Specialists
+- **python-pro**: Advanced Python with decorators, async patterns, type hints
+- **javascript-pro**: Modern JavaScript, ES6+ features, Node.js APIs
+- **typescript-pro**: Advanced TypeScript, generics, type inference
+- **golang-pro**: Idiomatic Go, goroutines, channels, interface design
+- **rust-pro**: Rust ownership, lifetimes, trait implementations
+
+### Specialized Tools
+- **mobile-developer**: React Native/Flutter, native integrations, mobile optimization
+- **graphql-architect**: GraphQL schema design, resolvers, federation
+- **ml-engineer**: ML pipelines, model deployment, feature engineering
+- **prompt-engineer**: LLM prompt creation and optimization
+- **ui-ux-designer**: Interface designs, wireframes, design systems
+- **search-specialist**: Web research, information synthesis, competitive intelligence
+
+### Usage Guidelines
+- **Actively utilize appropriate sub-agents** to enhance productivity
+- Sub-agents are automatically selected based on task context
+- Use explicit agent flags when specific expertise is needed
+- Combine multiple agents for complex cross-domain tasks
 
 ## 💡 DECISION FRAMEWORK
 When facing choices, prioritize in order:

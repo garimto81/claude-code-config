@@ -3,11 +3,10 @@
 # Usage: curl -sSL https://raw.githubusercontent.com/garimto81/claude-code-config/master/quick-install.sh | bash
 
 echo "Starting Claude Code Universal Configuration v2.1.0 setup..."
-echo "Installing in current directory: $(pwd)"
+echo "Installing global configuration..."
 
-# Configuration variables - install in current directory
-CURRENT_DIR="$(pwd)"
-CLAUDE_DIR="$CURRENT_DIR/.claude"
+# Configuration variables - global installation
+CLAUDE_DIR="$HOME/.claude"
 CONFIG_REPO_DIR="$HOME/.claude-config"  # Temp download location
 
 # Create Claude configuration directory
@@ -19,13 +18,10 @@ else
 fi
 
 # Backup existing configuration
-if [ -f "$CURRENT_DIR/CLAUDE.md" ]; then
+if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
     BACKUP_DIR="$CLAUDE_DIR/backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$BACKUP_DIR"
-    cp "$CURRENT_DIR/CLAUDE.md" "$BACKUP_DIR/CLAUDE.md" 2>/dev/null || true
-    if [ -d "$CLAUDE_DIR" ]; then
-        cp -r "$CLAUDE_DIR"/* "$BACKUP_DIR" 2>/dev/null || true
-    fi
+    cp -r "$CLAUDE_DIR"/* "$BACKUP_DIR" 2>/dev/null || true
     echo "Existing configuration backed up to: $BACKUP_DIR"
 fi
 
@@ -44,10 +40,10 @@ if command -v git &> /dev/null; then
         git clone "https://github.com/garimto81/claude-code-config.git" "$CONFIG_REPO_DIR" &> /dev/null
     fi
     
-    # Copy main CLAUDE.md to current directory root and .claude folder contents to current directory
+    # Copy main CLAUDE.md and .claude folder contents to global Claude directory
     if [ -f "$CONFIG_REPO_DIR/CLAUDE.md" ]; then
-        echo "Copying main configuration file to current directory..."
-        cp "$CONFIG_REPO_DIR/CLAUDE.md" "$CURRENT_DIR/CLAUDE.md"
+        echo "Copying main configuration file..."
+        cp "$CONFIG_REPO_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
     fi
     
     if [ -d "$CONFIG_REPO_DIR/.claude" ]; then
@@ -68,7 +64,7 @@ echo ""
 
 # Check installed components
 echo "Installed components:"
-if [ -f "$CURRENT_DIR/CLAUDE.md" ]; then
+if [ -f "$CLAUDE_DIR/CLAUDE.md" ]; then
     echo "  - Main configuration file (CLAUDE.md)"
 fi
 if [ -f "$CLAUDE_DIR/version.json" ]; then

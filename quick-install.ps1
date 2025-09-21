@@ -1,15 +1,11 @@
 # Claude Code Project Setup Script for Windows PowerShell
 # Usage: iwr -useb https://raw.githubusercontent.com/garimto81/claude-code-config/master/quick-install.ps1 | iex
 
-# Save original location for restoration
-$OriginalLocation = Get-Location
-
 Write-Host "Starting Claude Code Project Configuration v2.1.0 setup..." -ForegroundColor Green
-Write-Host "Installing in current directory: $(Get-Location)" -ForegroundColor Blue
+Write-Host "Installing global configuration..." -ForegroundColor Blue
 
-# Configuration variables - install in current directory
-$CurrentDir = Get-Location
-$ClaudeDir = "$CurrentDir\.claude"
+# Configuration variables - global installation
+$ClaudeDir = "$env:USERPROFILE\.claude"
 $ConfigRepoDir = "$env:USERPROFILE\.claude-config"  # Temp download location
 
 # Create Claude configuration directory
@@ -21,13 +17,10 @@ if (!(Test-Path $ClaudeDir)) {
 }
 
 # Backup existing configuration
-if (Test-Path "$CurrentDir\CLAUDE.md") {
+if (Test-Path "$ClaudeDir\CLAUDE.md") {
     $BackupDir = "$ClaudeDir\backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
     New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
-    Copy-Item "$CurrentDir\CLAUDE.md" "$BackupDir\CLAUDE.md" -ErrorAction SilentlyContinue
-    if (Test-Path "$ClaudeDir") {
-        Copy-Item "$ClaudeDir\*" $BackupDir -Recurse -ErrorAction SilentlyContinue
-    }
+    Copy-Item "$ClaudeDir\*" $BackupDir -Recurse -ErrorAction SilentlyContinue
     Write-Host "Existing configuration backed up to: $BackupDir" -ForegroundColor Green
 }
 
@@ -48,10 +41,10 @@ try {
             & git clone "https://github.com/garimto81/claude-code-config.git" $ConfigRepoDir 2>$null
         }
         
-        # Copy main CLAUDE.md to current directory root and .claude folder contents to current directory
+        # Copy main CLAUDE.md and .claude folder contents to global Claude directory
         if (Test-Path "$ConfigRepoDir\CLAUDE.md") {
-            Write-Host "Copying main configuration file to current directory..." -ForegroundColor Cyan
-            Copy-Item "$ConfigRepoDir\CLAUDE.md" "$CurrentDir\CLAUDE.md" -Force
+            Write-Host "Copying main configuration file..." -ForegroundColor Cyan
+            Copy-Item "$ConfigRepoDir\CLAUDE.md" "$ClaudeDir\CLAUDE.md" -Force
         }
         
         if (Test-Path "$ConfigRepoDir\.claude") {
@@ -75,7 +68,7 @@ Write-Host ""
 
 # Check installed components
 Write-Host "Installed components:" -ForegroundColor Blue
-if (Test-Path "$CurrentDir\CLAUDE.md") {
+if (Test-Path "$ClaudeDir\CLAUDE.md") {
     Write-Host "  - Main configuration file (CLAUDE.md)" -ForegroundColor Green
 }
 if (Test-Path "$ClaudeDir\version.json") {
@@ -109,5 +102,3 @@ Write-Host ""
 Write-Host "To update in the future, run:" -ForegroundColor Blue
 Write-Host "iwr -useb https://raw.githubusercontent.com/garimto81/claude-code-config/master/quick-install.ps1 | iex" -ForegroundColor Cyan
 
-# Restore original location
-Set-Location $OriginalLocation

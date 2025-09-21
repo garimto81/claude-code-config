@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "schema": "2024-12",
+  "release_date": "2024-12-21",
+  "release_notes": "Complete redesign with automatic synchronization and project-aware templates",
+  "compatibility": {
+    "min_claude_version": "1.0.0",
+    "supported_platforms": ["windows", "macos", "linux"],
+    "required_tools": ["git", "curl"]
+  },
+  "features": {
+    "auto_sync": true,
+    "project_templates": true,
+    "version_migration": true,
+    "background_updates": true,
+    "shell_integration": true
+  },
+  "migration_path": {
+    "from_1.x": "migrate-1.x-to-2.x.sh"
+  }
+}

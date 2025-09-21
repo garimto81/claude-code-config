@@ -1,6 +1,15 @@
-# Claude Code Configuration Repository
+# 🎯 Claude Code Universal Configuration v2.0
 
-이 저장소는 Claude Code 환경 설정을 여러 장비에서 동일하게 유지하기 위한 중앙 집중식 구성 관리 시스템입니다.
+**완벽한 자동 동기화 시스템** - 어떤 장비에서든 단 한 줄로 동일한 Claude Code 환경을 구축합니다.
+
+## ✨ v2.0 주요 특징
+
+- 🚀 **원클릭 설치**: 단 한 줄의 명령어로 완전 자동 설정
+- 🔄 **실시간 동기화**: Shell wrapper를 통한 백그라운드 자동 업데이트  
+- 📦 **프로젝트 인식**: JavaScript, Python, Rust, Go 등 자동 감지 및 맞춤 설정
+- 🛡️ **버전 관리**: 자동 마이그레이션과 rollback 지원
+- 🏗️ **계층적 설정**: 전역 → 프로젝트 → 폴더별 설정 상속
+- 🌍 **크로스 플랫폼**: Windows, macOS, Linux 완벽 지원
 
 ## 🎯 목적
 

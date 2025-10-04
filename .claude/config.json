@@ -1,0 +1,26 @@
+{
+  "version": "4.1",
+  "description": "Claude Code - Web Auth Edition",
+  "core": {
+    "language": "ko",
+    "style": "explanatory",
+    "auth": "github_cli_oauth"
+  },
+  "agents": {
+    "active": [
+      "debugger",
+      "code-reviewer"
+    ],
+    "auto_detect": true
+  },
+  "sync": {
+    "method": "gist",
+    "gist_id": "",
+    "auto_sync": true,
+    "sync_interval": "daily"
+  },
+  "notes": {
+    "authentication": "Using GitHub CLI web authentication (OAuth)",
+    "no_token_needed": "Token is managed by gh CLI automatically"
+  }
+}

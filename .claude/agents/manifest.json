@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "description": "Agent manifest for smart loading",
+
+  "categories": {
+    "always_active": [
+      "debugger",
+      "code-reviewer"
+    ],
+
+    "development": {
+      "frontend": ["frontend-developer", "ui-ux-designer"],
+      "backend": ["backend-architect", "database-optimizer"],
+      "fullstack": ["javascript-pro", "typescript-pro", "python-pro"]
+    },
+
+    "specialized": {
+      "data": ["data-engineer", "data-scientist", "ml-engineer"],
+      "infrastructure": ["cloud-architect", "deployment-engineer", "terraform-specialist"],
+      "security": ["security-auditor", "error-detective"],
+      "database": ["database-admin", "sql-pro"]
+    },
+
+    "language_specific": {
+      "javascript": ["javascript-pro", "frontend-developer"],
+      "typescript": ["typescript-pro", "frontend-developer"],
+      "python": ["python-pro", "data-scientist"],
+      "rust": ["rust-pro"],
+      "go": ["golang-pro"],
+      "graphql": ["graphql-architect"]
+    }
+  },
+
+  "auto_detect_rules": {
+    "package.json": ["javascript-pro", "frontend-developer"],
+    "requirements.txt": ["python-pro"],
+    "Cargo.toml": ["rust-pro"],
+    "go.mod": ["golang-pro"],
+    "docker-compose.yml": ["deployment-engineer"],
+    "terraform": ["terraform-specialist"]
+  },
+
+  "token_cost": {
+    "active": 1000,
+    "lazy_per_agent": 200
+  }
+}

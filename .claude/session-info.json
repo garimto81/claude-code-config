@@ -1,0 +1,68 @@
+{
+  "lastSession": {
+    "timestamp": "2025-10-05T00:30:00+09:00",
+    "workingDirectory": "e:\\claude",
+    "ideInfo": {
+      "name": "Visual Studio Code",
+      "pid": 35164,
+      "workspaceFolders": [
+        "e:\\claude\\virtual_data_claude"
+      ],
+      "transport": "ws",
+      "runningInWindows": true
+    },
+    "activeProjects": [
+      {
+        "name": "Claude Main",
+        "path": "e:\\claude",
+        "type": "main-workspace"
+      },
+      {
+        "name": "Virtual Data Claude",
+        "path": "e:\\claude\\virtual_data_claude",
+        "type": "sub-project"
+      }
+    ],
+    "mcpServers": [
+      "context7",
+      "sequential-thinking",
+      "supabase",
+      "github",
+      "exa"
+    ],
+    "configuration": {
+      "language": "ko",
+      "style": "explanatory",
+      "agents": {
+        "active": ["debugger", "code-reviewer"],
+        "lazy": 24
+      }
+    }
+  },
+  "workspaceConfig": {
+    "multiRoot": "workspace/claude-workspace.code-workspace",
+    "folders": [
+      {
+        "name": "📁 Claude Main",
+        "path": "e:\\claude"
+      },
+      {
+        "name": "🎬 Smart Shorts",
+        "path": "e:\\claude\\smart-shorts-claude"
+      },
+      {
+        "name": "📤 Soft Sender",
+        "path": "e:\\claude\\softSender"
+      }
+    ]
+  },
+  "scripts": {
+    "open_workspace": "scripts/open-workspace.bat",
+    "restore_session": "scripts/restore-session.bat"
+  },
+  "notes": {
+    "description": "현재 IDE 세션 및 배치 정보",
+    "usage": "복원 시 이 정보를 참고하여 동일한 환경 구성",
+    "restore_command": "code e:\\claude\\workspace\\claude-workspace.code-workspace"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(git:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(grep:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(curl:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(test:*)",
+      "Bash(echo:*)",
+      "Bash(claude:*)",
+      "Read(//c/Users/브로드스튜디오/.claude/**)",
+      "Read(//e/claude/**)",
+      "Write(//e/claude/**)",
+      "Edit(//e/claude/**)"
+    ],
+    "deny": [
+      "Read(//c/Users/브로드스튜디오/Documents/**)",
+      "Write(//c/**)"
+    ],
+    "ask": []
+  }
+}

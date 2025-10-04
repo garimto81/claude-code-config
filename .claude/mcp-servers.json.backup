@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@xinzhongyouhai/mcp-sequentialthinking-tools/mcp?api_key=1225b0b1-a453-4017-8633-f6ff0e39c785&profile=isolated-marmot-yA9s0K"
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@supabase-community/supabase-mcp/mcp?api_key=1225b0b1-a453-4017-8633-f6ff0e39c785&profile=isolated-marmot-yA9s0K"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@smithery-ai/github/mcp?api_key=1225b0b1-a453-4017-8633-f6ff0e39c785&profile=isolated-marmot-yA9s0K"
+    },
+    "exa": {
+      "type": "http",
+      "url": "https://server.smithery.ai/exa/mcp?api_key=1225b0b1-a453-4017-8633-f6ff0e39c785&profile=isolated-marmot-yA9s0K"
+    }
+  }
+}

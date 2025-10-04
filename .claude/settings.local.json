@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -ExecutionPolicy Bypass -File E:\claude\.claude\bin\verify-mcp-simple.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}

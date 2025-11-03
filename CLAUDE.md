@@ -21,7 +21,7 @@ Phase 0: 요구사항 (PRD) → Phase 0.5: Task List 생성
 
 **저장**: `/tasks/prds/0001-prd-feature-name.md` (0001부터 시작)
 
-📚 **상세**: [docs/PRD_GUIDE.md](docs/PRD_GUIDE.md)
+📚 **상세**: [docs/guides/PRD_GUIDE.md](docs/guides/PRD_GUIDE.md)
 
 ---
 
@@ -35,7 +35,6 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 
 **상태 마커**: `[ ]` 미시작 | `[x]` 완료 | `[!]` 실패 | `[⏸]` 블락
 
-📚 [generate-tasks.md](generate-tasks.md), [process-task-list.md](process-task-list.md)
 
 ---
 
@@ -94,8 +93,6 @@ python scripts/create_prd.py feature-name "Description"
 python scripts/auto_deploy.py feat "Add feature" --prd 0001 --bump minor
 ```
 
-📚 [scripts/README.md](scripts/README.md)
-
 ---
 
 ## 🚦 토큰 최적화
@@ -141,9 +138,8 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 
 | 문서 | 내용 |
 |------|------|
-| [PRD_GUIDE.md](docs/PRD_GUIDE.md) | Phase 0 상세, 명확화 질문 전체 |
-| [TOOLS_REFERENCE.md](docs/TOOLS_REFERENCE.md) | Python/Node/Docker 명령어 |
-| [scripts/README.md](scripts/README.md) | 자동화 스크립트 사용법 |
+| [PRD_GUIDE.md](docs/guides/PRD_GUIDE.md) | Phase 0 상세, 명확화 질문 전체 |
+| [TOOLS_REFERENCE.md](docs/guides/TOOLS_REFERENCE.md) | Python/Node/Docker 명령어 |
 
 ### 공식 문서
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)

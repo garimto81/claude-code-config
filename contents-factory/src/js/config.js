@@ -2,12 +2,12 @@
 // API Keys and Environment Variables
 
 // Supabase Configuration
-export const SUPABASE_URL = 'https://your-project.supabase.co';
-export const SUPABASE_ANON_KEY = 'your_anon_public_key_here';
+export const SUPABASE_URL = 'https://nuecesgtciziaotdmfhp.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51ZWNlc2d0Y2l6aWFvdGRtZmhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0ODM5MjEsImV4cCI6MjA3ODA1OTkyMX0.1BK_8McSgrE7T0vrjBL2zT_uWFmfkq-z7w05RqxzkDQ';
 
 // Cloudinary API Configuration
-export const CLOUDINARY_CLOUD_NAME = 'your_cloud_name_here';
-export const CLOUDINARY_UPLOAD_PRESET = 'your_upload_preset_here'; // unsigned preset
+export const CLOUDINARY_CLOUD_NAME = 'dzjp22inj';
+export const CLOUDINARY_UPLOAD_PRESET = 'photo-factory'; // unsigned preset
 
 // App Configuration
 export const APP_CONFIG = {

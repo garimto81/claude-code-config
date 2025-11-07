@@ -20,7 +20,7 @@ echo.
 echo ========================================
 echo 🌐 스마트폰에서 접속하세요:
 echo.
-echo    http://%IP%:8080/index.html
+echo    http://%IP%:8080/public/index.html
 echo.
 echo ========================================
 echo.
@@ -32,7 +32,7 @@ echo.
 echo [3/3] HTTP 서버 실행...
 echo.
 
-cd src\public
+cd src
 python -m http.server 8080
 
 pause

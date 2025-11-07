@@ -9,6 +9,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+  <!-- Uppy CSS -->
+  <link href="https://releases.transloadit.com/uppy/v3.21.0/uppy.min.css" rel="stylesheet">
+
   <style>
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -153,6 +156,24 @@
       justify-content: center;
     }
 
+    /* Uppy 커스텀 스타일 */
+    .uppy-container {
+      margin-bottom: 20px;
+    }
+
+    .uppy-Dashboard-inner {
+      border: 2px dashed #667eea !important;
+      border-radius: 10px;
+    }
+
+    .uppy-Dashboard-AddFiles {
+      border-color: #667eea !important;
+    }
+
+    .uppy-Dashboard-AddFiles-title {
+      color: #667eea !important;
+    }
+
     .job-info {
       background: #f8f9fa;
       padding: 20px;
@@ -255,11 +276,14 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Uppy JS -->
+  <script src="https://releases.transloadit.com/uppy/v3.21.0/uppy.min.js"></script>
+
   <!-- App JS -->
   <script type="module">
     import { requireAuth, displayUserProfile } from '../js/auth.js';
-    import { addPhotoToCategory, saveJob, resetJob, currentJob } from '../js/upload.js';
-    import { APP_CONFIG } from '../js/config.js';
+    import { saveJob, resetJob, currentJob } from '../js/upload.js';
+    import { APP_CONFIG, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../js/config.js';
 
     // 로그인 확인
     const user = await requireAuth();
@@ -300,17 +324,8 @@
           <h4 class="mb-3">${category.icon} ${category.label}</h4>
           <p class="text-muted">${category.description}</p>
 
-          <label for="camera-${category.id}" class="camera-btn">
-            <i class="bi bi-camera"></i>
-            <span>사진 촬영 (최대 ${APP_CONFIG.photosPerCategory}장)</span>
-            <input type="file"
-                   id="camera-${category.id}"
-                   class="d-none"
-                   accept="image/*"
-                   capture="camera"
-                   multiple
-                   onchange="handlePhotoCapture(event, '${category.id}')">
-          </label>
+          <!-- Uppy Dashboard for this category -->
+          <div id="uppy-${category.id}" class="uppy-container mb-3"></div>
 
           <div id="photos-${category.id}" class="photos-grid"></div>
         `;
@@ -318,33 +333,112 @@
       });
     }
 
-    // 사진 촬영 처리
-    window.handlePhotoCapture = async function(event, category) {
-      const files = Array.from(event.target.files);
-      const badge = document.getElementById(`badge-${category}`);
+    // Uppy 인스턴스 저장소
+    const uppyInstances = {};
 
-      for (const file of files) {
-        try {
-          await addPhotoToCategory(category, file);
-
-          // 배지 업데이트
-          const count = currentJob.photos[category]?.length || 0;
-          badge.textContent = count;
-
-          // 최대 개수 도달 시 비활성화
-          if (count >= APP_CONFIG.photosPerCategory) {
-            event.target.disabled = true;
-            event.target.parentElement.style.opacity = '0.5';
+    // 카테고리별 Uppy 초기화
+    function initializeUppy(category) {
+      const uppy = new Uppy.Core({
+        id: `uppy-${category.id}`,
+        restrictions: {
+          maxFileSize: APP_CONFIG.maxFileSize,
+          maxNumberOfFiles: APP_CONFIG.photosPerCategory,
+          allowedFileTypes: APP_CONFIG.allowedFileTypes
+        },
+        autoProceed: true // 파일 선택 즉시 자동 업로드
+      })
+      .use(Uppy.Dashboard, {
+        inline: true,
+        target: `#uppy-${category.id}`,
+        height: 300,
+        proudlyDisplayPoweredByUppy: false,
+        note: `${category.label} 사진 (최대 ${APP_CONFIG.photosPerCategory}장)`,
+        locale: {
+          strings: {
+            dropPasteImportBoth: '사진을 드래그하거나 %{browse}',
+            browse: '선택하세요',
+            takePicture: '📸 촬영하기',
+            dropPaste: '사진을 여기에 드롭',
+            uploading: '업로드 중...',
+            complete: '완료!'
           }
-        } catch (error) {
-          console.error('사진 업로드 오류:', error);
-          alert(error.message);
         }
-      }
+      })
+      .use(Uppy.Webcam, {
+        target: Uppy.Dashboard,
+        modes: ['picture'],
+        mirror: false,
+        facingMode: 'environment' // 후면 카메라 (모바일)
+      })
+      .use(Uppy.XHRUpload, {
+        endpoint: `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`,
+        formData: true,
+        fieldName: 'file',
+        method: 'POST',
+        headers: {},
+        bundle: false
+      });
 
-      // 파일 입력 초기화
-      event.target.value = '';
-    };
+      // 업로드 전 Cloudinary 파라미터 추가
+      uppy.on('file-added', (file) => {
+        uppy.setFileMeta(file.id, {
+          upload_preset: window.CLOUDINARY_UPLOAD_PRESET,
+          folder: 'photo-factory',
+          tags: `category:${category.id}`
+        });
+      });
+
+      // 업로드 성공 시
+      uppy.on('upload-success', (file, response) => {
+        const cloudinaryData = response.body;
+
+        // currentJob에 추가
+        if (!currentJob.photos[category.id]) {
+          currentJob.photos[category.id] = [];
+        }
+
+        currentJob.photos[category.id].push({
+          file: file.data,
+          cloudinaryUrl: cloudinaryData.secure_url,
+          thumbnailUrl: cloudinaryData.secure_url.replace('/upload/', '/upload/c_thumb,w_300,h_300/'),
+          publicId: cloudinaryData.public_id,
+          fileSize: cloudinaryData.bytes
+        });
+
+        // 배지 업데이트
+        const badge = document.getElementById(`badge-${category.id}`);
+        badge.textContent = currentJob.photos[category.id].length;
+
+        // 썸네일 표시
+        displayUploadedThumbnail(category.id, cloudinaryData);
+
+        console.log(`✅ ${category.label} 사진 업로드 완료:`, cloudinaryData.secure_url);
+      });
+
+      // 업로드 오류 시
+      uppy.on('upload-error', (file, error) => {
+        console.error('업로드 오류:', error);
+        alert(`업로드 실패: ${error.message}`);
+      });
+
+      uppyInstances[category.id] = uppy;
+    }
+
+    // 썸네일 표시 함수
+    function displayUploadedThumbnail(categoryId, cloudinaryData) {
+      const container = document.getElementById(`photos-${categoryId}`);
+
+      const thumbnail = document.createElement('div');
+      thumbnail.className = 'photo-preview uploaded scale-in';
+      thumbnail.innerHTML = `
+        <img src="${cloudinaryData.secure_url.replace('/upload/', '/upload/c_thumb,w_300,h_300/')}"
+             alt="${categoryId}"
+             class="img-thumbnail">
+        <div class="check-mark">✓</div>
+      `;
+
+      container.appendChild(thumbnail);
+    }
 
     // 작업 제출
     window.handleSubmit = async function() {
@@ -399,7 +493,16 @@
     initializeTabs();
     resetJob();
 
-    console.log('✅ Upload page initialized');
+    // Cloudinary 설정을 전역으로 노출
+    window.CLOUDINARY_CLOUD_NAME = CLOUDINARY_CLOUD_NAME;
+    window.CLOUDINARY_UPLOAD_PRESET = CLOUDINARY_UPLOAD_PRESET;
+
+    // 모든 카테고리에 Uppy 초기화
+    APP_CONFIG.categories.forEach(category => {
+      initializeUppy(category);
+    });
+
+    console.log('✅ Upload page with Uppy initialized');
   </script>
 
 </body>

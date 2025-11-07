@@ -35,13 +35,19 @@ cp .env.example .env
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
 
-### 3. Imgur API 설정 (5분)
+### 3. Cloudinary API 설정 (5분)
 
-1. https://api.imgur.com/oauth2/addclient 접속
-2. Application 등록:
-   - Application name: `Photo Factory`
-   - Authorization type: `Anonymous usage without user authorization`
-3. Client ID 복사 → `.env` 파일에 입력
+1. https://cloudinary.com 회원가입
+2. Dashboard에서 **Cloud Name** 복사
+3. Settings → Upload → **Add upload preset**:
+   - Preset name: `photo-factory`
+   - Signing Mode: **Unsigned** (중요! ⚠️)
+   - Folder: `photo-factory` (선택사항)
+4. `.env` 파일에 입력:
+   ```env
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_UPLOAD_PRESET=photo-factory
+   ```
 
 ### 4. 로컬 실행
 
@@ -90,6 +96,7 @@ contents-factory/
 ### 진행 상태
 
 - ✅ **완료**: SQL 스키마, JavaScript 모듈, 모든 HTML 페이지, CSS 스타일
+- ✅ **v1.1.0**: Uppy 통합 - 자동 업로드 + 웹캠 지원 + 진행바
 
 ---
 
@@ -98,10 +105,10 @@ contents-factory/
 | 레이어 | 기술 | 비용 |
 |--------|------|------|
 | Frontend | PWA + HTML5 | $0 |
-| UI | Bootstrap 5 | $0 |
+| UI | Bootstrap 5 + **Uppy** | $0 |
 | 인증 | Supabase Auth | $0 (월 5만 사용자) |
 | DB | Supabase PostgreSQL | $0 (500MB) |
-| 이미지 | Imgur API | $0 (무제한) |
+| 이미지 | **Cloudinary** | $0 (25 credits/월) |
 | 호스팅 | Vercel / Netlify | $0 (100GB/월) |
 
 ---
@@ -124,8 +131,8 @@ contents-factory/
 - id: UUID (PK)
 - job_id: UUID (FK → jobs)
 - category: TEXT (before_car, before_wheel, during, after_wheel, after_car)
-- imgur_url: TEXT
-- imgur_delete_hash: TEXT
+- cloudinary_url: TEXT
+- cloudinary_public_id: TEXT
 - thumbnail_url: TEXT
 - sequence: INTEGER
 ```
@@ -136,8 +143,8 @@ contents-factory/
 
 ### Step 1: 로컬 테스트 (30분)
 1. 로그인 → Google OAuth
-2. 촬영 → 5개 카테고리 × 2장
-3. 업로드 → Imgur + Supabase 저장
+2. 촬영 → 5개 카테고리 × 2장 (Uppy 자동 업로드)
+3. 업로드 → Cloudinary + Supabase 저장
 4. 갤러리 → 작업 목록 조회
 
 ### Step 2: Vercel 배포 (15분)
@@ -177,7 +184,10 @@ vercel --prod
 → Supabase Dashboard → Authentication → Providers → Google 활성화 확인
 
 ### "사진 업로드 실패"
-→ Imgur Client ID 확인 + 파일 크기 10MB 이하 확인
+→ Cloudinary Cloud Name & Upload Preset 확인 + 파일 크기 10MB 이하 확인
+
+### "Uppy가 표시되지 않음"
+→ CDN 로딩 확인 (https://releases.transloadit.com/uppy/v3.21.0/uppy.min.js)
 
 ---
 

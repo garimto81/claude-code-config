@@ -23,7 +23,7 @@ export async function fetchJobs(filters = {}) {
         photos (
           id,
           category,
-          imgur_url,
+          cloudinary_url,
           thumbnail_url,
           sequence
         )
@@ -74,7 +74,7 @@ export async function fetchJobById(jobId) {
         photos (
           id,
           category,
-          imgur_url,
+          cloudinary_url,
           thumbnail_url,
           file_size,
           uploaded_at,
@@ -209,7 +209,7 @@ export function renderJobDetails(job, containerId = 'jobDetails') {
           <div class="row g-3">
             ${photos.length > 0 ? photos.map((photo, idx) => `
               <div class="col-md-4">
-                <a href="${photo.imgur_url}" data-lightbox="${cat.id}" data-title="${cat.label} ${idx + 1}">
+                <a href="${photo.cloudinary_url}" data-lightbox="${cat.id}" data-title="${cat.label} ${idx + 1}">
                   <img src="${photo.thumbnail_url}"
                        class="img-thumbnail"
                        alt="${cat.label} ${idx + 1}">

@@ -35,9 +35,9 @@ CREATE TABLE IF NOT EXISTS photos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
   category TEXT NOT NULL,                   -- 'before_car', 'before_wheel', 'during', 'after_wheel', 'after_car'
-  imgur_url TEXT NOT NULL,                  -- 'https://i.imgur.com/abc123.jpg'
-  imgur_delete_hash TEXT,                   -- Imgur 삭제용 해시
-  thumbnail_url TEXT,                       -- Imgur 썸네일 URL
+  cloudinary_url TEXT NOT NULL,             -- 'https://res.cloudinary.com/...'
+  cloudinary_public_id TEXT,                -- Cloudinary 삭제/변환용 ID
+  thumbnail_url TEXT,                       -- Cloudinary 썸네일 URL
   file_size INTEGER,                        -- 파일 크기 (bytes)
   uploaded_at TIMESTAMP DEFAULT NOW(),
   sequence INTEGER DEFAULT 1,               -- 카테고리 내 순서 (1, 2, 3...)

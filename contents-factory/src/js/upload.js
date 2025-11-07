@@ -1,15 +1,15 @@
 // Photo Factory - Upload Module
-// Imgur API + Supabase integration
+// Cloudinary API + Supabase integration
 
 import { supabase, getCurrentUser } from './auth.js';
-import { IMGUR_CLIENT_ID, APP_CONFIG } from './config.js';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, APP_CONFIG } from './config.js';
 
 // 현재 작업 상태
 let currentJob = {
   jobNumber: null,
   carModel: '',
   location: '',
-  photos: {} // { category: [{ file, imgurUrl, thumbnailUrl }] }
+  photos: {} // { category: [{ file, cloudinaryUrl, thumbnailUrl }] }
 };
 
 /**
@@ -37,11 +37,11 @@ async function generateJobNumber() {
 }
 
 /**
- * Imgur에 이미지 업로드
+ * Cloudinary에 이미지 업로드
  * @param {File} file - 업로드할 파일
- * @returns {Promise<Object>} - { url, deleteHash, thumbnail }
+ * @returns {Promise<Object>} - { url, publicId, thumbnail }
  */
-export async function uploadToImgur(file) {
+export async function uploadToCloudinary(file) {
   // 파일 크기 검증
   if (file.size > APP_CONFIG.maxFileSize) {
     throw new Error(`파일 크기가 너무 큽니다. (최대 ${APP_CONFIG.maxFileSize / 1024 / 1024}MB)`);
@@ -53,34 +53,37 @@ export async function uploadToImgur(file) {
   }
 
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('folder', 'photo-factory'); // 선택사항: 폴더 구조
 
   try {
-    const response = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`
-      },
-      body: formData
-    });
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Imgur 업로드 실패: ${errorData.data?.error || response.statusText}`);
+      throw new Error(`Cloudinary 업로드 실패: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
 
     return {
-      url: data.data.link,
-      deleteHash: data.data.deletehash,
-      thumbnail: data.data.link.replace(/\.(jpg|png|webp)$/, 'm.$1'), // 중간 크기 썸네일
-      width: data.data.width,
-      height: data.data.height,
-      size: data.data.size
+      url: data.secure_url, // 원본 URL
+      publicId: data.public_id, // 삭제/변환용 ID
+      thumbnail: data.secure_url.replace('/upload/', '/upload/c_thumb,w_300,h_300/'), // 300x300 썸네일
+      width: data.width,
+      height: data.height,
+      size: data.bytes,
+      format: data.format
     };
   } catch (error) {
-    console.error('Imgur 업로드 오류:', error);
+    console.error('Cloudinary 업로드 오류:', error);
     throw error;
   }
 }
@@ -105,24 +108,24 @@ export async function addPhotoToCategory(category, file) {
   displayUploadingPhoto(category, file, photoId);
 
   try {
-    // Imgur 업로드
-    const imgurData = await uploadToImgur(file);
+    // Cloudinary 업로드
+    const cloudinaryData = await uploadToCloudinary(file);
 
     // 로컬 상태에 추가
     currentJob.photos[category].push({
       file,
-      imgurUrl: imgurData.url,
-      thumbnailUrl: imgurData.thumbnail,
-      deleteHash: imgurData.deleteHash,
-      fileSize: imgurData.size
+      cloudinaryUrl: cloudinaryData.url,
+      thumbnailUrl: cloudinaryData.thumbnail,
+      publicId: cloudinaryData.publicId,
+      fileSize: cloudinaryData.size
     });
 
     // UI 업데이트: 업로드 완료
-    displayUploadedPhoto(category, imgurData, photoId);
+    displayUploadedPhoto(category, cloudinaryData, photoId);
 
-    console.log(`✅ ${category} 사진 업로드 완료:`, imgurData.url);
+    console.log(`✅ ${category} 사진 업로드 완료:`, cloudinaryData.url);
 
-    return imgurData;
+    return cloudinaryData;
   } catch (error) {
     // UI 업데이트: 오류 표시
     displayUploadError(category, error.message, photoId);
@@ -184,8 +187,8 @@ export async function saveJob() {
         photoInserts.push({
           job_id: jobData.id,
           category: category,
-          imgur_url: photo.imgurUrl,
-          imgur_delete_hash: photo.deleteHash,
+          cloudinary_url: photo.cloudinaryUrl,
+          cloudinary_public_id: photo.publicId,
           thumbnail_url: photo.thumbnailUrl,
           file_size: photo.fileSize,
           sequence: index + 1
@@ -236,13 +239,13 @@ function displayUploadingPhoto(category, file, photoId) {
 /**
  * UI 헬퍼: 업로드 완료 표시
  */
-function displayUploadedPhoto(category, imgurData, photoId) {
+function displayUploadedPhoto(category, cloudinaryData, photoId) {
   const preview = document.getElementById(photoId);
   if (!preview) return;
 
   preview.className = 'photo-preview uploaded';
   preview.innerHTML = `
-    <img src="${imgurData.thumbnail}" alt="${category}" class="img-thumbnail">
+    <img src="${cloudinaryData.thumbnail}" alt="${category}" class="img-thumbnail">
     <button type="button" class="btn-close btn-sm" onclick="removePhoto('${category}', '${photoId}')">
     </button>
     <div class="check-mark">✓</div>

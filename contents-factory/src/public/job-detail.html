@@ -452,7 +452,7 @@
               const photoIndex = allPhotos.findIndex(p => p.id === photo.id);
               return `
                 <div class="photo-item" onclick="openLightbox(${photoIndex})">
-                  <img src="${photo.thumbnail_url || photo.imgur_url}" alt="${category.label} ${index + 1}">
+                  <img src="${photo.thumbnail_url || photo.cloudinary_url}" alt="${category.label} ${index + 1}">
                   <div class="photo-overlay">
                     <i class="bi bi-zoom-in"></i> 확대 보기
                   </div>
@@ -500,7 +500,7 @@
       const photo = allPhotos[currentPhotoIndex];
       const category = APP_CONFIG.categories.find(c => c.id === photo.category);
 
-      document.getElementById('lightboxImage').src = photo.imgur_url;
+      document.getElementById('lightboxImage').src = photo.cloudinary_url;
       document.getElementById('lightboxInfo').textContent =
         `${currentPhotoIndex + 1} / ${allPhotos.length} - ${category?.label || photo.category}`;
     }
@@ -526,7 +526,7 @@
       for (let i = 0; i < allPhotos.length; i++) {
         const photo = allPhotos[i];
         const link = document.createElement('a');
-        link.href = photo.imgur_url;
+        link.href = photo.cloudinary_url;
         link.download = `${currentJob.job_number}_${photo.category}_${photo.sequence}.jpg`;
         link.target = '_blank';
         document.body.appendChild(link);

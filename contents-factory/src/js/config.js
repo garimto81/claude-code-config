@@ -5,8 +5,9 @@
 export const SUPABASE_URL = 'https://your-project.supabase.co';
 export const SUPABASE_ANON_KEY = 'your_anon_public_key_here';
 
-// Imgur API Configuration
-export const IMGUR_CLIENT_ID = 'your_imgur_client_id_here';
+// Cloudinary API Configuration
+export const CLOUDINARY_CLOUD_NAME = 'your_cloud_name_here';
+export const CLOUDINARY_UPLOAD_PRESET = 'your_upload_preset_here'; // unsigned preset
 
 // App Configuration
 export const APP_CONFIG = {
@@ -36,8 +37,12 @@ export function validateConfig() {
     errors.push('Supabase ANON KEY가 설정되지 않았습니다.');
   }
 
-  if (!IMGUR_CLIENT_ID || IMGUR_CLIENT_ID.includes('your_imgur')) {
-    errors.push('Imgur Client ID가 설정되지 않았습니다.');
+  if (!CLOUDINARY_CLOUD_NAME || CLOUDINARY_CLOUD_NAME.includes('your_cloud')) {
+    errors.push('Cloudinary Cloud Name이 설정되지 않았습니다.');
+  }
+
+  if (!CLOUDINARY_UPLOAD_PRESET || CLOUDINARY_UPLOAD_PRESET.includes('your_upload')) {
+    errors.push('Cloudinary Upload Preset이 설정되지 않았습니다.');
   }
 
   if (errors.length > 0) {

@@ -330,7 +330,14 @@
 
     // 카테고리별 Uppy 초기화
     function initializeUppy(category) {
-      const uppy = new Uppy.Core({
+      const { Core, Dashboard, Webcam, XHRUpload } = window.Uppy || {};
+
+      if (!Core) {
+        console.error('❌ Uppy 라이브러리가 로드되지 않았습니다');
+        return;
+      }
+
+      const uppy = new Core({
         id: `uppy-${category.id}`,
         restrictions: {
           maxFileSize: APP_CONFIG.maxFileSize,
@@ -339,7 +346,7 @@
         },
         autoProceed: true // 파일 선택 즉시 자동 업로드
       })
-      .use(Uppy.Dashboard, {
+      .use(Dashboard, {
         inline: true,
         target: `#uppy-${category.id}`,
         height: 300,
@@ -356,13 +363,13 @@
           }
         }
       })
-      .use(Uppy.Webcam, {
-        target: Uppy.Dashboard,
+      .use(Webcam, {
+        target: Dashboard,
         modes: ['picture'],
         mirror: false,
         facingMode: 'environment' // 후면 카메라 (모바일)
       })
-      .use(Uppy.XHRUpload, {
+      .use(XHRUpload, {
         endpoint: `https://api.cloudinary.com/v1_1/${window.CLOUDINARY_CLOUD_NAME}/image/upload`,
         formData: true,
         fieldName: 'file',

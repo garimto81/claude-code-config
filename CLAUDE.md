@@ -44,6 +44,7 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 - ✅ **1:1 Test Pairing**: 모든 구현 파일 → 테스트 파일 필수
 - ✅ **Feature Branch**: Task 0.0 항상 포함
 - ✅ **체크박스 업데이트**: Sub-task 완료 시 즉시 `[x]` 표시
+- ✅ **진행률 확인**: `grep -oP '\[.\]' tasks/NNNN-*.md | sort | uniq -c`
 
 **상태 마커**: `[ ]` 미시작 | `[x]` 완료 | `[!]` 실패 | `[⏸]` 블락
 

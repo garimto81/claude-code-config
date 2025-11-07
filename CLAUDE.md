@@ -17,21 +17,33 @@ Phase 0: 요구사항 (PRD) → Phase 0.5: Task List 생성
 
 ## 📌 Phase 0: 요구사항 정의 (PRD 작성)
 
-**절차**: 요청 수신 → **8개 영역 질문** (문제/목표, 사용자, 기능, 스토리, 수락기준, 범위, 데이터, 디자인) → PRD 저장 → 승인 대기 → Phase 1 시작
+**절차**: 요청 수신 → **A/B/C/D 명확화 질문** (3-8개) → PRD 저장 → 승인 대기 → Phase 0.5
 
 **저장**: `/tasks/prds/0001-prd-feature-name.md` (0001부터 시작)
 
-📚 **상세**: [docs/guides/PRD_GUIDE.md](docs/guides/PRD_GUIDE.md)
+**가이드 선택**:
+- [MINIMAL](docs/guides/PRD_GUIDE_MINIMAL.md): 경험 많은 개발자 (10분)
+- [STANDARD](docs/guides/PRD_GUIDE_STANDARD.md): 중급 개발자 (20-30분)
+- [JUNIOR](docs/guides/PRD_GUIDE_JUNIOR.md): 초보자 (40-60분)
 
 ---
 
 ## 📋 Phase 0.5: Task List 생성
+
+**Two-Phase 프로세스**:
+1. Parent Tasks 생성 → 사용자 확인
+2. "Go" 입력 → Sub-Tasks 생성
 
 **자동화**:
 ```bash
 python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 # → tasks/0001-tasks-user-auth.md
 ```
+
+**필수 규칙**:
+- ✅ **1:1 Test Pairing**: 모든 구현 파일 → 테스트 파일 필수
+- ✅ **Feature Branch**: Task 0.0 항상 포함
+- ✅ **체크박스 업데이트**: Sub-task 완료 시 즉시 `[x]` 표시
 
 **상태 마커**: `[ ]` 미시작 | `[x]` 완료 | `[!]` 실패 | `[⏸]` 블락
 

@@ -303,7 +303,7 @@ window.downloadAllPhotos = async function(jobId) {
  * 작업 상세 페이지로 이동
  */
 window.viewJobDetails = function(jobId) {
-  window.location.href = `/job-detail.html?id=${jobId}`;
+  window.location.href = `/public/job-detail.html?id=${jobId}`;
 };
 
 // 페이지 로드 시 자동 실행

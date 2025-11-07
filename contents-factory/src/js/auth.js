@@ -11,7 +11,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  * Google OAuth 로그인
  * @param {string} redirectTo - 로그인 후 리다이렉트할 URL
  */
-export async function signInWithGoogle(redirectTo = '/upload.html') {
+export async function signInWithGoogle(redirectTo = '/public/upload.html') {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -43,7 +43,7 @@ export async function signOut() {
     if (error) throw error;
 
     console.log('✅ 로그아웃 성공');
-    window.location.href = '/index.html';
+    window.location.href = '/public/index.html';
     return { success: true };
   } catch (error) {
     console.error('❌ 로그아웃 오류:', error);

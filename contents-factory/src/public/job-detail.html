@@ -257,7 +257,7 @@
   <!-- Navbar -->
   <nav class="navbar navbar-dark">
     <div class="container">
-      <a class="navbar-brand text-white" href="/gallery.html">
+      <a class="navbar-brand text-white" href="/public/gallery.html">
         <i class="bi bi-arrow-left"></i> 갤러리로 돌아가기
       </a>
     </div>
@@ -373,7 +373,7 @@
 
     if (!jobId) {
       alert('작업 ID가 없습니다.');
-      window.location.href = '/gallery.html';
+      window.location.href = '/public/gallery.html';
     }
 
     // 전역 상태
@@ -403,7 +403,7 @@
       } catch (error) {
         console.error('작업 로드 오류:', error);
         alert('작업을 불러오는데 실패했습니다.');
-        window.location.href = '/gallery.html';
+        window.location.href = '/public/gallery.html';
       }
     }
 
@@ -575,7 +575,7 @@
         if (error) throw error;
 
         alert('작업이 삭제되었습니다.');
-        window.location.href = '/gallery.html';
+        window.location.href = '/public/gallery.html';
       } catch (error) {
         console.error('삭제 오류:', error);
         alert('삭제에 실패했습니다.');

@@ -1,381 +1,215 @@
-# Claude Code 최적화 프레임워크
+# Claude AI 전역 지침 레포
 
-**AI 개발 비용을 86% 절감하는 체계적 워크플로우**
+**목적**: Claude Code 작업을 위한 전역 워크플로우 및 가이드 관리
 
-[![Token Savings](https://img.shields.io/badge/Token%20Savings-86%25-brightgreen)]()
-[![Setup Time](https://img.shields.io/badge/Setup-5%20minutes-orange)]()
-
----
-
-## 📌 개요 (30초 이해)
-
-### 문제
-AI 지원 개발 시 **불필요한 토큰 낭비**로 비용 증가
-
-```
-일반적인 10 Task 프로젝트:
-  350,000 토큰 | $1.05 | 4시간
-```
-
-### 해결책
-**5가지 최적화 전략**으로 토큰 86% 절감
-
-```
-최적화된 워크플로우:
-  50,000 토큰 | $0.15 | 1시간
-  → 300,000 토큰 절감! 🎉
-```
-
-### 핵심 가치
-- ✅ **즉시 적용**: 5분 설정
-- ✅ **검증된 효과**: 86% 토큰 절감
-- ✅ **Zero 의존성**: Python 표준 라이브러리만
-- ✅ **프로젝트 무관**: 모든 언어/프레임워크 지원
+**버전**: 4.1.0 | **업데이트**: 2025-01-12
 
 ---
 
-## 🚀 Quick Start (5분)
+## 📚 핵심 문서
 
-### 1단계: 인덱싱 (1회, 30초)
+### 1. **워크플로우 (필수)**
+- **[CLAUDE.md](CLAUDE.md)** - Phase 0-6 개발 사이클 (핵심)
+
+### 2. **GitHub 네이티브 워크플로우**
+- **[깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md)** - GitHub 기반 작업 (5분)
+- **[깃허브_빠른시작.md](깃허브_빠른시작.md)** - 30분 설정 가이드
+- **[docs/깃허브_워크플로우_색인.md](docs/깃허브_워크플로우_색인.md)** - 전체 네비게이션
+- **[README_GITHUB_WORKFLOW.md](README_GITHUB_WORKFLOW.md)** - 문서 안내
+
+### 3. **Spec Kit 통합**
+- **[docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md)** - 5분 개요
+- **[docs/SPECKIT_QUICKSTART.md](docs/SPECKIT_QUICKSTART.md)** - 30분 설정
+- **[.speckit/constitution.md](.speckit/constitution.md)** - Constitution 템플릿
+
+### 4. **자동화 도구**
+- **[scripts/setup-github-labels.sh](scripts/setup-github-labels.sh)** - GitHub 라벨 생성
+- **[scripts/github-issue-dev.sh](scripts/github-issue-dev.sh)** - 이슈 작업 시작
+
+---
+
+## 📂 폴더 구조
+
+```
+d:\AI\claude01\              # 전역 지침 레포
+├── CLAUDE.md               # 핵심 Phase 0-6 워크플로우
+├── README.md               # 이 파일
+│
+├── 깃허브_워크플로우_개요.md
+├── 깃허브_빠른시작.md
+├── README_GITHUB_WORKFLOW.md
+│
+├── docs/                   # 상세 가이드
+│   ├── 깃허브_워크플로우_색인.md
+│   ├── 깃허브_의사결정_프레임워크.md
+│   ├── GITHUB_*.md         # GitHub 워크플로우 (영문 참조)
+│   ├── SPECKIT_*.md        # Spec Kit 통합
+│   └── QUICK_COMMANDS.md
+│
+├── scripts/                # 자동화 스크립트
+│   ├── setup-github-labels.sh
+│   └── github-issue-dev.sh
+│
+├── .speckit/               # Spec Kit 템플릿
+│   └── constitution.md
+│
+└── .gitignore              # Git 제외 설정
+```
+
+---
+
+## 🚫 이 레포에 포함하지 않는 것
+
+### 프로젝트별 폴더 (.gitignore 등록됨)
+```
+actiontracker/
+contents-factory/
+VTC_Logger/
+sso-system/
+... 기타 프로젝트
+```
+
+**원칙**:
+- 이 레포 = **전역 지침만**
+- 각 프로젝트 = **별도 레포**
+
+---
+
+## 🎯 사용 방법
+
+### 새 프로젝트 시작
 
 ```bash
-cd your-project
-python scripts/index_codebase.py .
+# 1. 전역 워크플로우 참조
+cat CLAUDE.md
 
-# 출력:
-# ✅ Index created: .claude/index.json
-# 📊 Files indexed: 47
+# 2. 프로젝트 폴더 생성 (claude01 밖에)
+cd d:\Projects
+mkdir my-new-project
+cd my-new-project
+
+# 3. Git 초기화
+git init
+
+# 4. Phase 0 시작
+# PRD 작성 → Task List → 구현
 ```
 
-### 2단계: 미니멀 PRD 작성 (3분)
-
-```markdown
-# User Authentication
-
-**What:** Email/password login
-**Why:** Protect user data
-**Who:** All users (10K)
-**Must-Have:**
-  - [ ] Registration with email verification
-  - [ ] Login/logout with sessions
-  - [ ] Password reset
-**Success:** <2s login time, <1% errors
-```
-
-### 3단계: 최적화 실행 (1분)
+### GitHub 워크플로우 채택
 
 ```bash
-python scripts/execute_optimized_workflow.py
+# 1. 개요 읽기 (5분)
+cat 깃허브_워크플로우_개요.md
 
-# 출력:
-# ✅ Task 1: 5,000 tokens (vs 30,000)
-# ✅ Task 2-10: 2,000 tokens each (vs 30,000)
-# 🎉 Total: 50,000 tokens (86% saved!)
+# 2. 라벨 설정 (2분)
+bash scripts/setup-github-labels.sh
+
+# 3. 이슈 템플릿 추가
+cp -r .github/ISSUE_TEMPLATE/ your-project/
+
+# 4. 작업 시작
+bash scripts/github-issue-dev.sh 123
 ```
 
-**상세 가이드**: [QUICK_START.md](docs/QUICK_START.md)
-
----
-
-## 💡 핵심 기능
-
-### 1️⃣ 미니멀 PRD
-**15,000 → 2,000 토큰 (87% ↓)**
-
-```
-기존: 14 섹션, 5-10 페이지, 2-4시간
-최적화: 5줄 체크리스트, 3분
-```
-
-📚 [PRD_MINIMAL_TEMPLATE.md](docs/PRD_MINIMAL_TEMPLATE.md)
-
-### 2️⃣ 스마트 컨텍스트
-**30,000 → 5,000 토큰 (83% ↓)**
-
-```python
-# 1회 인덱싱
-python scripts/index_codebase.py .
-# → .claude/index.json 생성
-
-# 이후 매번
-cm = ContextManager(".")
-summary = cm.get_summary()         # 500 tokens
-files = cm.find_file("auth")       # 200 tokens
-content = cm.load_file(files[0])   # 2,000 tokens
-# Total: 2,700 tokens (vs 30,000)
-```
-
-📚 [SMART_CONTEXT_GUIDE.md](docs/SMART_CONTEXT_GUIDE.md)
-
-### 3️⃣ Diff 기반 업데이트
-**270,000 → 20,000 토큰 (93% ↓)**
-
-```python
-# Task 1: 전체 컨텍스트
-# 30,000 tokens
-
-# Task 2-10: 변경사항만
-dm = DiffManager(".")
-diff = dm.generate_diff(["src/auth.py"])
-# → 2,000 tokens (Git diff만)
-```
-
-📚 [DIFF_UPDATE_GUIDE.md](docs/DIFF_UPDATE_GUIDE.md)
-
-### 4️⃣ Function Calling
-**10,000 → 2,000 토큰 (80% ↓)**
-
-```python
-# Before: 자연어 응답
-"파일을 읽고, 함수를 수정하고, 테스트를 실행하세요"
-
-# After: JSON 응답
-{"action": "edit", "file": "app.py", "test": "run"}
-```
-
-### 5️⃣ 배치 처리
-**병렬 도구 호출로 50% 시간 절감**
-
-```python
-# 병렬 실행
-Read("file1.py"), Read("file2.py"), Grep("pattern")
-```
-
----
-
-## 📊 실제 성과
-
-### 프로젝트별 절감
-
-| 프로젝트 | Tasks | Before | After | 절감 |
-|----------|-------|---------|--------|------|
-| E-commerce | 15개 | 420K ($1.26) | 61K ($0.18) | 85% |
-| SaaS Dashboard | 25개 | 680K ($2.04) | 88K ($0.26) | 87% |
-
-### ROI 계산
-
-```
-월 50개 프로젝트:
-  절감: $45/월 = $540/년
-
-연 600개 프로젝트:
-  절감: $540/년
-  회수 기간: 1개월
-```
-
----
-
-## 📁 프로젝트 구조
-
-```
-claude01/
-├── CLAUDE.md                  # 전역 개발 가이드 (Phase 0-6)
-├── README.md                  # 이 파일
-├── docs/
-│   ├── QUICK_START.md         # 5분 시작 가이드
-│   ├── TOKEN_OPTIMIZATION_MASTER.md  # 전체 최적화 가이드
-│   ├── PRD_MINIMAL_TEMPLATE.md       # 미니멀 PRD 템플릿
-│   ├── SMART_CONTEXT_GUIDE.md        # 스마트 컨텍스트
-│   └── DIFF_UPDATE_GUIDE.md          # Diff 업데이트
-├── scripts/
-│   ├── index_codebase.py             # 코드베이스 인덱싱
-│   ├── context_manager.py            # 컨텍스트 관리
-│   ├── diff_manager.py               # Diff 관리
-│   └── execute_optimized_workflow.py # 통합 실행
-└── .claude/
-    ├── index.json                    # 코드베이스 인덱스
-    ├── state.json                    # Diff 상태
-    └── token_report.json             # 토큰 리포트
-```
-
----
-
-## 📖 사용법
-
-### Python API
-
-```python
-from scripts.context_manager import ContextManager
-from scripts.diff_manager import DiffManager
-
-# 초기화
-cm = ContextManager(".")
-dm = DiffManager(".")
-
-# Task 1: 전체 컨텍스트
-summary = cm.get_summary()              # 500 tokens
-files = cm.find_file("auth")            # 200 tokens
-content = cm.load_file(files[0]['path']) # 2,000 tokens
-
-# AI 호출
-response = ai.generate(summary + content, "Implement login")
-
-# Task 2+: Diff만
-diff = dm.generate_diff(["src/auth.py"])
-diff_context = dm.format_diff_context(diff)  # 2,000 tokens
-response = ai.generate(diff_context, "Add password reset")
-```
-
-### CLI
+### Spec Kit Constitution 사용
 
 ```bash
-# 통합 워크플로우
-python scripts/execute_optimized_workflow.py
+# 1. Constitution 파일 복사
+cp .speckit/constitution.md your-project/
 
-# Diff 확인
-python scripts/diff_manager.py --diff src/*.py
+# 2. 프로젝트 맞게 수정
+code your-project/constitution.md
 
-# 통계
-python scripts/diff_manager.py --stats
-
-# 리셋
-python scripts/diff_manager.py --reset
+# 3. Phase 0 전에 체크
+# Constitution 검토 → PRD 작성
 ```
 
 ---
 
-## 🔧 설치
+## 📖 주요 개념
 
-### 요구사항
-- Python 3.8+
-- Git (선택사항)
-
-### 설치
-
-```bash
-# 1. 클론
-git clone https://github.com/yourusername/claude01.git
-cd claude01
-
-# 2. (선택) 가상환경
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# 3. 의존성 설치
-# 없음! 표준 라이브러리만 사용
-
-# 4. 테스트
-python scripts/index_codebase.py .
+### Phase 0-6 워크플로우
 ```
+Phase 0: 요구사항 (PRD)
+  ↓
+Phase 0.5: Task List 생성
+  ↓
+Phase 1: 코드 작성
+  ↓
+Phase 2: 테스트
+  ↓
+Phase 3: 버전 관리
+  ↓
+Phase 4: Git 커밋
+  ↓
+Phase 5: 검증
+  ↓
+Phase 6: 배포 및 캐시
+```
+
+### GitHub 네이티브
+- 로컬 PRD 파일 → GitHub Issues
+- 로컬 Task List → GitHub Projects
+- 크로스 레포 자동 링크
+- GitHub Actions 자동화
+
+### Spec Kit Constitution
+- 프로젝트 원칙 정의
+- 보안 체크리스트
+- 아키텍처 가이드
+- "깜빡" 버그 예방
 
 ---
 
-## 🎯 작동 원리
+## 📊 버전 히스토리
 
-### 워크플로우 비교
+### v4.1.0 (2025-01-12)
+- README 전역 지침 중심으로 재작성
+- sso-system .gitignore 추가
+- 프로젝트/전역 분리 명확화
 
-**Before (일반적인 방식)**:
-```
-PRD (15K) → Task 1-10 (각 30K) → 배포 (10K)
-= 350K tokens
-```
+### v4.0.0 (2025-01-12)
+- GitHub 네이티브 워크플로우 추가
+- Spec Kit 통합 가이드
+- 한글 문서 완성
+- CLAUDE.md 54% 축소 (373줄 → 171줄)
 
-**After (최적화)**:
-```
-미니멀 PRD (2K) → 인덱싱 (20K, 1회만)
-→ Task 1 (5K) → Task 2-10 (각 2K) → 배포 (1K)
-= 50K tokens
-```
-
-### 절감 분석
-
-| 단계 | Before | After | 전략 |
-|------|--------|-------|------|
-| PRD | 15K | 2K | 미니멀 PRD |
-| 인덱싱 | 300K | 20K | 스마트 컨텍스트 (1회만) |
-| Task 1 | 30K | 5K | 요약 + 필요 파일만 |
-| Task 2-10 | 270K (30K×9) | 18K (2K×9) | Diff 업데이트 |
-| 배포 | 10K | 1K | Function Calling |
-| **총합** | **350K** | **50K** | **86% 절감** |
-
----
-
-## 🛠️ 고급 기능
-
-### Git Hooks 자동화
-
-```bash
-# .git/hooks/post-commit
-#!/bin/bash
-python scripts/index_codebase.py --update
-python scripts/diff_manager.py --stats
-```
-
-### CI/CD 통합
-
-```yaml
-# .github/workflows/optimize.yml
-name: Token Optimization
-on: [push]
-jobs:
-  optimize:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Update Index
-        run: python scripts/index_codebase.py .
-      - name: Generate Report
-        run: python scripts/execute_optimized_workflow.py
-```
-
----
-
-## 📚 문서
-
-| 문서 | 내용 |
-|------|------|
-| [CLAUDE.md](CLAUDE.md) | 전체 개발 워크플로우 (Phase 0-6) |
-| [QUICK_START.md](docs/QUICK_START.md) | 5분 시작 가이드 |
-| [TOKEN_OPTIMIZATION_MASTER.md](docs/TOKEN_OPTIMIZATION_MASTER.md) | 전체 최적화 가이드 |
-| [PRD_MINIMAL_TEMPLATE.md](docs/PRD_MINIMAL_TEMPLATE.md) | 미니멀 PRD 템플릿 |
-| [SMART_CONTEXT_GUIDE.md](docs/SMART_CONTEXT_GUIDE.md) | 스마트 컨텍스트 |
-| [DIFF_UPDATE_GUIDE.md](docs/DIFF_UPDATE_GUIDE.md) | Diff 업데이트 |
+### v3.x
+- Phase 0-6 워크플로우 확립
+- PRD 가이드 3종 (MINIMAL/STANDARD/JUNIOR)
+- Two-Phase Task Generation
 
 ---
 
 ## 🤝 기여
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/optimization`)
-3. Commit your changes (`git commit -m 'Add optimization'`)
-4. Push to the branch (`git push origin feature/optimization`)
-5. Open a Pull Request
+개인 워크플로우 관리용이지만 개선 제안 환영합니다.
+
+- Issue 생성
+- Pull Request
 
 ---
 
-## 📝 라이선스
+## 📝 라이센스
 
-MIT License - 자유롭게 사용, 수정, 배포 가능
-
----
-
-## 📞 연락처
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/claude01/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/claude01/discussions)
+MIT License
 
 ---
 
-## 🎉 지금 시작하세요!
+## 🎓 Quick Links
 
-```bash
-# 3분이면 충분합니다
-cd your-project
-python scripts/index_codebase.py .
-python scripts/execute_optimized_workflow.py
+### 처음 사용자
+1. [CLAUDE.md](CLAUDE.md) 읽기 (10분)
+2. [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) 읽기 (5분)
 
-# → 토큰 86% 절감 달성! 🎉
-```
+### GitHub 워크플로우 도입
+1. [깃허브_빠른시작.md](깃허브_빠른시작.md) 따라하기 (30분)
+
+### Spec Kit 도입
+1. [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) 읽기 (5분)
 
 ---
 
-**버전**: 2.0.0  
-**업데이트**: 2025-01-12  
-**라이선스**: MIT
-
-**v2.0.0 변경사항**:
-- 📉 567줄 → 270줄 (52% 축소)
-- 🎯 PRD 스타일 재구성 (명확한 구조)
-- ⚡ 핵심 가치 우선 (30초 이해 가능)
-- 🗑️ 마케팅 콘텐츠 제거 (기술 집중)
+**관리자**: 바이브 코더
+**도구**: Claude Code + GitHub
+**최종 업데이트**: 2025-01-12

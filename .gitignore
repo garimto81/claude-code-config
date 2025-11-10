@@ -8,6 +8,7 @@ keyplayer_manager/
 pd-note/
 softsender/
 table_tracker/
+sso-system/
 
 # 개발 환경
 .venv/

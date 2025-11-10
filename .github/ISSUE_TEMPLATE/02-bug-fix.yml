@@ -1,0 +1,82 @@
+name: "🐛 Bug Report"
+description: "버그 수정 요청"
+title: "[BUG] "
+labels: ["type:bug", "status:triage"]
+
+body:
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: "Bug Description"
+      description: "버그 상세 설명"
+      placeholder: "로그인 후 리다이렉트가 /public/index.html이 아닌 /index.html로 이동"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: "Reproduction Steps"
+      description: "재현 단계"
+      placeholder: |
+        1. 로그인 페이지 접속
+        2. Google 로그인 클릭
+        3. 인증 완료
+        4. → 404 에러 발생 (/index.html 경로 오류)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "기대 동작"
+      placeholder: "/public/index.html로 리다이렉트"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "Actual Behavior"
+      description: "실제 동작"
+      placeholder: "/index.html로 리다이렉트 → 404 에러"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      options:
+        - "S0 - Blocker (서비스 중단)"
+        - "S1 - Critical (주요 기능 불가)"
+        - "S2 - Major (일부 기능 불가)"
+        - "S3 - Minor (불편함)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-files
+    attributes:
+      label: "Affected Files"
+      description: "영향받는 파일 목록"
+      placeholder: |
+        - src/features/auth/components/LoginForm.tsx
+        - src/features/auth/store/authStore.ts
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "환경 정보"
+      value: |
+        - OS:
+        - Browser:
+        - Version:
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "Additional Context"
+      description: "추가 정보 (스크린샷, 로그 등)"

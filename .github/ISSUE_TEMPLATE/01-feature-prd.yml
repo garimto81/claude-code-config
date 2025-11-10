@@ -1,0 +1,170 @@
+name: "🚀 Feature Request (PRD)"
+description: "Phase 0: Product Requirements Document for new feature"
+title: "[FEATURE] "
+labels: ["phase-0", "type:feature", "status:planning"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Phase 0: 요구사항 정의
+        이 템플릿은 CLAUDE.md의 Phase 0 (PRD)에 해당합니다.
+
+  - type: input
+    id: feature-name
+    attributes:
+      label: "Feature Name"
+      description: "기능명 (예: user-authentication, sso-integration)"
+      placeholder: "sso-google-login"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      options:
+        - "P0 - Critical"
+        - "P1 - High"
+        - "P2 - Medium"
+        - "P3 - Low"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: prd-level
+    attributes:
+      label: "PRD Detail Level"
+      description: "개발 경험에 따라 선택 (CLAUDE.md 참조)"
+      options:
+        - "MINIMAL - 경험 많은 개발자 (10분)"
+        - "STANDARD - 중급 개발자 (20-30분)"
+        - "JUNIOR - 초보자 (40-60분)"
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: executive-summary
+    attributes:
+      label: "📋 Executive Summary"
+      description: "기능 개요 (1-2 문장)"
+      placeholder: "Supabase 기반 SSO 시스템에 Google OAuth 로그인 추가"
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: "🎯 Goals"
+      description: "주요 목표 (3-5개)"
+      placeholder: |
+        1. Google OAuth 2.0 통합
+        2. 사용자 프로필 자동 생성
+        3. 세션 관리 구현
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: "📊 Success Metrics"
+      description: "성공 지표"
+      placeholder: |
+        - [ ] Google 로그인 버튼 클릭 → 2초 내 인증 완료
+        - [ ] 프로필 자동 생성 (이메일, 이름, 사진)
+        - [ ] 세션 7일 유지
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+
+  - type: textarea
+    id: technical-requirements
+    attributes:
+      label: "🔧 Technical Requirements"
+      description: "기술 요구사항"
+      placeholder: |
+        - Supabase Auth Google Provider 설정
+        - React hooks: useAuth, useUser
+        - Protected routes 구현
+      value: |
+        -
+        -
+        -
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "🔗 Dependencies"
+      description: "의존성 (다른 이슈, 외부 서비스)"
+      placeholder: |
+        - 블로커: #123 (Supabase 프로젝트 생성)
+        - 관련: #124 (사용자 DB 스키마)
+        - 외부: Google Cloud Console OAuth 설정
+      value: |
+        -
+
+  - type: textarea
+    id: security-checklist
+    attributes:
+      label: "🔐 Security Checklist"
+      description: "보안 체크리스트 (CLAUDE.md 참조)"
+      value: |
+        - [ ] 환경변수로 API 키 분리 (.env)
+        - [ ] Supabase RLS 정책 적용
+        - [ ] XSS 방지 (입력값 sanitization)
+        - [ ] CSRF 토큰 적용
+        - [ ] HTTPS only
+        - [ ] Rate limiting (로그인 시도)
+        - [ ] 보안 헤더 (CSP, HSTS)
+        - [ ] 의존성 스캔 (npm audit)
+
+  - type: textarea
+    id: test-requirements
+    attributes:
+      label: "🧪 Test Requirements"
+      description: "테스트 요구사항 (1:1 Test Pairing 원칙)"
+      placeholder: |
+        - [ ] Unit: auth.test.ts (Google login function)
+        - [ ] Integration: auth.integration.test.ts
+        - [ ] E2E: login-flow.spec.ts (Playwright)
+      value: |
+        - [ ] Unit:
+        - [ ] Integration:
+        - [ ] E2E:
+
+  - type: textarea
+    id: clarifying-questions
+    attributes:
+      label: "❓ Clarifying Questions (A/B/C/D)"
+      description: "명확화 질문 3-8개 (CLAUDE.md Phase 0)"
+      placeholder: |
+        A. Scope: SSO는 Google만? 추후 GitHub, Apple 확장 고려?
+        B. User Flow: 로그인 실패 시 fallback 방법은?
+        C. Data: 사용자 프로필에 추가 필드 필요한가?
+        D. Integration: 기존 VTC_Logger와 통합 시점은?
+      value: |
+        A.
+        B.
+        C.
+        D.
+
+  - type: checkboxes
+    id: phase-checklist
+    attributes:
+      label: "Phase 0 Checklist"
+      description: "이슈 생성 전 확인"
+      options:
+        - label: "PRD 레벨 선택 완료 (MINIMAL/STANDARD/JUNIOR)"
+          required: true
+        - label: "명확화 질문 3개 이상 작성"
+          required: true
+        - label: "보안 체크리스트 검토"
+          required: true
+        - label: "테스트 요구사항 명시"
+          required: true

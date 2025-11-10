@@ -1,7 +1,7 @@
 # Claude AI 마스터 개발 가이드
 *핵심 워크플로우 & 자동화 규칙*
 
-**버전**: 4.0.0 | **업데이트**: 2025-01-12
+**버전**: 4.1.0 | **업데이트**: 2025-01-12
 
 ---
 
@@ -21,10 +21,10 @@ Phase 0: 요구사항 (PRD) → Phase 0.5: Task List 생성
 
 **저장**: `/tasks/prds/0001-prd-feature-name.md` (0001부터 시작)
 
-**가이드 선택**:
-- [MINIMAL](docs/guides/PRD_GUIDE_MINIMAL.md): 경험 많은 개발자 (10분)
-- [STANDARD](docs/guides/PRD_GUIDE_STANDARD.md): 중급 개발자 (20-30분)
-- [JUNIOR](docs/guides/PRD_GUIDE_JUNIOR.md): 초보자 (40-60분)
+**PRD 가이드**:
+- MINIMAL: 경험 많은 개발자 (10분)
+- STANDARD: 중급 개발자 (20-30분)
+- JUNIOR: 초보자 (40-60분)
 
 ---
 
@@ -74,7 +74,7 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 
 ## 🌍 언어 & 표준
 
-**언어**: 한글 우선, 용어는 `한글명(English)` 형식
+**언어**: 한글 우선, 원문 용어는 그대로 유지 (GitHub, Docker 등)
 
 **폴더**: `tasks/prds/` (PRD) | `tasks/tickets/` (버그) | `scripts/` (자동화) | `docs/` | `src/` | `tests/`
 
@@ -96,14 +96,19 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 
 ---
 
-## 🚀 자동화 스크립트
+## 🚀 GitHub 워크플로우
 
+**GitHub 네이티브 개발**:
+- [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) - 5분 개요
+- [깃허브_빠른시작.md](깃허브_빠른시작.md) - 30분 설정
+
+**자동화**:
 ```bash
-# PRD 생성
-python scripts/create_prd.py feature-name "Description"
+# GitHub 라벨 설정
+bash scripts/setup-github-labels.sh
 
-# 자동 배포 (버전+Git+푸시)
-python scripts/auto_deploy.py feat "Add feature" --prd 0001 --bump minor
+# 이슈 작업 시작
+bash scripts/github-issue-dev.sh 123
 ```
 
 ---
@@ -149,32 +154,62 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 
 ## 📚 참조 문서
 
-| 문서 | 내용 |
-|------|------|
-| [PRD_GUIDE.md](docs/guides/PRD_GUIDE.md) | Phase 0 상세, 명확화 질문 전체 |
-| [TOOLS_REFERENCE.md](docs/guides/TOOLS_REFERENCE.md) | Python/Node/Docker 명령어 |
+### 워크플로우
+- [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) - GitHub 네이티브 개발
+- [README_GITHUB_WORKFLOW.md](README_GITHUB_WORKFLOW.md) - 문서 네비게이션
+
+### Spec Kit
+- [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) - 5분 개요
+- [.speckit/constitution.md](.speckit/constitution.md) - Constitution 템플릿
 
 ### 공식 문서
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
-- [Sequential Thinking MCP](https://github.com/sequentialthinking/mcp)
+- [GitHub Spec Kit](https://github.com/github/spec-kit)
 
 ---
 
 ## 🎓 Quick Start
 
+### 로컬 PRD 방식
 ```bash
-python scripts/create_prd.py user-auth "Add auth"  # Phase 0
-# → 개발 & 테스트 (Phase 1-2)
-python scripts/auto_deploy.py feat "Add auth" --prd 0001  # Phase 3-6
+# 1. PRD 작성
+vim tasks/prds/0001-prd-feature.md
+
+# 2. 개발 & 테스트 (Phase 1-2)
+
+# 3. 커밋
+git commit -m "feat: Add feature (v1.0.0) [PRD-0001]"
+```
+
+### GitHub 네이티브 방식
+```bash
+# 1. 이슈 생성
+gh issue create --template 01-feature-prd.yml
+
+# 2. 작업 시작
+bash scripts/github-issue-dev.sh 123
+
+# 3. 개발 & 푸시
+git commit -m "feat: Add feature [#123]"
+git push
 ```
 
 ---
 
-**v4.0.0 변경사항**:
+## 📋 버전 히스토리
+
+### v4.1.0 (2025-01-12)
+- ✅ 언어 정책 명확화 (괄호 영문명 불필요)
+- ✅ GitHub 워크플로우 통합
+- ✅ Spec Kit 참조 추가
+- ✅ Quick Start 두 가지 방식 제시
+
+### v4.0.0 (2025-01-12)
 - 🎯 171줄 달성 (373줄에서 54% 축소)
 - 🗑️ 비용 계산 및 중복 설명 제거
-- 📦 상세 내용 → TOKEN_OPTIMIZATION_DETAILS.md
 - ⚡ Phase 0-6 핵심 워크플로우에 집중
 
-*이 문서는 Claude Code 작업의 핵심만 담았습니다.*
-*상세 내용은 docs/ 폴더 참조.*
+---
+
+*이 문서는 Claude Code 작업의 핵심 워크플로우만 담았습니다.*
+*상세 내용은 [README.md](README.md) 및 docs/ 폴더 참조.*

@@ -28,6 +28,39 @@
 
 ---
 
+## 🚀 빠른 시작 (사용자 유형별)
+
+### 처음 사용하는 경우
+1. **[CLAUDE.md](CLAUDE.md) 읽기** (10분) - Phase 0-6 워크플로우 완전 이해
+2. **Phase 0 실습** - PRD 작성 연습
+   ```bash
+   # 로컬 방식
+   mkdir -p tasks/prds
+   vim tasks/prds/0001-prd-test-feature.md
+   ```
+3. **다음 단계** - [GitHub 워크플로우](#github-워크플로우-채택) 또는 [Spec Kit](#spec-kit-constitution-사용) 도입 고려
+
+### GitHub 워크플로우 도입하려는 경우
+1. **[깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md)** (5분) - ROI 및 Before/After 파악
+2. **[docs/깃허브_의사결정_프레임워크.md](docs/깃허브_의사결정_프레임워크.md)** (10분) - 도입 여부 결정
+3. **[깃허브_빠른시작.md](깃허브_빠른시작.md)** (30분) - GitHub CLI 설치 및 라벨 설정 실행
+4. **첫 이슈 시작**
+   ```bash
+   gh issue create --template 01-feature-prd.yml
+   bash scripts/github-issue-dev.sh 123
+   ```
+
+### Spec Kit Constitution 사용하려는 경우
+1. **[docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md)** (5분) - Constitution의 67% 버그 예방 효과 확인
+2. **[.speckit/constitution.md](.speckit/constitution.md) 복사** - 프로젝트에 맞게 수정
+   ```bash
+   cp .speckit/constitution.md your-project/
+   code your-project/constitution.md
+   ```
+3. **Phase 0 전 체크 습관화** - PRD 작성 전 Constitution 검토 (2분)
+
+---
+
 ## 📂 폴더 구조
 
 ```
@@ -196,17 +229,23 @@ MIT License
 
 ---
 
-## 🎓 Quick Links
+## 🎓 빠른 참조
 
-### 처음 사용자
-1. [CLAUDE.md](CLAUDE.md) 읽기 (10분)
-2. [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) 읽기 (5분)
+### 문서 네비게이션
+- **워크플로우 전체**: [docs/깃허브_워크플로우_색인.md](docs/깃허브_워크플로우_색인.md)
+- **영문 참조**: [README_GITHUB_WORKFLOW.md](README_GITHUB_WORKFLOW.md)
 
-### GitHub 워크플로우 도입
-1. [깃허브_빠른시작.md](깃허브_빠른시작.md) 따라하기 (30분)
+### 자주 사용하는 명령어
+```bash
+# GitHub 라벨 설정
+bash scripts/setup-github-labels.sh
 
-### Spec Kit 도입
-1. [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) 읽기 (5분)
+# 이슈로 작업 시작
+bash scripts/github-issue-dev.sh 123
+
+# 진행률 확인
+grep -oP '\[.\]' tasks/0001-*.md | sort | uniq -c
+```
 
 ---
 

@@ -1,20 +1,27 @@
 # 프로젝트 폴더들 (전역 설정과 무관)
 actiontracker/
 ai-production/
+broadcast-qc/
 commercial/
 config/
+contents-factory/
 handlogger/
 keyplayer_manager/
 pd-note/
 softsender/
-table_tracker/
 sso-system/
+table_tracker/
+VTC_Logger/
 
 # 개발 환경
 .venv/
 .vscode/
 __pycache__/
 *.pyc
+node_modules/
+.env
+.env.*
+!.env.example
 
 # 백업 파일
 *.backup
@@ -42,3 +49,10 @@ CLAUDE.md.backup
 # Symlinks
 docs-global/
 scripts-global/
+
+# 테스트 및 빌드 산출물
+playwright-report/
+test-results/
+coverage/
+dist/
+build/

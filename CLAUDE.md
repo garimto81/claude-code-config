@@ -70,6 +70,27 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 
 **MCP**: `sequentialthinking`, `ide`, `github`, `supabase`, `playwright` (Primary) | `context7`, `exa`, `slack` (Secondary)
 
+### 📋 Phase별 Agent 활용 가이드
+
+| Phase | 추천 Agent | 용도 | 필수 여부 |
+|-------|-----------|------|----------|
+| **0** | `seq-engineer` | PRD 구조화, 복잡한 요구사항 분석 | 권장 |
+| **0** | `context7-engineer` | 기술 스택 최신 버전 검증 | **필수** |
+| **1** | `python-pro` | Python 고급 구현 (decorators, async 등) | 선택 |
+| **1** | `frontend-developer` | React/Next.js 컴포넌트 개발 | 선택 |
+| **1** | `backend-architect` | API 설계, DB 스키마 설계 | 권장 |
+| **2** | `test-automator` | 단위 테스트, 통합 테스트 작성 | 권장 |
+| **2** | `playwright-engineer` | E2E 테스트 자동화 | **필수** |
+| **3-4** | `github-engineer` | 버전 관리, PR 생성 자동화 | 선택 |
+| **5** | `playwright-engineer` | 최종 검증 (실제 작동 확인) | **필수** |
+| **5** | `security-auditor` | 보안 취약점 스캔 | 권장 |
+| **6** | `deployment-engineer` | CI/CD 파이프라인, Docker 설정 | 선택 |
+
+**사용 원칙**:
+- **필수** Agent는 반드시 사용
+- **권장** Agent는 복잡도에 따라 선택
+- **선택** Agent는 필요시 활용
+
 ### 📚 Context7: 최신 기술 검증 필수
 
 **원칙**: 외부 라이브러리/프레임워크 사용 전 **반드시** Context7 MCP로 최신 문서 확인
@@ -115,6 +136,32 @@ npx playwright test --headed  # 시각적 확인
 ```
 
 **효과**: "로컬에선 되는데?" 버그 제로화, 프로덕션 안정성 보장
+
+### 🔄 Agent 조합 예시
+
+**시나리오 1: 새 기능 개발** (Phase 0 → 6)
+```
+Phase 0: seq-engineer (PRD 분석) + context7-engineer (기술 검증)
+Phase 1: frontend-developer (UI 구현)
+Phase 2: test-automator + playwright-engineer (테스트)
+Phase 5: playwright-engineer (최종 검증) + security-auditor
+```
+
+**시나리오 2: 버그 수정**
+```
+Phase 0: debugger (원인 분석)
+Phase 1: python-pro (수정)
+Phase 2: playwright-engineer (회귀 테스트)
+Phase 5: playwright-engineer (검증)
+```
+
+**시나리오 3: 성능 최적화**
+```
+Phase 0: seq-engineer (병목 분석)
+Phase 1: performance-engineer (최적화)
+Phase 2: test-automator (성능 테스트)
+Phase 5: playwright-engineer (실제 환경 검증)
+```
 
 ---
 

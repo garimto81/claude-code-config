@@ -137,31 +137,31 @@ npx playwright test --headed  # 시각적 확인
 
 **효과**: "로컬에선 되는데?" 버그 제로화, 프로덕션 안정성 보장
 
-### 🔄 Agent 조합 예시
+### 🔄 병렬 Agent 실행
 
-**시나리오 1: 새 기능 개발** (Phase 0 → 6)
-```
-Phase 0: seq-engineer (PRD 분석) + context7-engineer (기술 검증)
-Phase 1: frontend-developer (UI 구현)
-Phase 2: test-automator + playwright-engineer (테스트)
-Phase 5: playwright-engineer (최종 검증) + security-auditor
-```
+**핵심 원칙**: 독립적 작업 → 병렬 호출, 의존성 있음 → 순차 실행
 
-**시나리오 2: 버그 수정**
-```
-Phase 0: debugger (원인 분석)
-Phase 1: python-pro (수정)
-Phase 2: playwright-engineer (회귀 테스트)
-Phase 5: playwright-engineer (검증)
+**병렬 실행 예시**:
+```bash
+# ✅ 병렬 (Phase 1)
+frontend-developer + backend-architect + database-architect
+
+# ✅ 병렬 (Phase 2)
+test-automator + playwright-engineer + security-auditor
+
+# ✅ 병렬 (Phase 5)
+playwright-engineer + security-auditor + performance-engineer
 ```
 
-**시나리오 3: 성능 최적화**
+**순차 실행 예시** (의존성):
+```bash
+# ❌ database-architect → backend-architect (API가 DB 스키마 참조)
+# ❌ Phase 1 → Phase 2 (구현 후 테스트)
 ```
-Phase 0: seq-engineer (병목 분석)
-Phase 1: performance-engineer (최적화)
-Phase 2: test-automator (성능 테스트)
-Phase 5: playwright-engineer (실제 환경 검증)
-```
+
+**효과**: 개발 시간 **64% 단축** (180분 → 60분)
+
+**상세 가이드**: 33개 Agent 전체 활용법 → [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md)
 
 ---
 
@@ -239,6 +239,9 @@ bash scripts/github-issue-dev.sh 123
 ### Spec Kit
 - [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) - 5분 개요
 - [.speckit/constitution.md](.speckit/constitution.md) - Constitution 템플릿
+
+### Agent
+- [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md) - 33개 Agent 완전 가이드 & 병렬 실행 패턴
 
 ### 공식 문서
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)

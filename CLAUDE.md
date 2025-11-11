@@ -59,16 +59,62 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 | 2 | 테스트 | `pytest tests/ -v --cov=src` (Python) / `npm test` (Node.js) |
 | 3 | 버전 | Semantic Versioning (Major.Minor.Patch), README 업데이트 |
 | 4 | Git | `git commit -m "type: 설명 (v버전) [PRD-####]"` |
-| 5 | 검증 | GitHub 파일 확인, CI/CD 통과 확인 |
+| 5 | 검증 | **Playwright E2E 필수** - 실제 작동 확인 후 완료 처리 |
 | 6 | 캐시 | `Ctrl+Shift+R` 또는 `?v=1.2.3` |
 
 ---
 
 ## 🤖 Subagent & MCP
 
-**Top 5 Agent**: `seq-engineer` (요구사항) | `python-pro` | `frontend-developer` | `test-automator` | `security-auditor`
+**Top 5 Agent**: `seq-engineer` (요구사항) | `playwright-engineer` (검증) | `python-pro` | `frontend-developer` | `test-automator`
 
-**MCP**: `sequentialthinking`, `ide`, `github`, `supabase` (Primary) | `context7`, `exa`, `slack` (Secondary)
+**MCP**: `sequentialthinking`, `ide`, `github`, `supabase`, `playwright` (Primary) | `context7`, `exa`, `slack` (Secondary)
+
+### 📚 Context7: 최신 기술 검증 필수
+
+**원칙**: 외부 라이브러리/프레임워크 사용 전 **반드시** Context7 MCP로 최신 문서 확인
+
+**적용 시점**:
+1. **Phase 0**: PRD 작성 시 기술 스택 선정
+2. **Phase 1**: 구현 전 API/패턴 검증
+3. **문제 발생 시**: 디버깅 전 breaking changes 확인
+
+**예시**:
+```bash
+# ❌ 잘못된 방식: 기억에 의존
+"NextAuth.js 사용하면 되겠지"
+
+# ✅ 올바른 방식: Context7 검증
+"NextAuth.js 최신 버전과 권장 패턴을 Context7로 확인"
+→ context7-engineer agent 사용
+→ 최신 문서 기반 구현
+```
+
+**효과**: deprecated API 사용 방지, 최신 best practice 적용
+
+### 🎭 Playwright: E2E 검증 필수
+
+**원칙**: UI/기능 변경 완료 후 **반드시** Playwright로 실제 작동 테스트
+
+**적용 시점**:
+1. **Phase 2**: 단위 테스트 후 E2E 테스트
+2. **Phase 5**: 배포 전 최종 검증 (필수)
+3. **버그 수정 후**: 회귀 테스트 실행
+
+**검증 프로세스**:
+```bash
+# 1. playwright-engineer agent 사용
+"로그인 기능을 Playwright로 테스트"
+
+# 2. 테스트 실행 및 통과 확인
+npx playwright test --headed  # 시각적 확인
+
+# 3. 통과 시에만 검증 완료 처리
+✅ 모든 테스트 통과 → Phase 5 완료
+❌ 실패 → Phase 1로 복귀, 수정 후 재검증
+```
+
+**효과**: "로컬에선 되는데?" 버그 제로화, 프로덕션 안정성 보장
 
 ---
 
@@ -115,29 +161,12 @@ bash scripts/github-issue-dev.sh 123
 
 ## 🚦 토큰 최적화
 
-### 5대 기법
+### 핵심 전략
 
-#### 1. 미니멀 PRD
-```bash
-python scripts/create_prd.py --minimal "Feature Name"
-```
-
-#### 2. 스마트 컨텍스트
-```bash
-python scripts/index_codebase.py .
-python scripts/context_manager.py --summary
-```
-
-#### 3. Diff 기반 업데이트
-```bash
-python scripts/diff_manager.py . --diff src/*.py
-```
-
-#### 4. Function Calling
-JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
-
-#### 5. 배치 처리
-병렬 도구 호출: `Read("file1.py"), Read("file2.py")`
+1. **미니멀 PRD**: MINIMAL 가이드 사용 (10분, ~1270 토큰)
+2. **병렬 도구 호출**: 독립 작업 동시 실행 (`Read("a.py"), Read("b.py")`)
+3. **컨텍스트 집중**: 필요한 파일만 읽기, 전체 탐색 지양
+4. **Diff 기반**: 변경된 부분만 전달
 
 📚 [TOKEN_OPTIMIZATION_DETAILS.md](docs/TOKEN_OPTIMIZATION_DETAILS.md) - 상세 분석 및 비용 효과
 
@@ -149,6 +178,8 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 2. **PRD 중심**: 커밋마다 `[PRD-####]` 참조
 3. **자동화 우선**: 스크립트 활용
 4. **병렬 실행**: 독립 작업 동시 호출
+5. **Context7 검증**: 외부 기술 사용 전 최신 문서 확인 필수
+6. **Playwright 검증**: Phase 5에서 실제 작동 확인 후 완료 처리
 
 ---
 

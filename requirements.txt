@@ -1,0 +1,7 @@
+# Agent/Skill Optimizer Dependencies
+
+# Claude API
+anthropic>=0.40.0
+
+# Optional: For advanced git operations
+# GitPython>=3.1.40

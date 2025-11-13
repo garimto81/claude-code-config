@@ -15,7 +15,7 @@ from pathlib import Path
 repo_root = Path(__file__).parent.parent.parent
 
 # Path to the analysis script
-analysis_script = repo_root / ".claude" / "scripts" / "analyze-agent-usage.py"
+analysis_script = repo_root / ".claude" / "scripts" / "analyze_agent_usage.py"
 
 # Check if the analysis script exists
 if not analysis_script.exists():

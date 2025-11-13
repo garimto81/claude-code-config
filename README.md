@@ -2,7 +2,7 @@
 
 **목적**: Claude Code 작업을 위한 전역 워크플로우 및 가이드 관리
 
-**버전**: 4.1.0 | **업데이트**: 2025-01-12
+**버전**: 4.2.0 | **업데이트**: 2025-01-13
 
 ---
 
@@ -25,6 +25,13 @@
 ### 4. **자동화 도구**
 - **[scripts/setup-github-labels.sh](scripts/setup-github-labels.sh)** - GitHub 라벨 생성
 - **[scripts/github-issue-dev.sh](scripts/github-issue-dev.sh)** - 이슈 작업 시작
+- **[scripts/check-phase-completion.py](scripts/check-phase-completion.py)** - Phase 완료 감지
+- **[scripts/create-phase-pr.sh](scripts/create-phase-pr.sh)** - PR 자동 생성
+
+### 5. **자동 PR/머지 시스템 (NEW)**
+- **[.github/workflows/auto-pr-merge.yml](.github/workflows/auto-pr-merge.yml)** - GitHub Actions 워크플로우
+- **[docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)** - Branch Protection 설정 가이드
+- **[.github/pull_request_template.md](.github/pull_request_template.md)** - PR 템플릿
 
 ---
 

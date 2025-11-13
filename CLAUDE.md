@@ -1,7 +1,7 @@
 # Claude AI 마스터 개발 가이드
 *핵심 워크플로우 & 자동화 규칙*
 
-**버전**: 4.5.0 | **업데이트**: 2025-01-12
+**버전**: 4.6.0 | **업데이트**: 2025-01-13
 
 ---
 
@@ -58,9 +58,28 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 | 1 | 코드 작성 | PRD 구현 + 문서화 |
 | 2 | 테스트 | `pytest tests/ -v --cov=src` (Python) / `npm test` (Node.js) |
 | 3 | 버전 | Semantic Versioning (Major.Minor.Patch), README 업데이트 |
-| 4 | Git | `git commit -m "type: 설명 (v버전) [PRD-####]"` |
+| 4 | Git | `git commit -m "type: 설명 (v버전) [PRD-####]"` → **자동 PR 생성** |
 | 5 | 검증 | **Playwright E2E 필수** - 실제 작동 확인 후 완료 처리 |
 | 6 | 캐시 | `Ctrl+Shift+R` 또는 `?v=1.2.3` |
+
+### 🚀 자동 PR/머지 (Phase 4+)
+
+**커밋 후 자동 실행**:
+```
+커밋 (vX.Y.Z) [PRD-####] → Push → GitHub Actions
+→ PR 생성 → CI 테스트 → 자동 머지 → 브랜치 삭제
+```
+
+**수동 실행**:
+```bash
+# PR 생성
+bash scripts/create-phase-pr.sh
+
+# Phase 감지 확인
+python scripts/check-phase-completion.py HEAD
+```
+
+📚 **설정 가이드**: [docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)
 
 ---
 

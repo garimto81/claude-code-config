@@ -13,9 +13,9 @@
 - [x] 0.0.2 로컬 환경 설정 확인
 
 ### Task 1.0: Git Hooks 구현
-- [ ] 1.1 `.git/hooks/post-commit` hook 작성
-- [ ] 1.2 백그라운드 실행 설정
-- [ ] 1.3 Hook 실행 테스트
+- [x] 1.1 `.git/hooks/post-commit` hook 작성
+- [x] 1.2 백그라운드 실행 설정
+- [x] 1.3 Hook 실행 테스트
 
 ### Task 2.0: 로그 파일 분석 시스템 구현
 - [ ] 2.1 `.claude/scripts/analyze-agent-usage.py` 작성

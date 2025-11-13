@@ -2,7 +2,7 @@
 
 **목적**: Claude Code 작업을 위한 전역 워크플로우 및 가이드 관리
 
-**버전**: 4.2.0 | **업데이트**: 2025-01-13
+**버전**: 4.3.0 | **업데이트**: 2025-01-13
 
 ---
 
@@ -28,10 +28,37 @@
 - **[scripts/check-phase-completion.py](scripts/check-phase-completion.py)** - Phase 완료 감지
 - **[scripts/create-phase-pr.sh](scripts/create-phase-pr.sh)** - PR 자동 생성
 
-### 5. **자동 PR/머지 시스템 (NEW)**
+### 5. **자동 PR/머지 시스템**
 - **[.github/workflows/auto-pr-merge.yml](.github/workflows/auto-pr-merge.yml)** - GitHub Actions 워크플로우
 - **[docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)** - Branch Protection 설정 가이드
 - **[.github/pull_request_template.md](.github/pull_request_template.md)** - PR 템플릿
+
+### 6. **Agent/Skill 자동 최적화 (NEW)**
+- **[.claude/hooks/post-commit](.claude/hooks/post-commit)** - Git Hook (커밋 시 자동 실행)
+- **[.claude/scripts/analyze_agent_usage.py](.claude/scripts/analyze_agent_usage.py)** - 로그 분석 엔진
+- **[.claude/optimizer-config.json](.claude/optimizer-config.json)** - 설정 파일
+- **[docs/AGENT_OPTIMIZER_GUIDE.md](docs/AGENT_OPTIMIZER_GUIDE.md)** - 완전한 설치 및 사용 가이드
+
+**기능**:
+- ✅ 커밋 시 Agent/Skill 사용 패턴 자동 분석
+- ✅ 실패 원인 자동 분류 (timeout, missing_context, parameter_error, ambiguous_prompt, api_error)
+- ✅ Claude API로 프롬프트 개선 제안 생성
+- ✅ Git 메타데이터 자동 저장 (Agent-Usage trailer)
+- ✅ 콘솔 알림 및 파일 저장 (`.claude/improvement-suggestions.md`)
+
+**빠른 설치**:
+```bash
+# 1. Git hook 활성화
+ln -s ../../.claude/hooks/post-commit .git/hooks/post-commit  # Unix/Linux/macOS
+# 또는
+cp .claude/hooks/post-commit .git/hooks/post-commit          # Windows
+
+# 2. 의존성 설치
+pip install -r requirements.txt
+
+# 3. API 키 설정 (선택)
+export ANTHROPIC_API_KEY=your_api_key_here
+```
 
 ---
 
@@ -89,10 +116,30 @@ d:\AI\claude01\              # 전역 지침 레포
 │
 ├── scripts/                # 자동화 스크립트
 │   ├── setup-github-labels.sh
-│   └── github-issue-dev.sh
+│   ├── github-issue-dev.sh
+│   ├── check-phase-completion.py
+│   └── create-phase-pr.sh
+│
+├── .claude/                # Claude Code 확장
+│   ├── hooks/
+│   │   └── post-commit     # Git Hook
+│   ├── scripts/
+│   │   └── analyze_agent_usage.py  # Agent 최적화
+│   └── optimizer-config.json       # 설정
 │
 ├── .speckit/               # Spec Kit 템플릿
 │   └── constitution.md
+│
+├── .github/                # GitHub Actions
+│   └── workflows/
+│       └── auto-pr-merge.yml
+│
+├── tests/                  # 테스트 (pytest)
+│   ├── test_log_parser.py
+│   ├── test_analyzer.py
+│   ├── test_optimizer.py
+│   ├── test_git_metadata.py
+│   └── test_integration.py
 │
 └── .gitignore              # Git 제외 설정
 ```

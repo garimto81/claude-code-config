@@ -34,6 +34,11 @@ nul
 
 # Claude 설정
 .claude/
+!.claude/scripts/
+!.claude/hooks/
+!.claude/optimizer-config.json
+.claude/improvement-suggestions.md
+.claude/optimizer-error.log
 .claude-global/
 
 # 구버전 문서들

@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "log_analysis": {
+    "max_log_size_mb": 10,
+    "parse_timeout_seconds": 5
+  },
+  "improvement": {
+    "auto_generate": true,
+    "model": "claude-sonnet-4-20250514",
+    "max_suggestions": 5
+  },
+  "git_metadata": {
+    "enabled": true,
+    "use_trailer": true,
+    "amend_commit": true
+  },
+  "notification": {
+    "console_output": true,
+    "save_to_file": true
+  }
+}

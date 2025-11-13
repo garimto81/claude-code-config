@@ -125,7 +125,10 @@ jobs:
           )
 
           # PR 생성
-          PR_NUM=$(gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base master --json number --jq '.number')
+          gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base master
+
+          # PR 번호 가져오기
+          PR_NUM=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
           echo "pr_number=$PR_NUM" >> $GITHUB_OUTPUT
           echo "✅ PR #$PR_NUM created"
         env:

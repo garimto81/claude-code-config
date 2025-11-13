@@ -57,13 +57,13 @@
 - [x] 4.3.2 설명 제거
 - [x] 4.3.3 라인 수 확인: 35줄 달성 (목표 대비 +5줄)
 
-### Task 5.0: Claude CLI 문서 통합 (179줄 → 80줄, -99줄)
-- [ ] 5.1 2개 파일 분석 (AUTO_BYPASS_SETUP, README_CLAUDE_CLI)
-- [ ] 5.2 통합 전략 결정: 단일 파일 or docs/ 이동
-- [ ] 5.3 CLAUDE_CLI_QUICKSTART.md 생성 (또는 기존 파일 통합)
-- [ ] 5.4 중복 제거, 핵심만 유지
-- [ ] 5.5 라인 수 확인: 80줄 목표
-- [ ] 5.6 기존 파일 제거 (선택)
+### Task 5.0: Claude CLI 문서 통합 (179줄 → 98줄, -81줄)
+- [x] 5.1 2개 파일 분석 (AUTO_BYPASS_SETUP, README_CLAUDE_CLI)
+- [x] 5.2 통합 전략 결정: 단일 파일 생성
+- [x] 5.3 CLAUDE_CLI_QUICKSTART.md 생성
+- [x] 5.4 중복 제거, 핵심만 유지
+- [x] 5.5 라인 수 확인: 98줄 달성 (목표 대비 +18줄)
+- [x] 5.6 기존 파일 제거 완료
 
 ### Task 6.0: 문서 간 일관성 검증
 - [ ] 6.1 용어 통일 확인 (Agent vs Subagent 등)

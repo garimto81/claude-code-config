@@ -2,7 +2,7 @@
 
 **목적**: Claude Code 작업을 위한 전역 워크플로우 및 가이드 관리
 
-**버전**: 4.1.0 | **업데이트**: 2025-01-12
+**버전**: 4.2.0 | **업데이트**: 2025-01-13
 
 ---
 
@@ -25,6 +25,13 @@
 ### 4. **자동화 도구**
 - **[scripts/setup-github-labels.sh](scripts/setup-github-labels.sh)** - GitHub 라벨 생성
 - **[scripts/github-issue-dev.sh](scripts/github-issue-dev.sh)** - 이슈 작업 시작
+- **[scripts/check-phase-completion.py](scripts/check-phase-completion.py)** - Phase 완료 감지
+- **[scripts/create-phase-pr.sh](scripts/create-phase-pr.sh)** - PR 자동 생성
+
+### 5. **자동 PR/머지 시스템 (NEW)**
+- **[.github/workflows/auto-pr-merge.yml](.github/workflows/auto-pr-merge.yml)** - GitHub Actions 워크플로우
+- **[docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)** - Branch Protection 설정 가이드
+- **[.github/pull_request_template.md](.github/pull_request_template.md)** - PR 템플릿
 
 ---
 
@@ -32,13 +39,14 @@
 
 ### 처음 사용하는 경우
 1. **[CLAUDE.md](CLAUDE.md) 읽기** (10분) - Phase 0-6 워크플로우 완전 이해
-2. **Phase 0 실습** - PRD 작성 연습
+2. **Context7 검증 습관화** - 외부 기술 사용 전 최신 문서 확인
+3. **Phase 0 실습** - PRD 작성 연습
    ```bash
    # 로컬 방식
    mkdir -p tasks/prds
    vim tasks/prds/0001-prd-test-feature.md
    ```
-3. **다음 단계** - [GitHub 워크플로우](#github-워크플로우-채택) 또는 [Spec Kit](#spec-kit-constitution-사용) 도입 고려
+4. **다음 단계** - [GitHub 워크플로우](#github-워크플로우-채택) 또는 [Spec Kit](#spec-kit-constitution-사용) 도입 고려
 
 ### GitHub 워크플로우 도입하려는 경우
 1. **[깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md)** (5분) - ROI 및 Before/After 파악
@@ -159,6 +167,32 @@ code your-project/constitution.md
 
 ---
 
+## 📊 구현 상태
+
+### ✅ 완전 구현
+- **Phase 0-6 워크플로우** - 핵심 개발 사이클
+- **GitHub 네이티브 워크플로우** - 이슈 중심 개발
+- **자동화 스크립트** - 이슈 작업 시작, 라벨 설정
+- **문서 체계** - MINIMAL/STANDARD/JUNIOR PRD 가이드
+- **Context7 검증** - 외부 기술 최신 문서 확인
+- **Playwright E2E** - Phase 5 실제 작동 검증 필수
+
+### 🔧 선택 구현 (프로젝트별)
+- **GitHub Actions** - CI/CD 자동화 (템플릿 제공)
+- **Task 생성 자동화** - PRD → Task List 변환
+- **토큰 최적화 스크립트** - 고급 최적화 도구
+
+### 📁 폴더 구조
+```
+tasks/
+├── prds/       ✅ PRD 저장 (로컬 워크플로우)
+└── tickets/    ✅ 버그 티켓 추적
+```
+
+**참조**: 구현 여부는 [CLAUDE.md](CLAUDE.md)의 각 섹션 참조
+
+---
+
 ## 📖 주요 개념
 
 ### Phase 0-6 워크플로우
@@ -191,6 +225,18 @@ Phase 6: 배포 및 캐시
 - 보안 체크리스트
 - 아키텍처 가이드
 - "깜빡" 버그 예방
+
+### Context7 MCP 활용
+- 외부 라이브러리/프레임워크 최신 문서 검증
+- Deprecated API 사용 방지
+- Breaking changes 사전 확인
+- Best practices 자동 적용
+
+### Playwright E2E 검증
+- Phase 5 배포 전 필수 검증
+- 실제 브라우저 환경 테스트
+- 모든 테스트 통과 시에만 완료 처리
+- "로컬에선 되는데?" 버그 제로화
 
 ---
 

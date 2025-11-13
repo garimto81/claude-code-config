@@ -1,7 +1,7 @@
 # Claude AI 마스터 개발 가이드
 *핵심 워크플로우 & 자동화 규칙*
 
-**버전**: 4.1.0 | **업데이트**: 2025-01-12
+**버전**: 4.6.0 | **업데이트**: 2025-01-13
 
 ---
 
@@ -58,17 +58,64 @@ python scripts/generate_tasks.py tasks/prds/0001-prd-user-auth.md
 | 1 | 코드 작성 | PRD 구현 + 문서화 |
 | 2 | 테스트 | `pytest tests/ -v --cov=src` (Python) / `npm test` (Node.js) |
 | 3 | 버전 | Semantic Versioning (Major.Minor.Patch), README 업데이트 |
-| 4 | Git | `git commit -m "type: 설명 (v버전) [PRD-####]"` |
-| 5 | 검증 | GitHub 파일 확인, CI/CD 통과 확인 |
+| 4 | Git | `git commit -m "type: 설명 (v버전) [PRD-####]"` → **자동 PR 생성** |
+| 5 | 검증 | **Playwright E2E 필수** - 실제 작동 확인 후 완료 처리 |
 | 6 | 캐시 | `Ctrl+Shift+R` 또는 `?v=1.2.3` |
+
+### 🚀 자동 PR/머지 (Phase 4+)
+
+**커밋 후 자동 실행**:
+```
+커밋 (vX.Y.Z) [PRD-####] → Push → GitHub Actions
+→ PR 생성 → CI 테스트 → 자동 머지 → 브랜치 삭제
+```
+
+**수동 실행**:
+```bash
+# PR 생성
+bash scripts/create-phase-pr.sh
+
+# Phase 감지 확인
+python scripts/check-phase-completion.py HEAD
+```
+
+📚 **설정 가이드**: [docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)
 
 ---
 
 ## 🤖 Subagent & MCP
 
-**Top 5 Agent**: `seq-engineer` (요구사항) | `python-pro` | `frontend-developer` | `test-automator` | `security-auditor`
+**Top 5 Agent** (범용):
+1. `context7-engineer` (필수) - 외부 기술 최신 문서 검증
+2. `playwright-engineer` (필수) - E2E 테스트 및 최종 검증
+3. `seq-engineer` (권장) - 복잡한 요구사항 분석
+4. `test-automator` (권장) - 단위/통합 테스트 작성
+5. `typescript-expert` (권장) - TypeScript 타입 안정성
 
-**MCP**: `sequentialthinking`, `ide`, `github`, `supabase` (Primary) | `context7`, `exa`, `slack` (Secondary)
+**MCP**: `sequentialthinking`, `ide`, `github`, `supabase`, `playwright` (Primary) | `context7`, `exa`, `slack` (Secondary)
+
+**핵심 원칙**:
+- **Context7 필수**: 외부 라이브러리 사용 전 최신 문서 확인 (Phase 0, 1)
+- **Playwright 필수**: E2E 테스트 실행 (Phase 2, 5)
+- **병렬 실행**: 독립 작업 동시 호출 (Phase 1 최대 6개, Phase 2 최대 5개)
+- **개발 시간 단축**: 병렬 실행으로 평균 64% 절감
+
+📚 **상세 가이드**: [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md)
+- 33개 Agent 전체 목록 및 용도
+- Phase별 활용법 및 필수 여부
+- 병렬 실행 패턴 및 시나리오별 조합
+- 시간 단축 효과 분석
+
+---
+
+## 🎓 Skill 활용
+
+**용도**: PDF 변환, Excel 분석, 이미지 압축 등 파일 처리 자동화
+**원칙**: Agents 먼저, Skills는 보조 도구
+
+**예시**: `Skill("pdf")` → "PRD-0003을 PDF로 변환"
+
+📚 [Skill 카탈로그](https://docs.anthropic.com/en/docs/claude-code/skills) - 전체 Skills 목록 및 사용법
 
 ---
 
@@ -115,31 +162,10 @@ bash scripts/github-issue-dev.sh 123
 
 ## 🚦 토큰 최적화
 
-### 5대 기법
-
-#### 1. 미니멀 PRD
-```bash
-python scripts/create_prd.py --minimal "Feature Name"
-```
-
-#### 2. 스마트 컨텍스트
-```bash
-python scripts/index_codebase.py .
-python scripts/context_manager.py --summary
-```
-
-#### 3. Diff 기반 업데이트
-```bash
-python scripts/diff_manager.py . --diff src/*.py
-```
-
-#### 4. Function Calling
-JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
-
-#### 5. 배치 처리
-병렬 도구 호출: `Read("file1.py"), Read("file2.py")`
-
-📚 [TOKEN_OPTIMIZATION_DETAILS.md](docs/TOKEN_OPTIMIZATION_DETAILS.md) - 상세 분석 및 비용 효과
+1. **미니멀 PRD**: MINIMAL 가이드 사용 (10분, ~1270 토큰)
+2. **병렬 도구 호출**: 독립 작업 동시 실행 (`Read("a.py"), Read("b.py")`)
+3. **컨텍스트 집중**: 필요한 파일만 읽기, 전체 탐색 지양
+4. **Diff 기반**: 변경된 부분만 전달
 
 ---
 
@@ -149,6 +175,8 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 2. **PRD 중심**: 커밋마다 `[PRD-####]` 참조
 3. **자동화 우선**: 스크립트 활용
 4. **병렬 실행**: 독립 작업 동시 호출
+5. **Context7 검증**: 외부 기술 사용 전 최신 문서 확인 필수
+6. **Playwright 검증**: Phase 5에서 실제 작동 확인 후 완료 처리
 
 ---
 
@@ -162,6 +190,9 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 - [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) - 5분 개요
 - [.speckit/constitution.md](.speckit/constitution.md) - Constitution 템플릿
 
+### Agent
+- [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md) - 33개 Agent 완전 가이드 & 병렬 실행 패턴
+
 ### 공식 문서
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
 - [GitHub Spec Kit](https://github.com/github/spec-kit)
@@ -172,42 +203,30 @@ JSON 응답 사용: `{"action": "edit", "file": "app.py"}`
 
 ### 로컬 PRD 방식
 ```bash
-# 1. PRD 작성
+# 1. PRD 작성 → 2. Task List 생성 → 3. 개발 & 테스트
 vim tasks/prds/0001-prd-feature.md
-
-# 2. 개발 & 테스트 (Phase 1-2)
-
-# 3. 커밋
 git commit -m "feat: Add feature (v1.0.0) [PRD-0001]"
 ```
 
-### GitHub 네이티브 방식
+### GitHub 네이티브 방식 (추천)
+**차이점**: PRD를 GitHub Issue로 작성
 ```bash
-# 1. 이슈 생성
 gh issue create --template 01-feature-prd.yml
-
-# 2. 작업 시작
-bash scripts/github-issue-dev.sh 123
-
-# 3. 개발 & 푸시
-git commit -m "feat: Add feature [#123]"
-git push
+bash scripts/github-issue-dev.sh 123  # 자동 브랜치 생성 & 라벨링
+git commit -m "feat: Add feature [#123]" && git push
 ```
+
+📚 [깃허브_빠른시작.md](깃허브_빠른시작.md) - 30분 설정 가이드
 
 ---
 
-## 📋 버전 히스토리
+## 📋 변경 이력
 
-### v4.1.0 (2025-01-12)
-- ✅ 언어 정책 명확화 (괄호 영문명 불필요)
-- ✅ GitHub 워크플로우 통합
-- ✅ Spec Kit 참조 추가
-- ✅ Quick Start 두 가지 방식 제시
+**현재 버전**: v4.5.0 (2025-01-12)
 
-### v4.0.0 (2025-01-12)
-- 🎯 171줄 달성 (373줄에서 54% 축소)
-- 🗑️ 비용 계산 및 중복 설명 제거
-- ⚡ Phase 0-6 핵심 워크플로우에 집중
+**주요 변경**: Agent 섹션 통합 (-88줄), Skill 간소화 (-24줄), Quick Start 통합 (-12줄), Agent Top 5 수정 (context7/playwright 우선)
+
+📚 **전체 이력**: `git log --oneline CLAUDE.md`
 
 ---
 

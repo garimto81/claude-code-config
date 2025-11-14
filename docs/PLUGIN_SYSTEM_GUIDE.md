@@ -15,7 +15,7 @@ wshobson/agents의 플러그인 아키텍처를 claude01에 통합하여, Phase/
 - ✅ Phase별 최적 Agent 자동 선택
 - ✅ 토큰 사용 40-70% 절감
 
-### 📊 지원 Agent (현재 5개)
+### 📊 지원 Agent (현재 15개)
 
 | Agent | 모델 | 토큰 | Phase | 활성화 키워드 |
 |-------|------|------|-------|--------------|
@@ -24,6 +24,16 @@ wshobson/agents의 플러그인 아키텍처를 claude01에 통합하여, Phase/
 | **seq-engineer** | Haiku | 500 | 0 | requirement, complex, decompose |
 | **test-automator** | Haiku | 600 | 1, 2 | unit test, pytest, jest |
 | **typescript-expert** | Sonnet | 1000 | 1 | TypeScript, type, generic |
+| **debugger** | Sonnet | 1300 | 1, 2 | error, bug, debug, exception |
+| **database-optimizer** | Sonnet | 1200 | 1, 2 | database, SQL, query, optimization |
+| **security-auditor** | Sonnet | 1400 | 1, 2, 5 | security, vulnerability, OWASP |
+| **deployment-engineer** | Haiku | 700 | 6 | deploy, CI/CD, Docker, Kubernetes |
+| **fullstack-developer** | Sonnet | 1600 | 1 | fullstack, API, integration |
+| **frontend-developer** | Sonnet | 1300 | 1 | React, Vue, UI, component |
+| **backend-architect** | Sonnet | 1400 | 0, 1 | backend, API, architecture |
+| **data-scientist** | Sonnet | 1200 | 1 | SQL, BigQuery, analytics |
+| **code-reviewer** | Sonnet | 1300 | 1, 2, 4 | review, code review, quality, PR |
+| **task-decomposition** | Haiku | 600 | 0.5 | task, decompose, PRD, planning |
 
 ---
 

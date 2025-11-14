@@ -1,0 +1,22 @@
+{
+  "name": "data-scientist",
+  "display_name": "Data Scientist",
+  "version": "1.0.0",
+  "description": "데이터 분석, SQL 쿼리 및 BigQuery 전문가",
+  "model": "sonnet",
+  "token_cost": 1200,
+  "capabilities": [
+    "sql_query_writing",
+    "data_analysis",
+    "bigquery_optimization",
+    "statistical_analysis"
+  ],
+  "activation": {
+    "keywords": ["SQL", "BigQuery", "data analysis", "query", "analytics", "statistics"],
+    "phases": ["Phase 1"],
+    "file_patterns": ["*.sql", "queries/"]
+  },
+  "resources": {
+    "instructions": "instructions.md"
+  }
+}

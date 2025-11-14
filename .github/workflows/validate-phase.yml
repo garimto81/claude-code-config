@@ -1,0 +1,135 @@
+name: Phase Validation
+
+# Based on cc-sdd validation workflow (MIT License)
+# Adapted for claude01 Phase 0-6 development cycle
+
+on:
+  pull_request:
+    branches:
+      - 'feature/PRD-*'
+      - 'master'
+  workflow_dispatch:
+    inputs:
+      prd_number:
+        description: 'PRD Number (예: 0005)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  extract-prd-number:
+    name: Extract PRD Number
+    runs-on: ubuntu-latest
+    outputs:
+      prd_number: ${{ steps.extract.outputs.prd_number }}
+    steps:
+      - name: Extract from branch name
+        id: extract
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PRD_NUM="${{ inputs.prd_number }}"
+          else
+            BRANCH="${{ github.head_ref }}"
+            PRD_NUM=$(echo "$BRANCH" | grep -oP 'PRD-\K\d+' || echo "")
+          fi
+
+          if [ -z "$PRD_NUM" ]; then
+            echo "⚠️  PRD 번호를 추출할 수 없습니다"
+            echo "prd_number=unknown" >> $GITHUB_OUTPUT
+          else
+            echo "✅ PRD 번호: $PRD_NUM"
+            echo "prd_number=$PRD_NUM" >> $GITHUB_OUTPUT
+          fi
+
+  validate-phase-0:
+    name: Phase 0 검증 (PRD)
+    needs: extract-prd-number
+    if: needs.extract-prd-number.outputs.prd_number != 'unknown'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x scripts/validate-*.sh
+
+      - name: Validate Phase 0
+        run: |
+          bash scripts/validate-phase-0.sh ${{ needs.extract-prd-number.outputs.prd_number }}
+
+  validate-phase-0-5:
+    name: Phase 0.5 검증 (Task List)
+    needs: [extract-prd-number, validate-phase-0]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x scripts/validate-*.sh
+
+      - name: Validate Phase 0.5
+        run: |
+          bash scripts/validate-phase-0.5.sh ${{ needs.extract-prd-number.outputs.prd_number }}
+
+  validate-test-pairing:
+    name: Phase 1 검증 (1:1 Test Pairing)
+    needs: extract-prd-number
+    if: contains(github.event.pull_request.title, 'Phase 1') || contains(github.event.pull_request.title, 'Phase 2')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate Test Pairing (Bash)
+        run: |
+          chmod +x scripts/validate-phase-1.sh
+          bash scripts/validate-phase-1.sh
+
+      - name: Validate Test Pairing (Python)
+        run: |
+          python scripts/validate-test-pairing.py
+
+  comment-results:
+    name: Comment Validation Results
+    needs: [extract-prd-number, validate-phase-0, validate-phase-0-5]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prdNum = '${{ needs.extract-prd-number.outputs.prd_number }}';
+            const phase0 = '${{ needs.validate-phase-0.result }}';
+            const phase0_5 = '${{ needs.validate-phase-0-5.result }}';
+            const testPairing = '${{ needs.validate-test-pairing.result }}';
+
+            let comment = `## 🔍 Phase 검증 결과\n\n`;
+            comment += `**PRD 번호**: ${prdNum}\n\n`;
+            comment += `| Phase | 상태 |\n`;
+            comment += `|-------|------|\n`;
+            comment += `| Phase 0 (PRD) | ${phase0 === 'success' ? '✅ 통과' : '❌ 실패'} |\n`;
+            comment += `| Phase 0.5 (Tasks) | ${phase0_5 === 'success' ? '✅ 통과' : phase0_5 === 'skipped' ? '⏭️ 스킵' : '❌ 실패'} |\n`;
+
+            if (testPairing !== 'skipped') {
+              comment += `| Phase 1 (Tests) | ${testPairing === 'success' ? '✅ 통과' : '❌ 실패'} |\n`;
+            }
+
+            comment += `\n---\n`;
+            comment += `🤖 Automated by [claude01 Phase Validation](https://github.com/${context.repo.owner}/${context.repo.repo}/.github/workflows/validate-phase.yml)`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

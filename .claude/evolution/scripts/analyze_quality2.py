@@ -30,10 +30,15 @@ Usage:
 import json
 import argparse
 import sys
+import io
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 from collections import defaultdict
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 # Import core logic
 from agent_quality_v2 import AgentQuality

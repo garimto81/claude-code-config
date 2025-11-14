@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Repository Purpose**: Global workflow templates and automation for Claude Code development
-**Version**: 4.13.0 | **Updated**: 2025-01-14
+**Version**: 4.14.0 | **Updated**: 2025-01-14
 
 ---
 
@@ -279,25 +279,21 @@ python .claude/evolution/scripts/analyze_quality2.py --alerts
 
 ## Agent Usage & Optimization
 
-### Plugin System (wshobson/agents inspired)
+### Smart Agent Selection (Automatic)
 
-**Smart Agent Loading**: Phase/키워드 기반 선택적 Agent 로딩으로 토큰 40-70% 절감
+**Claude Code automatically selects optimal agents based on Phase and context.**
 
-```bash
-# Phase별 최적 Agent 확인
-python .claude/scripts/load-plugins.py --phase "Phase 0"
-# → context7-engineer, seq-engineer 활성화 (66% 토큰 절감)
+No manual scripts needed - I read CLAUDE.md and choose appropriate agents:
 
-python .claude/scripts/load-plugins.py --phase "Phase 1" --keywords "React"
-# → context7-engineer, test-automator, typescript-expert (44% 절감)
+- **Phase 0**: context7-engineer, seq-engineer (research)
+- **Phase 1**: debugger, typescript-expert, test-automator (implementation)
+- **Phase 2**: test-automator, playwright-engineer (testing)
+- **Phase 5**: playwright-engineer, security-auditor (E2E & security)
+- **Phase 6**: deployment-engineer (deployment)
 
-python .claude/scripts/load-plugins.py --phase "Phase 5"
-# → playwright-engineer (70% 절감)
-```
+**Benefits**: 60-80% token savings vs loading all agents
 
-**상세 가이드**: `docs/PLUGIN_SYSTEM_GUIDE.md`
-
-### Top 15 Agents (15 plugins total)
+### Available Agents (15 total)
 
 **High Priority** (필수):
 1. **context7-engineer** ⭐ (Sonnet, 1200) - External library docs verification (Phase 0, 1)
@@ -336,33 +332,35 @@ Task("test-automator", "integration tests")
 
 **Time Savings**: Average 64% reduction with parallel execution
 
-### Agent Optimizer (Post-Commit Hook)
+### Agent Performance Analysis (On-Demand)
 
-**Auto-Analysis**: `.claude/hooks/post-commit` → `python .claude/scripts/analyze_agent_usage.py`
+**Simple approach**: Ask me when you need insights.
 
-**What It Does**:
-1. Parses Claude Code logs for agent usage
-2. Classifies failures: `timeout` | `missing_context` | `parameter_error` | `ambiguous_prompt` | `api_error`
-3. Uses Claude API to generate improved prompts
-4. Saves to: `.claude/improvement-suggestions.md`
-5. Amends commit with metadata: `Agent-Usage: [{"agent":"...","status":"..."}]`
+```
+User: "agent 사용 분석해줘"
+Claude Code:
+  1. Read .agent-quality-v2.jsonl
+  2. Analyze success rates, durations, trends
+  3. Provide insights and suggestions
+  4. Real-time conversation
 
-**Setup**:
-```bash
-# Unix/macOS
-ln -s ../../.claude/hooks/post-commit .git/hooks/post-commit
-
-# Windows
-copy .claude\hooks\post-commit .git\hooks\post-commit
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Optional: Set API key for improvement generation
-export ANTHROPIC_API_KEY=your_key
+Commands:
+- "debugger agent 성능 어때?"
+- "가장 실패 많은 agent는?"
+- "Phase 1에서 어떤 agent 쓸까?"
 ```
 
-**Config**: `.claude/optimizer-config.json`
+**Benefits**:
+- ✅ No API keys or setup needed
+- ✅ Free (already in conversation)
+- ✅ Real-time feedback
+- ✅ Interactive refinement
+
+**View detailed analytics**:
+```bash
+python .claude/evolution/scripts/analyze_quality2.py --summary
+python .claude/evolution/scripts/analyze_quality2.py --agent debugger
+```
 
 ---
 
@@ -384,38 +382,45 @@ bash scripts/github-issue-dev.sh 123
 python scripts/migrate_prds_to_issues.py tasks/prds/0001-prd-feature.md
 ```
 
-### Phase Validation (cc-sdd inspired)
+### Phase Validation (Automatic)
 
-**Validation Gates**: Explicit checkpoints preventing phase skipping, ensuring spec-first development.
+**Claude Code automatically validates phases based on CLAUDE.md rules.**
 
+When you request phase transition, I automatically check:
+
+**Phase 0 → 0.5**:
+- ✅ PRD exists in `tasks/prds/NNNN-prd-*.md`
+- ✅ PRD has minimum 50 lines
+- ✅ PRD includes acceptance criteria
+
+**Phase 0.5 → 1**:
+- ✅ Task List exists in `tasks/NNNN-tasks-*.md`
+- ✅ Task 0.0 completed (feature branch created)
+- ✅ CLAUDE.md updated with project context
+
+**Phase 1 → PR**:
+- ✅ All implementation files have test pairs
+- ✅ Tests pass (run tests before committing)
+- ✅ No TODO/FIXME comments without issues
+
+**GitHub CI Validation**: `.github/workflows/validate-phase.yml`
+- Auto-runs on PRs from `feature/PRD-*` branches
+- Enforces validation gates
+- Posts results as PR comment
+- Blocks merge if validation fails
+
+**Manual validation** (optional, for debugging):
 ```bash
-# Phase 0: PRD existence (before Task generation)
 bash scripts/validate-phase-0.sh NNNN
-
-# Phase 0.5: Task List + Task 0.0 completion (before coding)
 bash scripts/validate-phase-0.5.sh NNNN
-
-# Phase 1: 1:1 Test pairing (before PR)
-bash scripts/validate-phase-1.sh
-python scripts/validate-test-pairing.py  # More detailed
-
-# Check overall progress
-python scripts/check-phase-completion.py tasks/NNNN-tasks-*.md
+python scripts/validate-test-pairing.py
 ```
 
-**Automatic PR Validation**: `.github/workflows/validate-phase.yml`
-- Triggers on: `feature/PRD-*` branch PRs
-- Runs: Phase 0 → 0.5 → 1 validation sequence
-- Posts: Results as PR comment
-- Blocks: Merge if validation fails
-
-**Benefits** (from cc-sdd integration):
-- 🚫 Prevents coding without PRD
+**Benefits**:
+- 🚫 Prevents phase skipping
 - ✅ Enforces 1:1 test pairing
 - 📊 50% rework reduction
-- ⏱️ 90% validation time savings (10min → 1min)
-
-**Full Guide**: `docs/PHASE_VALIDATION_GUIDE.md`
+- 💬 Conversational validation (no manual scripts)
 
 ---
 
@@ -514,14 +519,28 @@ tasks/prds/*-internal.md
 
 ## Token Optimization
 
+### Conversation-First Approach
+
+**Core principle**: Leverage Claude Code (already in conversation) instead of external API calls.
+
+**Optimizations Applied**:
+1. ✅ **Task Generation**: Conversation (was: API script) - Saves API costs
+2. ✅ **Agent Selection**: Automatic (was: Manual script) - Saves execution time
+3. ✅ **Phase Validation**: Automatic (was: Manual scripts) - Saves user effort
+4. ✅ **Agent Analysis**: On-demand conversation (was: Post-commit hook + API) - Saves setup
+
+### Content Optimization
+
 1. **Minimal PRDs**: Use MINIMAL guide when experienced (saves ~3000 tokens)
 2. **Parallel tool calls**: `Read("a.py"), Read("b.py")` in single message
 3. **Focused context**: Read only necessary files, avoid full codebase scans
 4. **Diff-based**: Show only changed sections, not entire files
+5. **Smart agent loading**: 60-80% token savings per Phase (automatic)
 
 **Example Savings**:
 - PRD: MINIMAL (1270 tokens) vs JUNIOR (4500 tokens) = 72% reduction
-- Docs: Recent optimization reduced 1737 → 1255 lines = 28% token reduction
+- Agent loading: Phase-specific (2-4K tokens) vs All agents (16.8K) = 76-88% reduction
+- Workflow: Conversation-first removes duplicate API calls and manual scripts
 
 ---
 
@@ -579,33 +598,51 @@ git push
 
 ## Quick Start
 
-### Local Workflow
+### Simple Conversational Workflow (Recommended)
+
+```
+User: "새 기능 만들고 싶어"
+
+Claude Code: "Phase 0부터 시작하겠습니다."
+
+1. PRD 작성
+   User: "tasks/prds/0001-prd-auth.md에 PRD 작성해줘"
+   Claude: [PRD 작성] ✅ Phase 0 자동 검증
+
+2. Task List 생성
+   User: "Task List 작성해줘"
+   Claude: [Task List 생성] ✅ Phase 0.5 자동 검증
+
+3. 구현
+   User: "Task 1.1 구현해줘"
+   Claude: [코드 작성 + 테스트 작성 (1:1)] ✅ Phase 1 자동 검증
+
+4. 커밋 & PR
+   User: "커밋해줘"
+   Claude: [커밋 생성] → Auto PR/merge
+
+No manual scripts! Just conversation. 🎉
+```
+
+### Traditional Workflow (Optional)
+
 ```bash
 # 1. Create PRD
 vim tasks/prds/0001-prd-my-feature.md
 
-# 2. Validate Phase 0
-bash scripts/validate-phase-0.sh 0001
+# 2. Ask Claude to generate tasks
+"tasks/prds/0001-prd-my-feature.md 읽고 Task List 작성해줘"
 
-# 3. Generate tasks
-python scripts/generate_tasks.py tasks/prds/0001-prd-my-feature.md
-
-# 4. Review, then "Go" → sub-tasks generated
-
-# 5. Validate Phase 0.5 & create branch (Task 0.0)
-bash scripts/validate-phase-0.5.sh 0001
+# 3. Create branch (Task 0.0)
 git checkout -b feature/PRD-0001-my-feature
 
-# 6. Implement with tests
+# 4. Implement with tests
 vim src/my_feature.py
 vim tests/test_my_feature.py
 
-# 7. Validate Phase 1
-python scripts/validate-test-pairing.py
-
-# 8. Commit & push
+# 5. Commit & push
 git commit -m "feat: Add feature (v1.0.0) [PRD-0001]"
-git push  # → Auto PR/merge + validation takes over
+git push  # → Auto PR/merge
 ```
 
 ### GitHub-Native Workflow
@@ -637,8 +674,14 @@ git push  # → Auto PR/merge
 ---
 
 **Version History**:
-- v4.13.0 (2025-01-14) - Integrated PhaseFlow AI task generation system, Phase 0.5 automation (8h → 30min, 94% time savings)
-- v4.12.0 (2025-01-14) - Expanded plugin system to 15 agents (5 → 15), 16.8K baseline, 60-80% token savings per Phase
-- v4.11.0 (2025-01-14) - Integrated wshobson/agents plugin system, Phase/keyword-based agent loading, 40-70% token savings
-- v4.10.0 (2025-01-14) - Integrated cc-sdd validation gate system, added Phase 0/0.5/1 validation scripts, auto PR validation
-- v4.9.0 (2025-01-13) - Added architecture overview, testing commands, agent optimizer details, clarified meta-workflow nature
+- v4.14.0 (2025-01-14) - **Conversation-First Simplification**: Removed unnecessary complexity
+  - ✅ Task generation: API script → Conversation (saves API costs, setup complexity)
+  - ✅ Agent selection: Manual script → Automatic (no user action needed)
+  - ✅ Phase validation: Manual scripts → Automatic conversation (no user action needed)
+  - ✅ Agent analysis: Post-commit hook + API → On-demand conversation
+  - **Result**: Simpler workflow, no API keys, no setup, just conversation
+- v4.13.0 (2025-01-14) - Integrated PhaseFlow AI task generation (later simplified to conversation)
+- v4.12.0 (2025-01-14) - Expanded plugin system to 15 agents (later simplified to automatic)
+- v4.11.0 (2025-01-14) - Integrated wshobson/agents plugin system (later simplified)
+- v4.10.0 (2025-01-14) - Integrated cc-sdd validation gates (simplified to automatic)
+- v4.9.0 (2025-01-13) - Architecture overview, testing commands

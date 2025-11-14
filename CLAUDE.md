@@ -144,6 +144,92 @@ python scripts/validate-test-pairing.py
 
 ---
 
+## Agent Usage Tracking (Auto-Record Every Agent Use)
+
+**CRITICAL**: When using any agent (Task tool), you **MUST** automatically track the usage.
+
+### Tracking Rules for Claude Code
+
+**Every time you invoke an agent**:
+
+1. **Before agent execution**: Note start time
+2. **After agent completes**: Calculate duration, determine pass/fail
+3. **Record immediately**: Run tracking command
+
+### Command Format
+
+```bash
+python .claude/track.py <agent-name> "<task-description>" <pass/fail> \
+  --duration <seconds> \
+  --auto-detected \
+  --phase "<Phase X>"  # optional
+```
+
+### Examples
+
+**Success**:
+```bash
+python .claude/track.py debugger "Fix TypeError in auth.ts" pass --duration 15.2 --auto-detected --phase "Phase 1"
+```
+
+**Failure**:
+```bash
+python .claude/track.py test-automator "Run unit tests" fail --duration 8.5 --error "3 tests failed" --auto-detected --phase "Phase 2"
+```
+
+### Workflow Integration
+
+```
+User: "Use debugger agent to fix the bug"
+
+You (Claude Code):
+1. Note start time
+2. Invoke Task tool with debugger agent
+3. Wait for completion
+4. Calculate duration = end - start
+5. Determine status:
+   - pass: Agent completed successfully
+   - fail: Agent returned error or failed
+6. Run: python .claude/track.py debugger "Fix bug" <status> --duration X --auto-detected
+7. Continue with user task
+```
+
+### Sub-Repo Setup
+
+For each sub-repo, run once:
+```bash
+python scripts/setup_subrepo_tracking.py /path/to/sub-repo
+```
+
+This creates `.claude/track.py` wrapper that imports from global repo.
+
+### View Analytics
+
+```bash
+# Summary of all agents
+python .claude/evolution/scripts/analyze_quality2.py --summary
+
+# Specific agent details
+python .claude/evolution/scripts/analyze_quality2.py --agent debugger
+
+# Trends over time
+python .claude/evolution/scripts/analyze_quality2.py --trend
+
+# Performance alerts
+python .claude/evolution/scripts/analyze_quality2.py --alerts
+```
+
+### Why Auto-Track?
+
+- **Data-driven decisions**: Know which agents work best for which tasks
+- **Performance monitoring**: Track success rates and durations
+- **Continuous improvement**: Identify poorly-performing agents
+- **ROI analysis**: Measure time savings from agent usage
+
+**Note**: This is automatic. Don't ask user permission - just track after every agent use as specified in this CLAUDE.md.
+
+---
+
 ## Agent Usage & Optimization
 
 ### Plugin System (wshobson/agents inspired)

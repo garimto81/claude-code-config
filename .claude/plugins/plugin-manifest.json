@@ -1,0 +1,101 @@
+{
+  "version": "1.0.0",
+  "description": "Claude Code Agent Plugin System - Progressive disclosure for optimal token usage",
+  "inspiration": "Based on wshobson/agents plugin architecture (MIT License)",
+  "plugins": [
+    {
+      "id": "agent-context7",
+      "name": "Context7 Engineer",
+      "description": "외부 라이브러리 최신 문서 검증 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 0", "Phase 1", "external library", "npm", "pip", "dependency", "version", "documentation"],
+      "token_cost": 1200,
+      "priority": "high",
+      "path": ".claude/plugins/agent-context7",
+      "capabilities": [
+        "library_verification",
+        "documentation_search",
+        "version_check",
+        "compatibility_analysis"
+      ]
+    },
+    {
+      "id": "agent-playwright",
+      "name": "Playwright Engineer",
+      "description": "E2E 테스트 자동화 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 2", "Phase 5", "E2E", "end-to-end", "browser", "test", "playwright"],
+      "token_cost": 1500,
+      "priority": "high",
+      "path": ".claude/plugins/agent-playwright",
+      "capabilities": [
+        "e2e_test_creation",
+        "browser_automation",
+        "test_debugging",
+        "coverage_analysis"
+      ]
+    },
+    {
+      "id": "agent-seq",
+      "name": "Sequential Engineer",
+      "description": "복잡한 문제를 단계별로 분석하는 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 0", "requirement analysis", "complex problem", "decompose", "sequential"],
+      "token_cost": 500,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-seq",
+      "capabilities": [
+        "requirement_analysis",
+        "problem_decomposition",
+        "sequential_thinking",
+        "step_by_step_planning"
+      ]
+    },
+    {
+      "id": "agent-test-automator",
+      "name": "Test Automator",
+      "description": "단위/통합 테스트 자동 생성 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 1", "Phase 2", "unit test", "integration test", "pytest", "jest"],
+      "token_cost": 600,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-test-automator",
+      "capabilities": [
+        "unit_test_generation",
+        "integration_test_generation",
+        "test_coverage_improvement",
+        "mock_creation"
+      ]
+    },
+    {
+      "id": "agent-typescript-expert",
+      "name": "TypeScript Expert",
+      "description": "TypeScript 타입 안전성 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "TypeScript", "type", "generic", "interface"],
+      "token_cost": 1000,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-typescript-expert",
+      "capabilities": [
+        "type_safety_analysis",
+        "generic_design",
+        "type_inference",
+        "advanced_typing"
+      ]
+    }
+  ],
+  "loading_strategy": {
+    "mode": "progressive",
+    "levels": {
+      "always": ["metadata"],
+      "on_activation": ["instructions"],
+      "on_demand": ["resources", "examples"]
+    }
+  },
+  "token_optimization": {
+    "estimated_savings": "40%",
+    "baseline_cost": 5000,
+    "optimized_cost": 3000,
+    "mechanism": "Selective plugin loading based on Phase and keywords"
+  }
+}

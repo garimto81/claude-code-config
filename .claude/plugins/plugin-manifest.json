@@ -1,0 +1,262 @@
+{
+  "version": "1.0.0",
+  "description": "Claude Code Agent Plugin System - Progressive disclosure for optimal token usage",
+  "inspiration": "Based on wshobson/agents plugin architecture (MIT License)",
+  "plugins": [
+    {
+      "id": "agent-context7",
+      "name": "Context7 Engineer",
+      "description": "외부 라이브러리 최신 문서 검증 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 0", "Phase 1", "external library", "npm", "pip", "dependency", "version", "documentation"],
+      "token_cost": 1200,
+      "priority": "high",
+      "path": ".claude/plugins/agent-context7",
+      "capabilities": [
+        "library_verification",
+        "documentation_search",
+        "version_check",
+        "compatibility_analysis"
+      ]
+    },
+    {
+      "id": "agent-playwright",
+      "name": "Playwright Engineer",
+      "description": "E2E 테스트 자동화 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 2", "Phase 5", "E2E", "end-to-end", "browser", "test", "playwright"],
+      "token_cost": 1500,
+      "priority": "high",
+      "path": ".claude/plugins/agent-playwright",
+      "capabilities": [
+        "e2e_test_creation",
+        "browser_automation",
+        "test_debugging",
+        "coverage_analysis"
+      ]
+    },
+    {
+      "id": "agent-seq",
+      "name": "Sequential Engineer",
+      "description": "복잡한 문제를 단계별로 분석하는 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 0", "requirement analysis", "complex problem", "decompose", "sequential"],
+      "token_cost": 500,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-seq",
+      "capabilities": [
+        "requirement_analysis",
+        "problem_decomposition",
+        "sequential_thinking",
+        "step_by_step_planning"
+      ]
+    },
+    {
+      "id": "agent-test-automator",
+      "name": "Test Automator",
+      "description": "단위/통합 테스트 자동 생성 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 1", "Phase 2", "unit test", "integration test", "pytest", "jest"],
+      "token_cost": 600,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-test-automator",
+      "capabilities": [
+        "unit_test_generation",
+        "integration_test_generation",
+        "test_coverage_improvement",
+        "mock_creation"
+      ]
+    },
+    {
+      "id": "agent-typescript-expert",
+      "name": "TypeScript Expert",
+      "description": "TypeScript 타입 안전성 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "TypeScript", "type", "generic", "interface"],
+      "token_cost": 1000,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-typescript-expert",
+      "capabilities": [
+        "type_safety_analysis",
+        "generic_design",
+        "type_inference",
+        "advanced_typing"
+      ]
+    },
+    {
+      "id": "agent-debugger",
+      "name": "Debugger",
+      "description": "에러 디버깅 및 문제 해결 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "Phase 2", "error", "bug", "debug", "exception", "fail", "crash"],
+      "token_cost": 1300,
+      "priority": "high",
+      "path": ".claude/plugins/agent-debugger",
+      "capabilities": [
+        "error_analysis",
+        "stack_trace_debugging",
+        "root_cause_analysis",
+        "fix_suggestion"
+      ]
+    },
+    {
+      "id": "agent-database-optimizer",
+      "name": "Database Optimizer",
+      "description": "데이터베이스 쿼리 최적화 및 인덱스 설계 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "Phase 2", "database", "SQL", "query", "slow", "optimization", "index"],
+      "token_cost": 1200,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-database-optimizer",
+      "capabilities": [
+        "query_optimization",
+        "index_design",
+        "migration_planning",
+        "performance_analysis"
+      ]
+    },
+    {
+      "id": "agent-security-auditor",
+      "name": "Security Auditor",
+      "description": "보안 취약점 분석 및 OWASP 준수 검증 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "Phase 2", "Phase 5", "security", "vulnerability", "OWASP", "authentication"],
+      "token_cost": 1400,
+      "priority": "high",
+      "path": ".claude/plugins/agent-security-auditor",
+      "capabilities": [
+        "vulnerability_analysis",
+        "owasp_compliance",
+        "security_best_practices",
+        "penetration_testing"
+      ]
+    },
+    {
+      "id": "agent-deployment-engineer",
+      "name": "Deployment Engineer",
+      "description": "CI/CD 파이프라인 및 배포 설정 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 6", "deploy", "CI/CD", "Docker", "Kubernetes", "GitHub Actions"],
+      "token_cost": 700,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-deployment-engineer",
+      "capabilities": [
+        "cicd_pipeline",
+        "docker_configuration",
+        "kubernetes_deployment",
+        "cloud_deployment"
+      ]
+    },
+    {
+      "id": "agent-fullstack-developer",
+      "name": "Fullstack Developer",
+      "description": "풀스택 애플리케이션 개발 전문가 (Frontend + Backend + DB)",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "fullstack", "full-stack", "end-to-end", "API", "integration"],
+      "token_cost": 1600,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-fullstack-developer",
+      "capabilities": [
+        "end_to_end_development",
+        "api_integration",
+        "database_design",
+        "frontend_backend_integration"
+      ]
+    },
+    {
+      "id": "agent-frontend-developer",
+      "name": "Frontend Developer",
+      "description": "React/Vue/Svelte UI 개발 및 반응형 디자인 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "React", "Vue", "Svelte", "UI", "component", "responsive", "frontend"],
+      "token_cost": 1300,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-frontend-developer",
+      "capabilities": [
+        "ui_component_development",
+        "state_management",
+        "responsive_design",
+        "performance_optimization"
+      ]
+    },
+    {
+      "id": "agent-backend-architect",
+      "name": "Backend Architect",
+      "description": "백엔드 시스템 아키텍처 및 API 설계 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 0", "Phase 1", "backend", "API", "architecture", "microservices", "scalability"],
+      "token_cost": 1400,
+      "priority": "high",
+      "path": ".claude/plugins/agent-backend-architect",
+      "capabilities": [
+        "api_design",
+        "microservices_architecture",
+        "database_schema_design",
+        "scalability_planning"
+      ]
+    },
+    {
+      "id": "agent-data-scientist",
+      "name": "Data Scientist",
+      "description": "데이터 분석, SQL 쿼리 및 BigQuery 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "SQL", "BigQuery", "data analysis", "query", "analytics", "statistics"],
+      "token_cost": 1200,
+      "priority": "medium",
+      "path": ".claude/plugins/agent-data-scientist",
+      "capabilities": [
+        "sql_query_writing",
+        "data_analysis",
+        "bigquery_optimization",
+        "statistical_analysis"
+      ]
+    },
+    {
+      "id": "agent-code-reviewer",
+      "name": "Code Reviewer",
+      "description": "코드 품질, 보안, 유지보수성 검토 전문가",
+      "model": "sonnet",
+      "activation_triggers": ["Phase 1", "Phase 2", "Phase 4", "review", "code review", "quality", "PR"],
+      "token_cost": 1300,
+      "priority": "high",
+      "path": ".claude/plugins/agent-code-reviewer",
+      "capabilities": [
+        "code_quality_review",
+        "security_review",
+        "maintainability_analysis",
+        "best_practices_enforcement"
+      ]
+    },
+    {
+      "id": "agent-task-decomposition",
+      "name": "Task Decomposition Expert",
+      "description": "복잡한 프로젝트를 Task로 분해하는 전문가",
+      "model": "haiku",
+      "activation_triggers": ["Phase 0.5", "task", "decompose", "breakdown", "PRD", "planning"],
+      "token_cost": 600,
+      "priority": "high",
+      "path": ".claude/plugins/agent-task-decomposition",
+      "capabilities": [
+        "project_breakdown",
+        "task_creation",
+        "dependency_analysis",
+        "workflow_orchestration"
+      ]
+    }
+  ],
+  "loading_strategy": {
+    "mode": "progressive",
+    "levels": {
+      "always": ["metadata"],
+      "on_activation": ["instructions"],
+      "on_demand": ["resources", "examples"]
+    }
+  },
+  "token_optimization": {
+    "estimated_savings": "60%",
+    "baseline_cost": 18500,
+    "optimized_cost_range": "2000-4000 tokens per Phase",
+    "total_plugins": 15,
+    "mechanism": "Selective plugin loading based on Phase and keywords"
+  }
+}

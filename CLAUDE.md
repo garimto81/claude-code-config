@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Repository Purpose**: Global workflow templates and automation for Claude Code development
-**Version**: 4.10.0 | **Updated**: 2025-01-14
+**Version**: 4.12.0 | **Updated**: 2025-01-14
 
 ---
 
@@ -128,12 +128,47 @@ python scripts/validate-test-pairing.py
 
 ## Agent Usage & Optimization
 
-### Top 5 Agents (Priority Order)
-1. **context7-engineer** ⭐ - Verify latest external library docs (Phase 0, 1)
-2. **playwright-engineer** ⭐ - E2E testing (Phase 2, 5)
-3. **seq-engineer** - Complex requirement analysis
-4. **test-automator** - Unit/integration test generation
-5. **typescript-expert** - Type safety (TypeScript projects)
+### Plugin System (wshobson/agents inspired)
+
+**Smart Agent Loading**: Phase/키워드 기반 선택적 Agent 로딩으로 토큰 40-70% 절감
+
+```bash
+# Phase별 최적 Agent 확인
+python .claude/scripts/load-plugins.py --phase "Phase 0"
+# → context7-engineer, seq-engineer 활성화 (66% 토큰 절감)
+
+python .claude/scripts/load-plugins.py --phase "Phase 1" --keywords "React"
+# → context7-engineer, test-automator, typescript-expert (44% 절감)
+
+python .claude/scripts/load-plugins.py --phase "Phase 5"
+# → playwright-engineer (70% 절감)
+```
+
+**상세 가이드**: `docs/PLUGIN_SYSTEM_GUIDE.md`
+
+### Top 15 Agents (15 plugins total)
+
+**High Priority** (필수):
+1. **context7-engineer** ⭐ (Sonnet, 1200) - External library docs verification (Phase 0, 1)
+2. **playwright-engineer** ⭐ (Sonnet, 1500) - E2E testing (Phase 2, 5)
+3. **debugger** ⭐ (Sonnet, 1300) - Error debugging (Phase 1, 2)
+4. **security-auditor** ⭐ (Sonnet, 1400) - Security & OWASP compliance (Phase 1, 2, 5)
+5. **backend-architect** ⭐ (Sonnet, 1400) - Backend architecture & API design (Phase 0, 1)
+6. **code-reviewer** ⭐ (Sonnet, 1300) - Code quality review (Phase 1, 2, 4)
+7. **task-decomposition** ⭐ (Haiku, 600) - Task breakdown (Phase 0.5)
+
+**Medium Priority** (상황별):
+8. **seq-engineer** (Haiku, 500) - Requirement analysis (Phase 0)
+9. **test-automator** (Haiku, 600) - Unit/integration tests (Phase 1, 2)
+10. **typescript-expert** (Sonnet, 1000) - Type safety (Phase 1)
+11. **database-optimizer** (Sonnet, 1200) - DB query optimization (Phase 1, 2)
+12. **fullstack-developer** (Sonnet, 1600) - End-to-end development (Phase 1)
+13. **frontend-developer** (Sonnet, 1300) - React/Vue/Svelte UI (Phase 1)
+14. **data-scientist** (Sonnet, 1200) - SQL/BigQuery/analytics (Phase 1)
+15. **deployment-engineer** (Haiku, 700) - CI/CD & deployment (Phase 6)
+
+**Total Baseline**: 16,800 tokens (all agents)
+**Typical Usage**: 2,000-4,000 tokens per Phase (60-80% savings)
 
 ### Parallel Execution Pattern
 ```python
@@ -263,7 +298,14 @@ claude01/
 │
 ├── .claude/                  # Claude Code extensions
 │   ├── hooks/post-commit             # Git hook
-│   ├── scripts/analyze_agent_usage.py
+│   ├── scripts/
+│   │   ├── analyze_agent_usage.py    # Agent optimizer
+│   │   └── load-plugins.py           # Plugin loader
+│   ├── plugins/                      # Agent plugins
+│   │   ├── plugin-manifest.json      # Plugin metadata
+│   │   ├── agent-context7/           # Context7 engineer
+│   │   ├── agent-playwright/         # Playwright engineer
+│   │   └── ...
 │   └── optimizer-config.json
 │
 ├── .github/workflows/        # CI/CD
@@ -437,11 +479,14 @@ git push  # → Auto PR/merge
 - **깃허브_워크플로우_개요.md**: GitHub workflow 5-min overview (Korean)
 - **docs/AGENTS_REFERENCE.md**: Complete 33-agent documentation
 - **docs/AGENT_OPTIMIZER_GUIDE.md**: Post-commit analyzer setup
+- **docs/PLUGIN_SYSTEM_GUIDE.md**: Agent plugin system guide (wshobson/agents inspired)
 - **docs/PHASE_VALIDATION_GUIDE.md**: Phase validation system guide (cc-sdd inspired)
 - **docs/BRANCH_PROTECTION_GUIDE.md**: GitHub settings for auto-merge
 
 ---
 
 **Version History**:
+- v4.12.0 (2025-01-14) - Expanded plugin system to 15 agents (5 → 15), 16.8K baseline, 60-80% token savings per Phase
+- v4.11.0 (2025-01-14) - Integrated wshobson/agents plugin system, Phase/keyword-based agent loading, 40-70% token savings
 - v4.10.0 (2025-01-14) - Integrated cc-sdd validation gate system, added Phase 0/0.5/1 validation scripts, auto PR validation
 - v4.9.0 (2025-01-13) - Added architecture overview, testing commands, agent optimizer details, clarified meta-workflow nature

@@ -1,0 +1,22 @@
+{
+  "name": "fullstack-developer",
+  "display_name": "Fullstack Developer",
+  "version": "1.0.0",
+  "description": "풀스택 애플리케이션 개발 전문가 (Frontend + Backend + DB)",
+  "model": "sonnet",
+  "token_cost": 1600,
+  "capabilities": [
+    "end_to_end_development",
+    "api_integration",
+    "database_design",
+    "frontend_backend_integration"
+  ],
+  "activation": {
+    "keywords": ["fullstack", "full-stack", "end-to-end", "API", "integration"],
+    "phases": ["Phase 1"],
+    "triggers": ["complete feature implementation"]
+  },
+  "resources": {
+    "instructions": "instructions.md"
+  }
+}

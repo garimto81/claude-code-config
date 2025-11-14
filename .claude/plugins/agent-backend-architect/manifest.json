@@ -1,0 +1,22 @@
+{
+  "name": "backend-architect",
+  "display_name": "Backend Architect",
+  "version": "1.0.0",
+  "description": "백엔드 시스템 아키텍처 및 API 설계 전문가",
+  "model": "sonnet",
+  "token_cost": 1400,
+  "capabilities": [
+    "api_design",
+    "microservices_architecture",
+    "database_schema_design",
+    "scalability_planning"
+  ],
+  "activation": {
+    "keywords": ["backend", "API", "architecture", "microservices", "database schema", "scalability"],
+    "phases": ["Phase 0", "Phase 1"],
+    "triggers": ["system design", "API design"]
+  },
+  "resources": {
+    "instructions": "instructions.md"
+  }
+}

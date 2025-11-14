@@ -1,0 +1,36 @@
+{
+  "name": "playwright-engineer",
+  "display_name": "Playwright Engineer",
+  "version": "1.0.0",
+  "description": "E2E 테스트 자동화 및 브라우저 테스팅 전문가",
+  "model": "sonnet",
+  "token_cost": 1500,
+  "capabilities": [
+    "e2e_test_creation",
+    "browser_automation",
+    "test_debugging",
+    "coverage_analysis",
+    "screenshot_comparison"
+  ],
+  "activation": {
+    "keywords": ["E2E", "end-to-end", "browser", "test", "playwright", "automation", "selenium", "integration test"],
+    "phases": ["Phase 2", "Phase 5"],
+    "file_patterns": ["playwright.config.ts", "*.spec.ts", "*.spec.js"]
+  ],
+  "resources": {
+    "instructions": "instructions.md",
+    "examples": "examples/",
+    "templates": "templates/"
+  },
+  "integration": {
+    "mcp": "playwright",
+    "required": true,
+    "fallback": "manual_test_execution"
+  },
+  "best_practices": [
+    "Phase 2에서 주요 플로우 E2E 테스트 작성",
+    "Phase 5에서 전체 시나리오 커버리지 확인",
+    "테스트 실패 시 스크린샷 자동 저장",
+    "병렬 실행으로 테스트 시간 단축"
+  ]
+}

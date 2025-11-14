@@ -1,0 +1,22 @@
+{
+  "name": "deployment-engineer",
+  "display_name": "Deployment Engineer",
+  "version": "1.0.0",
+  "description": "CI/CD 파이프라인 및 배포 설정 전문가",
+  "model": "haiku",
+  "token_cost": 700,
+  "capabilities": [
+    "cicd_pipeline",
+    "docker_configuration",
+    "kubernetes_deployment",
+    "cloud_deployment"
+  ],
+  "activation": {
+    "keywords": ["deploy", "CI/CD", "Docker", "Kubernetes", "GitHub Actions", "pipeline"],
+    "phases": ["Phase 6"],
+    "file_patterns": ["Dockerfile", "docker-compose.yml", ".github/workflows/"]
+  },
+  "resources": {
+    "instructions": "instructions.md"
+  }
+}

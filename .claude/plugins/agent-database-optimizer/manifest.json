@@ -1,0 +1,22 @@
+{
+  "name": "database-optimizer",
+  "display_name": "Database Optimizer",
+  "version": "1.0.0",
+  "description": "데이터베이스 쿼리 최적화 및 인덱스 설계 전문가",
+  "model": "sonnet",
+  "token_cost": 1200,
+  "capabilities": [
+    "query_optimization",
+    "index_design",
+    "migration_planning",
+    "performance_analysis"
+  ],
+  "activation": {
+    "keywords": ["database", "SQL", "query", "slow", "optimization", "index", "migration"],
+    "phases": ["Phase 1", "Phase 2"],
+    "file_patterns": ["*.sql", "migrations/"]
+  },
+  "resources": {
+    "instructions": "instructions.md"
+  }
+}

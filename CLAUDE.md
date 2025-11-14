@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Repository Purpose**: Global workflow templates and automation for Claude Code development
-**Version**: 4.11.0 | **Updated**: 2025-01-14
+**Version**: 4.12.0 | **Updated**: 2025-01-14
 
 ---
 
@@ -146,12 +146,29 @@ python .claude/scripts/load-plugins.py --phase "Phase 5"
 
 **상세 가이드**: `docs/PLUGIN_SYSTEM_GUIDE.md`
 
-### Top 5 Agents (Priority Order)
-1. **context7-engineer** ⭐ (Sonnet, 1200 tokens) - Verify latest external library docs (Phase 0, 1)
-2. **playwright-engineer** ⭐ (Sonnet, 1500 tokens) - E2E testing (Phase 2, 5)
-3. **seq-engineer** (Haiku, 500 tokens) - Complex requirement analysis (Phase 0)
-4. **test-automator** (Haiku, 600 tokens) - Unit/integration test generation (Phase 1, 2)
-5. **typescript-expert** (Sonnet, 1000 tokens) - Type safety (TypeScript projects, Phase 1)
+### Top 15 Agents (15 plugins total)
+
+**High Priority** (필수):
+1. **context7-engineer** ⭐ (Sonnet, 1200) - External library docs verification (Phase 0, 1)
+2. **playwright-engineer** ⭐ (Sonnet, 1500) - E2E testing (Phase 2, 5)
+3. **debugger** ⭐ (Sonnet, 1300) - Error debugging (Phase 1, 2)
+4. **security-auditor** ⭐ (Sonnet, 1400) - Security & OWASP compliance (Phase 1, 2, 5)
+5. **backend-architect** ⭐ (Sonnet, 1400) - Backend architecture & API design (Phase 0, 1)
+6. **code-reviewer** ⭐ (Sonnet, 1300) - Code quality review (Phase 1, 2, 4)
+7. **task-decomposition** ⭐ (Haiku, 600) - Task breakdown (Phase 0.5)
+
+**Medium Priority** (상황별):
+8. **seq-engineer** (Haiku, 500) - Requirement analysis (Phase 0)
+9. **test-automator** (Haiku, 600) - Unit/integration tests (Phase 1, 2)
+10. **typescript-expert** (Sonnet, 1000) - Type safety (Phase 1)
+11. **database-optimizer** (Sonnet, 1200) - DB query optimization (Phase 1, 2)
+12. **fullstack-developer** (Sonnet, 1600) - End-to-end development (Phase 1)
+13. **frontend-developer** (Sonnet, 1300) - React/Vue/Svelte UI (Phase 1)
+14. **data-scientist** (Sonnet, 1200) - SQL/BigQuery/analytics (Phase 1)
+15. **deployment-engineer** (Haiku, 700) - CI/CD & deployment (Phase 6)
+
+**Total Baseline**: 16,800 tokens (all agents)
+**Typical Usage**: 2,000-4,000 tokens per Phase (60-80% savings)
 
 ### Parallel Execution Pattern
 ```python
@@ -469,6 +486,7 @@ git push  # → Auto PR/merge
 ---
 
 **Version History**:
+- v4.12.0 (2025-01-14) - Expanded plugin system to 15 agents (5 → 15), 16.8K baseline, 60-80% token savings per Phase
 - v4.11.0 (2025-01-14) - Integrated wshobson/agents plugin system, Phase/keyword-based agent loading, 40-70% token savings
 - v4.10.0 (2025-01-14) - Integrated cc-sdd validation gate system, added Phase 0/0.5/1 validation scripts, auto PR validation
 - v4.9.0 (2025-01-13) - Added architecture overview, testing commands, agent optimizer details, clarified meta-workflow nature

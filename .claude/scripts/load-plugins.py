@@ -151,9 +151,9 @@ class PluginLoader:
 
             total_tokens += plugin['token_cost']
 
-        # 토큰 절감 효과
-        baseline = 5000  # 전체 플러그인 로드 시 예상 토큰
-        savings = ((baseline - total_tokens) / baseline) * 100
+        # 토큰 절감 효과 (전체 플러그인 비용 계산)
+        baseline = sum(p['token_cost'] for p in self.plugins)
+        savings = ((baseline - total_tokens) / baseline) * 100 if baseline > 0 else 0
 
         print(f"📊 토큰 사용: {total_tokens} / {baseline} (절감: {savings:.1f}%)")
 

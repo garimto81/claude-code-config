@@ -1,210 +1,447 @@
-# Claude AI 마스터 개발 가이드
-*핵심 워크플로우 & 자동화 규칙*
+# CLAUDE.md
 
-**버전**: 4.8.0 | **업데이트**: 2025-01-13
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+**Repository Purpose**: Global workflow templates and automation for Claude Code development
+**Version**: 4.10.0 | **Updated**: 2025-01-14
 
 ---
 
-## 🔄 Phase 0-6: 완전한 개발 사이클
+## Architecture Overview
+
+This repository is a **meta-workflow system** - not a typical application codebase. It contains:
+
+1. **Workflow Templates**: Phase 0-6 development cycle methodology
+2. **Automation Scripts**: Python/Bash scripts for GitHub integration
+3. **Documentation**: Multi-language guides (Korean primary, English reference)
+4. **Agent Optimization**: Post-commit hooks for AI agent usage analysis
+
+**Key Principle**: This repo contains ONLY global workflows. Individual projects are separate repos (see `.gitignore` for excluded project folders).
+
+---
+
+## Phase 0-6 Development Cycle
 
 ```
-Phase 0: 요구사항 (PRD) → Phase 0.5: Task List
-→ Phase 1: 코드 → Phase 2: 테스트 → Phase 3: 버전
-→ Phase 4: Git → Phase 5: 검증 → Phase 6: 캐시
+Phase 0: PRD → Phase 0.5: Task List → Phase 1: Code → Phase 2: Test
+→ Phase 3: Version → Phase 4: Git + Auto PR → Phase 5: E2E → Phase 6: Deploy
+```
+
+### Phase 0: Requirements (PRD)
+- **Location**: `tasks/prds/NNNN-prd-feature-name.md`
+- **Format**: Ask 3-8 A/B/C/D clarification questions first
+- **Guides**:
+  - `docs/guides/PRD_GUIDE_MINIMAL.md` (10 min, ~1270 tokens)
+  - `docs/guides/PRD_GUIDE_STANDARD.md` (20-30 min)
+  - `docs/guides/PRD_GUIDE_JUNIOR.md` (40-60 min)
+
+**Validation** (mandatory before Phase 0.5):
+```bash
+bash scripts/validate-phase-0.sh NNNN
+# ✅ Confirms PRD file exists with minimum 50 lines
+```
+
+### Phase 0.5: Task Generation
+- **Auto-generate**: `python scripts/generate_tasks.py tasks/prds/NNNN-*.md`
+- **Output**: `tasks/NNNN-tasks-feature-name.md`
+- **Two-Phase Process**:
+  1. Generate Parent Tasks → user reviews → user says "Go"
+  2. Generate Sub-Tasks with **mandatory 1:1 test file pairing**
+
+**Critical Rules**:
+- Task 0.0 MUST create feature branch
+- Every implementation file MUST have corresponding test file
+- Update checkboxes immediately: `[ ]` → `[x]` upon completion
+- Status markers: `[ ]` pending | `[x]` done | `[!]` failed | `[⏸]` blocked
+
+**Validation** (mandatory before Phase 1):
+```bash
+bash scripts/validate-phase-0.5.sh NNNN
+# ✅ Confirms Task List exists, Task 0.0 completed, shows progress
+```
+
+### Phase 4: Git + Automation
+
+**Commit Format**: `type: description (vX.Y.Z) [PRD-NNNN]`
+
+**Auto PR/Merge Flow**:
+```
+git commit -m "feat: Add auth (v1.2.0) [PRD-0001]"
+git push
+→ GitHub Actions detects pattern
+→ Creates PR automatically
+→ Runs CI (pytest + npm test if applicable)
+→ Auto-merges on pass
+→ Deletes branch
+```
+
+**Workflow File**: `.github/workflows/auto-pr-merge.yml`
+- Triggers on: `feature/PRD-*` branches
+- Pattern detection: `(vX.Y.Z) [PRD-NNNN]` in commit message
+- Merge strategy: Squash
+- Branch cleanup: Automatic
+
+---
+
+## Testing
+
+### Python Projects
+```bash
+# Run all tests
+pytest tests/ -v --cov=src --cov-report=term-missing
+
+# Run single test file
+pytest tests/test_specific.py -v
+
+# Run with specific marker
+pytest tests/ -v -m "unit"
+```
+
+### Node.js Projects
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test
+npm test -- tests/specific.test.js
+```
+
+**Test Requirements**:
+- 1:1 pairing: Every `src/foo.py` → `tests/test_foo.py`
+- Enforced in Phase 0.5 task generation
+- CI runs automatically on PR (`.github/workflows/auto-pr-merge.yml`)
+
+**Phase 1 Validation** (before PR creation):
+```bash
+# Bash version (quick check)
+bash scripts/validate-phase-1.sh
+
+# Python version (detailed report)
+python scripts/validate-test-pairing.py
+# ✅ Confirms all implementation files have corresponding tests
 ```
 
 ---
 
-## 📌 Phase 0: 요구사항 정의
+## Agent Usage & Optimization
 
-**절차**: 요청 → **A/B/C/D 질문** (3-8개) → PRD 저장 → Phase 0.5
+### Top 5 Agents (Priority Order)
+1. **context7-engineer** ⭐ - Verify latest external library docs (Phase 0, 1)
+2. **playwright-engineer** ⭐ - E2E testing (Phase 2, 5)
+3. **seq-engineer** - Complex requirement analysis
+4. **test-automator** - Unit/integration test generation
+5. **typescript-expert** - Type safety (TypeScript projects)
 
-**저장**: `/tasks/prds/0001-prd-feature-name.md`
-
-**PRD 가이드**: MINIMAL (10분) | STANDARD (20-30분) | JUNIOR (40-60분)
-
----
-
-## 📋 Phase 0.5: Task List 생성
-
-**Two-Phase**: Parent Tasks → 확인 → "Go" → Sub-Tasks
-
-**필수 규칙**:
-- ✅ **1:1 Test Pairing**: 모든 구현 → 테스트 필수
-- ✅ **Feature Branch**: Task 0.0 필수
-- ✅ **체크박스 업데이트**: 완료 시 즉시 `[x]`
-
-**상태**: `[ ]` 미시작 | `[x]` 완료 | `[!]` 실패 | `[⏸]` 블락
-
----
-
-## 🔨 Phase 1-6: 개발 → 배포
-
-| Phase | 작업 | 명령/규칙 |
-|-------|------|----------|
-| 1 | 코드 | PRD 구현 + 문서화 |
-| 2 | 테스트 | `pytest tests/ -v` (Python) / `npm test` (Node.js) |
-| 3 | 버전 | Semantic Versioning, README 업데이트 |
-| 4 | Git | `git commit -m "type: 설명 (vX.Y.Z) [PRD-####]"` → **자동 PR** |
-| 5 | 검증 | **Playwright E2E 필수** |
-| 6 | 캐시 | `Ctrl+Shift+R` 또는 `?v=X.Y.Z` |
-
-### 🚀 자동 PR/머지 (Phase 4)
-
-```
-커밋 (vX.Y.Z) [PRD-####] → Push → GitHub Actions
-→ PR 생성 → CI 테스트 → 자동 머지 → 브랜치 삭제
-```
-
-📚 **설정**: [docs/BRANCH_PROTECTION_GUIDE.md](docs/BRANCH_PROTECTION_GUIDE.md)
-
----
-
-## 🤖 Agent & MCP
-
-**Top 5 Agent**:
-1. `context7-engineer` ★ - 외부 기술 최신 문서 검증
-2. `playwright-engineer` ★ - E2E 테스트 및 최종 검증
-3. `seq-engineer` - 복잡한 요구사항 분석
-4. `test-automator` - 단위/통합 테스트 작성
-5. `typescript-expert` - TypeScript 타입 안정성
-
-**핵심 원칙**:
-- **Context7 필수**: 외부 라이브러리 사용 전 (Phase 0, 1)
-- **Playwright 필수**: E2E 테스트 (Phase 2, 5)
-- **병렬 실행**: 독립 작업 동시 호출 (평균 64% 시간 절감)
-
-**병렬 실행 예시**:
+### Parallel Execution Pattern
 ```python
-# Phase 1: 6개 Agent 병렬
-Task("context7", "React 18 docs"), Task("seq", "requirements"),
-Task("typescript", "types"), Task("test-automator", "unit tests")
+# Phase 1: 6 agents parallel (max)
+Task("context7", "React 18 docs"),
+Task("seq", "analyze requirements"),
+Task("typescript", "define types"),
+Task("test-automator", "unit tests")
 
-# Phase 2: 5개 Agent 병렬
-Task("playwright", "E2E"), Task("test-automator", "integration")
+# Phase 2: 5 agents parallel (max)
+Task("playwright", "E2E tests"),
+Task("test-automator", "integration tests")
 ```
 
-📚 **33개 Agent 전체**: [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md)
+**Time Savings**: Average 64% reduction with parallel execution
 
----
+### Agent Optimizer (Post-Commit Hook)
 
-## 🔧 Agent 자동 최적화
+**Auto-Analysis**: `.claude/hooks/post-commit` → `python .claude/scripts/analyze_agent_usage.py`
 
-**커밋 시 자동 분석**: Agent/Skill 사용 패턴 → 실패 분류 → 개선 제안
+**What It Does**:
+1. Parses Claude Code logs for agent usage
+2. Classifies failures: `timeout` | `missing_context` | `parameter_error` | `ambiguous_prompt` | `api_error`
+3. Uses Claude API to generate improved prompts
+4. Saves to: `.claude/improvement-suggestions.md`
+5. Amends commit with metadata: `Agent-Usage: [{"agent":"...","status":"..."}]`
 
-**실패 원인 (5가지)**:
-`timeout` | `missing_context` | `parameter_error` | `ambiguous_prompt` | `api_error`
-
-**출력**:
-- `.claude/improvement-suggestions.md`: 개선 제안
-- Git 메타데이터: `Agent-Usage: [{"agent":"...","status":"..."}]`
-
-**예시**:
+**Setup**:
 ```bash
-git commit -m "feat: Add auth (v1.0.0) [PRD-0001]"
-# → post-commit hook 실행 → 로그 분석 → 개선 제안 생성
+# Unix/macOS
+ln -s ../../.claude/hooks/post-commit .git/hooks/post-commit
+
+# Windows
+copy .claude\hooks\post-commit .git\hooks\post-commit
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Optional: Set API key for improvement generation
+export ANTHROPIC_API_KEY=your_key
 ```
 
-📚 **설치/설정**: [docs/AGENT_OPTIMIZER_GUIDE.md](docs/AGENT_OPTIMIZER_GUIDE.md)
+**Config**: `.claude/optimizer-config.json`
 
 ---
 
-## 🎓 Skill 활용
+## Scripts & Automation
 
-**용도**: PDF, Excel, 이미지 처리 자동화 | **원칙**: Agents 먼저
-
-📚 [Skill 카탈로그](https://docs.anthropic.com/en/docs/claude-code/skills)
-
----
-
-## 🌍 언어 & 폴더
-
-**언어**: 한글 우선, 원문 용어 유지 (GitHub, Docker 등)
-
-**폴더**: `tasks/prds/` | `tasks/tickets/` | `scripts/` | `docs/` | `src/` | `tests/`
-
----
-
-## 📊 커밋 컨벤션
-
-**형식**: `type: subject (vX.Y.Z) [PRD-####]`
-
-**타입**: `feat` | `fix` | `docs` | `refactor` | `perf` | `test`
-
----
-
-## 🔐 보안 체크리스트
-
-**필수**: 환경변수 | SQL Injection 방지 | XSS 방지 | CSRF | Rate Limiting | HTTPS | 보안 헤더 | 의존성 스캔
-
-**.gitignore**: `.env*` | `*.key` | `secrets/` | `tasks/prds/*-internal.md`
-
----
-
-## 🚀 GitHub 워크플로우
-
-- [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) - 5분 개요, ROI
-- [깃허브_빠른시작.md](깃허브_빠른시작.md) - 30분 설정 가이드
-
-**자동화**:
+### GitHub Integration
 ```bash
-bash scripts/setup-github-labels.sh      # 라벨 설정
-bash scripts/github-issue-dev.sh 123     # 이슈 작업 시작
-```
+# One-time setup: Create GitHub labels
+bash scripts/setup-github-labels.sh
 
----
-
-## 🚦 토큰 최적화
-
-1. **미니멀 PRD**: 10분, ~1270 토큰
-2. **병렬 호출**: `Read("a.py"), Read("b.py")`
-3. **컨텍스트 집중**: 필요한 파일만
-4. **Diff 기반**: 변경 부분만
-
----
-
-## 💡 핵심 원칙
-
-1. **Phase 0부터**: PRD → 개발 순서
-2. **PRD 중심**: 커밋마다 `[PRD-####]`
-3. **자동화 우선**: 스크립트 활용
-4. **병렬 실행**: 독립 작업 동시
-5. **Context7 필수**: 외부 기술 전
-6. **Playwright 필수**: Phase 5 검증
-
----
-
-## 📚 참조 문서
-
-**워크플로우**: [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) | [README_GITHUB_WORKFLOW.md](README_GITHUB_WORKFLOW.md)
-
-**Spec Kit**: [docs/SPECKIT_EXECUTIVE_SUMMARY.md](docs/SPECKIT_EXECUTIVE_SUMMARY.md) | [.speckit/constitution.md](.speckit/constitution.md)
-
-**Agent**: [docs/AGENTS_REFERENCE.md](docs/AGENTS_REFERENCE.md)
-
-**공식**: [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | [GitHub Spec Kit](https://github.com/github/spec-kit)
-
----
-
-## 🎓 Quick Start
-
-**로컬**:
-```bash
-vim tasks/prds/0001-prd-feature.md
-git commit -m "feat: Add feature (v1.0.0) [PRD-0001]"
-```
-
-**GitHub** (추천):
-```bash
-gh issue create --template 01-feature-prd.yml
+# Start work from GitHub issue
 bash scripts/github-issue-dev.sh 123
-git commit -m "feat: Add feature [#123]" && git push
+# Creates: feature/issue-123 branch + draft PR
+```
+
+### PRD Migration
+```bash
+# Migrate local PRD to GitHub issue
+python scripts/migrate_prds_to_issues.py tasks/prds/0001-prd-feature.md
+```
+
+### Phase Validation (cc-sdd inspired)
+
+**Validation Gates**: Explicit checkpoints preventing phase skipping, ensuring spec-first development.
+
+```bash
+# Phase 0: PRD existence (before Task generation)
+bash scripts/validate-phase-0.sh NNNN
+
+# Phase 0.5: Task List + Task 0.0 completion (before coding)
+bash scripts/validate-phase-0.5.sh NNNN
+
+# Phase 1: 1:1 Test pairing (before PR)
+bash scripts/validate-phase-1.sh
+python scripts/validate-test-pairing.py  # More detailed
+
+# Check overall progress
+python scripts/check-phase-completion.py tasks/NNNN-tasks-*.md
+```
+
+**Automatic PR Validation**: `.github/workflows/validate-phase.yml`
+- Triggers on: `feature/PRD-*` branch PRs
+- Runs: Phase 0 → 0.5 → 1 validation sequence
+- Posts: Results as PR comment
+- Blocks: Merge if validation fails
+
+**Benefits** (from cc-sdd integration):
+- 🚫 Prevents coding without PRD
+- ✅ Enforces 1:1 test pairing
+- 📊 50% rework reduction
+- ⏱️ 90% validation time savings (10min → 1min)
+
+**Full Guide**: `docs/PHASE_VALIDATION_GUIDE.md`
+
+---
+
+## File Structure
+
+```
+claude01/
+├── CLAUDE.md                 # This file
+├── README.md                 # Navigation & quick start
+├── 깃허브_워크플로우_개요.md   # GitHub workflow (Korean, 5min)
+├── 깃허브_빠른시작.md         # GitHub setup (Korean, 30min)
+│
+├── docs/                     # Detailed guides
+│   ├── AGENTS_REFERENCE.md           # 33 agents documented
+│   ├── AGENT_OPTIMIZER_GUIDE.md      # Optimizer setup
+│   ├── BRANCH_PROTECTION_GUIDE.md    # GitHub settings
+│   └── guides/
+│       ├── PRD_GUIDE_MINIMAL.md
+│       ├── PRD_GUIDE_STANDARD.md
+│       └── PRD_GUIDE_JUNIOR.md
+│
+├── scripts/                  # Automation
+│   ├── generate_tasks.py             # Phase 0.5
+│   ├── validate-phase-0.sh           # Phase 0 validation
+│   ├── validate-phase-0.5.sh         # Phase 0.5 validation
+│   ├── validate-phase-1.sh           # Phase 1 validation
+│   ├── validate-test-pairing.py      # Detailed test pairing check
+│   ├── setup-github-labels.sh        # GitHub setup
+│   ├── github-issue-dev.sh           # Issue workflow
+│   └── migrate_prds_to_issues.py     # Migration
+│
+├── .claude/                  # Claude Code extensions
+│   ├── hooks/post-commit             # Git hook
+│   ├── scripts/analyze_agent_usage.py
+│   └── optimizer-config.json
+│
+├── .github/workflows/        # CI/CD
+│   ├── auto-pr-merge.yml             # Auto PR/merge
+│   └── validate-phase.yml            # Phase validation on PR
+│
+└── tasks/                    # PRDs & task lists
+    ├── prds/NNNN-prd-*.md
+    └── NNNN-tasks-*.md
 ```
 
 ---
 
-**v4.8.0** (2025-01-13) - 토큰 최적화: 262→200줄 (-24%), 병렬 Agent 예시 추가
+## Language & Conventions
+
+**Primary Language**: Korean (한글)
+- User-facing docs, commit messages, PRDs in Korean
+- Technical terms kept in English: GitHub, Docker, API, etc.
+- Format: `한글명(English Term)` when introducing concepts
+
+**Commit Convention**:
+- Format: `type: subject (vX.Y.Z) [PRD-NNNN]`
+- Types: `feat` | `fix` | `docs` | `refactor` | `perf` | `test` | `chore`
+- Example: `feat: Add Google OAuth (v1.2.0) [PRD-0001]`
+
+**Folder Naming**:
+- PRDs: `tasks/prds/` (numbered: 0001, 0002, ...)
+- Tasks: `tasks/` (same numbering)
+- Bugs: `tasks/tickets/`
 
 ---
 
-*핵심 워크플로우 레퍼런스. 상세: [README.md](README.md), docs/ 폴더*
+## Security Checklist
+
+**Mandatory Checks**:
+- [ ] Environment variables for secrets (never hardcode)
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (sanitize input/output)
+- [ ] CSRF tokens for state-changing operations
+- [ ] Rate limiting on APIs
+- [ ] HTTPS enforcement
+- [ ] Security headers (CSP, HSTS, X-Frame-Options)
+- [ ] Dependency scanning (`npm audit` / `pip-audit`)
+
+**.gitignore Requirements**:
+```
+.env*
+!.env.example
+*.key
+secrets/
+tasks/prds/*-internal.md
+```
+
+---
+
+## Token Optimization
+
+1. **Minimal PRDs**: Use MINIMAL guide when experienced (saves ~3000 tokens)
+2. **Parallel tool calls**: `Read("a.py"), Read("b.py")` in single message
+3. **Focused context**: Read only necessary files, avoid full codebase scans
+4. **Diff-based**: Show only changed sections, not entire files
+
+**Example Savings**:
+- PRD: MINIMAL (1270 tokens) vs JUNIOR (4500 tokens) = 72% reduction
+- Docs: Recent optimization reduced 1737 → 1255 lines = 28% token reduction
+
+---
+
+## GitHub Workflow (Optional but Recommended)
+
+**Local vs GitHub-Native**:
+
+| Aspect | Local | GitHub-Native |
+|--------|-------|---------------|
+| PRD | `tasks/prds/*.md` | GitHub Issue |
+| Task tracking | Local checkboxes | Issue tasklist |
+| Progress | `grep '\[.\]' tasks/*.md` | Project board |
+| Commit ref | `[PRD-0001]` | `[#123]` (auto-links) |
+
+**Setup** (30 minutes):
+```bash
+# 1. Create GitHub labels
+bash scripts/setup-github-labels.sh
+
+# 2. Create GitHub project
+gh project create --title "Development" --owner @me
+
+# 3. Start first issue
+gh issue create --template 01-feature-prd.yml
+bash scripts/github-issue-dev.sh 1
+
+# 4. Commit & push
+git commit -m "feat: Add feature [#1]"
+git push
+# → Auto PR/merge handles rest
+```
+
+**Benefits**:
+- Mobile access to tasks
+- Cross-repo issue linking (`org/repo#123`)
+- Visual kanban board
+- Automatic PR/merge (89% time savings)
+
+**ROI**: Break-even after ~15 features (~3 months)
+
+---
+
+## Core Principles
+
+1. **Phase 0 First**: Always start with PRD, never skip requirements
+2. **Validation Gates**: Run validation scripts before moving to next phase
+3. **PRD-Centric**: Every commit references `[PRD-NNNN]` or `[#issue]`
+4. **1:1 Test Pairing**: Every implementation file MUST have corresponding test
+5. **Automation Priority**: Use scripts over manual processes
+6. **Parallel Execution**: Run independent agents simultaneously
+7. **Context7 Required**: Verify external library docs before implementation
+8. **Playwright Required**: E2E tests mandatory before completion (Phase 5)
+
+---
+
+## Quick Start
+
+### Local Workflow
+```bash
+# 1. Create PRD
+vim tasks/prds/0001-prd-my-feature.md
+
+# 2. Validate Phase 0
+bash scripts/validate-phase-0.sh 0001
+
+# 3. Generate tasks
+python scripts/generate_tasks.py tasks/prds/0001-prd-my-feature.md
+
+# 4. Review, then "Go" → sub-tasks generated
+
+# 5. Validate Phase 0.5 & create branch (Task 0.0)
+bash scripts/validate-phase-0.5.sh 0001
+git checkout -b feature/PRD-0001-my-feature
+
+# 6. Implement with tests
+vim src/my_feature.py
+vim tests/test_my_feature.py
+
+# 7. Validate Phase 1
+python scripts/validate-test-pairing.py
+
+# 8. Commit & push
+git commit -m "feat: Add feature (v1.0.0) [PRD-0001]"
+git push  # → Auto PR/merge + validation takes over
+```
+
+### GitHub-Native Workflow
+```bash
+# 1. Create issue
+gh issue create --template 01-feature-prd.yml
+
+# 2. Start work
+bash scripts/github-issue-dev.sh 123
+
+# 3. Implement & commit
+git commit -m "feat: Add feature [#123]"
+git push  # → Auto PR/merge
+```
+
+---
+
+## Documentation Index
+
+- **This File (CLAUDE.md)**: Core workflow reference
+- **README.md**: Navigation & repository overview
+- **깃허브_워크플로우_개요.md**: GitHub workflow 5-min overview (Korean)
+- **docs/AGENTS_REFERENCE.md**: Complete 33-agent documentation
+- **docs/AGENT_OPTIMIZER_GUIDE.md**: Post-commit analyzer setup
+- **docs/PHASE_VALIDATION_GUIDE.md**: Phase validation system guide (cc-sdd inspired)
+- **docs/BRANCH_PROTECTION_GUIDE.md**: GitHub settings for auto-merge
+
+---
+
+**Version History**:
+- v4.10.0 (2025-01-14) - Integrated cc-sdd validation gate system, added Phase 0/0.5/1 validation scripts, auto PR validation
+- v4.9.0 (2025-01-13) - Added architecture overview, testing commands, agent optimizer details, clarified meta-workflow nature

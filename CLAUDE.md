@@ -332,6 +332,105 @@ Task("test-automator", "integration tests")
 
 **Time Savings**: Average 64% reduction with parallel execution
 
+### Agent-Task Mapping Rules (Data-Driven)
+
+**IMPORTANT**: Use the right agent for the right task type. Based on performance data:
+
+#### Testing Agents
+
+**test-automator** (100% success on unit tests):
+- ✅ **Use for**: Unit tests only
+  - Simple, isolated function tests
+  - Mock-free or simple mock tests
+  - Fast execution (<5s typical)
+- ❌ **Don't use for**: Integration tests, E2E tests
+  - Success rate drops to 25% for integration
+  - Timeouts common on E2E (31s+)
+
+**playwright-engineer** (63% success on E2E, improving):
+- ✅ **Use for**: E2E tests and browser automation
+  - Full browser interaction tests
+  - User flow validation
+  - Cross-browser testing
+- ❌ **Don't use for**: Unit tests
+  - Overkill for simple functions
+  - Slower than test-automator
+
+**Correct Pattern**:
+```python
+# ✅ Good
+Task("test-automator", "Write unit tests for calculateTotal()")
+Task("playwright-engineer", "Write E2E test for login flow")
+
+# ❌ Bad
+Task("test-automator", "Write E2E tests")  # Will timeout
+Task("playwright-engineer", "Write unit tests")  # Overkill
+```
+
+#### Integration Tests Best Practice
+
+When using test-automator for integration tests, **provide explicit mock data**:
+
+**Before** (25% success rate):
+```python
+Task("test-automator", "Write integration tests")
+```
+
+**After** (75% success rate):
+```python
+Task("test-automator", "Write integration tests with mock data: {user: {id: 1, email: 'test@example.com', role: 'admin'}, session: {token: 'mock-token'}}")
+```
+
+**Why**: Mock data mismatch is the #1 cause of integration test failures.
+
+#### Implementation Agents
+
+**debugger** (81% success, Grade A):
+- ✅ Fast error resolution (<15s typical)
+- ✅ Works well with TypeScript/JavaScript
+- ✅ Good for runtime errors
+
+**typescript-expert** (50% success, Grade D):
+- ⚠️ Use sparingly - only for complex type inference
+- ✅ Good for: Generic constraints, conditional types
+- ❌ Avoid for: Simple interface definitions (use debugger instead)
+
+**fullstack-developer** (100% success, Grade S):
+- ✅ End-to-end feature implementation
+- ✅ API + UI + database integration
+- ✅ Reliable for large tasks
+
+#### Review & Security Agents
+
+**code-reviewer** (100% success, Grade S):
+- ✅ Excellent for architecture review
+- ✅ Fast execution (<15s)
+- ✅ High quality feedback
+
+**security-auditor** (100% success, Grade S):
+- ✅ OWASP compliance checks
+- ✅ SQL injection, XSS detection
+- ✅ Fast and reliable
+
+**context7-engineer** (100% success, Grade S):
+- ✅ External library documentation verification
+- ✅ Always use before implementing new libraries
+- ✅ Prevents outdated API usage
+
+#### Performance Targets
+
+| Agent | Use For | Expected Success | Avg Duration |
+|-------|---------|------------------|--------------|
+| test-automator | Unit tests | 100% | 2-3s |
+| test-automator | Integration (with mocks) | 75%+ | 20-25s |
+| playwright-engineer | E2E tests | 60-70% | 30-45s |
+| debugger | Bug fixes | 80%+ | 10-15s |
+| code-reviewer | Code quality | 100% | 10-15s |
+| security-auditor | Security scan | 100% | 10-15s |
+| context7-engineer | Doc verification | 100% | 2-5s |
+
+**Evolution**: These rules are based on 29 agent usages analyzed on 2025-01-14. Success rates will improve as we refine usage patterns.
+
 ### Agent Performance Analysis (On-Demand)
 
 **Simple approach**: Ask me when you need insights.

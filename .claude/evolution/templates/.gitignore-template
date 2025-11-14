@@ -2,4 +2,6 @@
 # 이 내용을 서브 레포의 .gitignore에 추가하세요
 
 # Agent quality tracking
-.agent-quality.jsonl
+.agent-quality.jsonl       # v1.0 (deprecated)
+.agent-quality-v2.jsonl    # v2.0 (current)
+.agent-quality.jsonl.bak   # Backup files

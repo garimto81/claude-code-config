@@ -43,34 +43,81 @@ bash scripts/validate-phase-0.sh NNNN
 
 ### Phase 0.5: Task Generation
 
-**AI-Powered Auto-generation** (권장):
-```bash
-# 1. API 키 설정 (최초 1회)
-export ANTHROPIC_API_KEY=your_key_here  # Unix/macOS
-set ANTHROPIC_API_KEY=your_key_here     # Windows
-
-# 2. 의존성 설치 (최초 1회)
-pip install anthropic
-
-# 3. Task List 자동 생성 (30초)
-python scripts/generate_tasks_ai.py tasks/prds/NNNN-prd-feature.md
-
-# Preview 모드 (저장 안 함)
-python scripts/generate_tasks_ai.py tasks/prds/NNNN-prd-feature.md --preview
+**방법 1: Claude Code와 대화로 생성** (추천 ⭐ - 간단하고 무료):
+```
+사용자: "tasks/prds/0001-prd-feature.md 읽고 Task List 작성해줘"
+Claude Code: PRD 분석 후 Task List 생성 → tasks/0001-tasks-feature.md 저장
 ```
 
-- **Output**: `tasks/NNNN-tasks-feature-name.md`
-- **효과**: 8시간 → 30분 (94% 시간 단축)
-- **가이드**: `docs/AI_TASK_GENERATION_GUIDE.md`
-- **Two-Phase Process**:
-  1. Generate Parent Tasks → user reviews → user says "Go"
-  2. Generate Sub-Tasks with **mandatory 1:1 test file pairing**
+**장점**:
+- ✅ 즉시 실행 (API 키/설치 불필요)
+- ✅ 무료 (이미 대화 중)
+- ✅ 대화형 수정 가능
+- ✅ 효과: 8시간 → 5분 (96% 시간 단축)
 
-**Critical Rules** (자동 적용):
-- Task 0.0 MUST create feature branch
-- Every implementation file MUST have corresponding test file
-- Update checkboxes immediately: `[ ]` → `[x]` upon completion
-- Status markers: `[ ]` pending | `[x]` done | `[!]` failed | `[⏸]` blocked
+**Two-Phase Process** (자동 적용):
+1. Claude가 Parent Tasks 생성 → 사용자 검토 → "Go"
+2. Claude가 Sub-Tasks 생성 with **mandatory 1:1 test file pairing**
+
+---
+
+**방법 2: Python 스크립트** (선택 - API 키 필요, 비용 발생):
+```bash
+# API 키 설정 필요
+export ANTHROPIC_API_KEY=your_key_here
+pip install anthropic
+python scripts/generate_tasks_ai.py tasks/prds/NNNN-prd-feature.md
+```
+
+**단점**: API 키 관리, 비용 발생, 패키지 의존성
+**장점**: 완전 자동화 (사람 개입 최소)
+
+**추천**: 방법 1 사용 (Claude Code와 대화)
+
+**Task Generation Rules** (Claude Code가 자동 적용):
+
+When generating Task List from PRD:
+
+1. **Task 0.0 (Required)**: Create feature branch
+   ```markdown
+   ## Task 0.0: Setup
+   - [ ] Create feature branch: `feature/PRD-XXXX-feature-name`
+   - [ ] Update CLAUDE.md with project context
+   ```
+
+2. **Parent Tasks (5-12개)**: High-level phases
+   - Phase 0: Research/Documentation
+   - Phase 1: Implementation
+   - Phase 2: Testing
+   - Phase 3+: Integration, Deployment
+
+3. **Sub-Tasks**: Detailed implementation steps
+   - **Mandatory 1:1 test pairing**: Every `src/foo.py` → `tests/test_foo.py`
+   - Include duration estimates
+   - Clear acceptance criteria
+
+4. **Checkbox Format**:
+   - `[ ]` pending | `[x]` done | `[!]` failed | `[⏸]` blocked
+
+5. **File naming**: `tasks/XXXX-tasks-feature-name.md`
+
+**Example Output Structure**:
+```markdown
+# Task List: Feature Name (PRD-0001)
+
+## Task 0.0: Setup
+- [ ] Create feature branch
+- [ ] Update CLAUDE.md
+
+## Task 1.0: Phase 1 - Implementation
+- [ ] Task 1.1: Create `src/auth.py`
+- [ ] Task 1.2: Create `tests/test_auth.py` (1:1 pair with 1.1)
+- [ ] Task 1.3: Implement login logic
+
+## Task 2.0: Phase 2 - Testing
+- [ ] Task 2.1: Unit tests (80% coverage)
+- [ ] Task 2.2: E2E tests with Playwright
+```
 
 **Validation** (mandatory before Phase 1):
 ```bash

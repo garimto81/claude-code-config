@@ -1406,15 +1406,170 @@ export default function RegisterPage() {
 - [NextAuth.js Docs](https://next-auth.js.org/)
 - [NextAuth.js v5 Guide](https://authjs.dev/getting-started/installation)
 - [Supabase Auth Docs](https://supabase.com/docs/guides/auth)
+- [Supabase SSR Guide](https://supabase.com/docs/guides/auth/server-side/nextjs)
 - [Next.js 14 Docs](https://nextjs.org/docs)
 
 ### Example Repositories
 - [NextAuth.js Example with Credentials](https://github.com/nextauthjs/next-auth-example)
 - [Supabase + NextAuth.js](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+- [AsharibAli/next-authjs-v5](https://github.com/AsharibAli/next-authjs-v5) - NextAuth v5 고급 구현
+- [wpcodevo/nextjs14-supabase-ssr-authentication](https://github.com/wpcodevo/nextjs14-supabase-ssr-authentication) - Supabase SSR 인증
 
 ### Security Resources
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Next.js Security Headers](https://nextjs.org/docs/app/api-reference/next-config-js/headers)
+
+---
+
+## 🔍 GitHub 리포지토리 분석 (Repository Analysis)
+
+**분석일**: 2025-01-14
+**분석 대상**: 4개 GitHub 프로젝트
+**문서 위치**: `docs/research/`
+
+### 분석 결과 요약
+
+우리 프로젝트 개선을 위해 유사한 GitHub 프로젝트 4개를 분석했습니다. 주요 발견사항:
+
+#### 1. AsharibAli/next-authjs-v5 (⭐ 102 stars)
+**점수**: 22/25 (88%)
+**장점**:
+- ✅ NextAuth v5 고급 기능 완벽 구현 (2FA, 이메일 인증)
+- ✅ Custom Hooks (`useCurrentUser`, `useRole`)
+- ✅ Prisma + NeonDB 통합
+- ✅ 미들웨어 기반 라우트 보호
+- ✅ Zod 스키마 유효성 검사
+
+**약점**:
+- ❌ Rate Limiting 없음
+- ❌ 계정 잠금 기능 없음
+- ❌ E2E 테스트 없음
+
+**즉시 적용 가능한 개선사항**:
+1. 미들웨어 패턴 (Phase 2 - 30분)
+2. Custom Hooks (Phase 2 - 20분)
+3. Zod 스키마 (Phase 3 - 1시간)
+
+**분석 문서**: [docs/research/repos/01-asharibali-nextauthv5.md](../research/repos/01-asharibali-nextauthv5.md)
+
+#### 2. wpcodevo/nextjs14-supabase-ssr-authentication (⭐ 60 stars)
+**점수**: 20/25 (80%)
+**장점**:
+- ✅ Supabase SSR 최신 패턴 (`@supabase/ssr`)
+- ✅ 자동 세션 갱신 (미들웨어)
+- ✅ Google/GitHub OAuth 통합
+- ✅ RLS (Row Level Security) 활용
+
+**약점**:
+- ❌ Rate Limiting 없음
+- ❌ 계정 잠금 없음
+- ❌ E2E 테스트 없음
+
+**즉시 적용 가능한 개선사항**:
+1. Supabase Client 팩토리 (Phase 2 - 30분)
+2. 자동 세션 갱신 미들웨어 (Phase 2 - 1시간)
+3. OAuth 추가 (Phase 3 - 2시간)
+
+**분석 문서**: [docs/research/repos/02-wpcodevo-supabase-ssr.md](../research/repos/02-wpcodevo-supabase-ssr.md)
+
+### 핵심 인사이트
+
+#### 1. 미들웨어의 중요성 🔴
+**발견**: 분석한 모든 프로덕션급 프로젝트가 미들웨어 사용
+**현재 상태**: 우리 프로젝트는 페이지 레벨 보호만 사용
+**권장 사항**: Phase 2에서 즉시 구현 필요
+
+#### 2. Supabase Client 팩토리 패턴 🔴
+**발견**: Supabase SSR에서는 3가지 클라이언트 필요
+- Server Components용: `lib/supabase/server.ts`
+- Client Components용: `lib/supabase/client.ts`
+- Middleware용: 직접 생성
+
+**권장 사항**: Phase 2 Supabase 통합 시 필수
+
+#### 3. 자동 세션 갱신 🟡
+**발견**: wpcodevo 프로젝트는 미들웨어에서 자동 세션 갱신
+```typescript
+// middleware.ts에서 getUser() 호출만으로 자동 갱신
+await supabase.auth.getUser()
+```
+**권장 사항**: 사용자 경험 향상을 위해 구현 검토
+
+#### 4. Custom Hooks로 DX 향상 🟡
+**발견**: AsharibAli 프로젝트의 Custom Hooks
+```typescript
+const user = useCurrentUser()  // vs useSession().data.user
+const role = useRole()          // vs useSession().data.user.role
+```
+**권장 사항**: Phase 2-3에서 구현
+
+#### 5. Zod 스키마 필수 🟡
+**발견**: 모든 프로덕션 프로젝트가 Zod 사용
+**현재 상태**: 우리 프로젝트는 기본 검증만
+**권장 사항**: Phase 3에서 비밀번호 강도 검증 시 구현
+
+### 기술적 의사결정 포인트
+
+#### 결정 1: NextAuth v5 유지 vs Supabase Auth 전환
+
+**옵션 A: NextAuth v5 유지 (현재 선택)**
+- ✅ 현재 구조 유지
+- ✅ 점진적 마이그레이션
+- ✅ OAuth 제공자 다양성
+- ❌ Supabase RLS와 부분적 통합
+- ❌ 이중 인증 시스템 (복잡도 증가)
+
+**옵션 B: Supabase Auth 전환 (wpcodevo 패턴)**
+- ✅ Supabase 생태계 완전 활용
+- ✅ RLS 자동 연동
+- ✅ 이메일 발송 내장
+- ✅ 관리 UI 제공
+- ❌ NextAuth 의존성 제거 작업 필요
+
+**권장사항**: Phase 2 시작 전 팀 논의 필요
+
+#### 결정 2: Prisma 추가 vs Supabase Client 사용
+
+**옵션 A: Prisma 추가 (AsharibAli 패턴)**
+- ✅ 타입 안전 쿼리
+- ✅ 마이그레이션 자동화
+- ❌ Supabase Client와 중복
+- ❌ 복잡도 증가
+
+**옵션 B: Supabase Client만 사용 (wpcodevo 패턴)**
+- ✅ 단순한 스택
+- ✅ RLS 자동 적용
+- ✅ Realtime 기능 활용 가능
+- ⚠️ 타입 안전성은 수동 관리
+
+**권장사항**: Supabase Client만 사용 (PRD 목표와 일치)
+
+### 적용 우선순위
+
+**Phase 2 (이번 주) - 즉시 적용**:
+1. 🔴 미들웨어 구현 (AsharibAli 패턴)
+2. 🔴 Supabase Client 팩토리 (wpcodevo 패턴)
+3. 🔴 자동 세션 갱신 (wpcodevo 패턴)
+4. 🟡 Custom Hooks (AsharibAli 패턴)
+
+**Phase 3 (다음 주) - 중기 적용**:
+1. 🟡 Zod 스키마 유효성 검사
+2. 🟡 OAuth 제공자 추가 (Google, GitHub)
+3. 🟡 Server Actions 레이어 분리
+
+**Phase 5+ (다음 달) - 장기 검토**:
+1. 🟢 2FA 구현 (AsharibAli 참고)
+2. 🟢 이메일 인증 (AsharibAli 참고)
+3. 🟢 Supabase Realtime 활용
+
+### 상세 분석 문서
+
+전체 분석 결과는 다음 문서에서 확인:
+- `docs/research/README.md` - 분석 프로젝트 개요
+- `docs/research/analysis-framework.md` - 분석 방법론
+- `docs/research/repos/` - 개별 리포 상세 분석
+- `docs/research/comparison-matrix.md` - 기능 비교표 (작성 예정)
+- `docs/research/recommendations/` - 우선순위별 개선 제안 (작성 예정)
 
 ---
 

@@ -3,8 +3,9 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Project**: NextAuth.js + Supabase SSO Integration
-**Status**: Planning Phase (PRD v2.0 완료, 구현 대기 중)
+**Status**: Phase 1 Complete - Basic NextAuth.js implementation with placeholder auth (v0.1.0)
 **PRD**: See `docs/prd.md` for complete requirements (v2.0 - 2025-01-13 업데이트)
+**Current Version**: 0.0.0 (Phase 1 완료, Supabase 통합 대기 중)
 
 ---
 
@@ -32,51 +33,56 @@ This is a Next.js 14 authentication system integrating NextAuth.js v5 with Supab
 
 ## Development Commands
 
-### Initial Setup (Not Yet Run)
-```bash
-# Create Next.js project
-npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
-
-# Install dependencies
-npm install next-auth@beta @supabase/supabase-js @auth/supabase-adapter zod
-
-# Install dev dependencies
-npm install -D @playwright/test @types/node @sentry/nextjs pino pino-pretty
-```
-
 ### Development
 ```bash
-# Start dev server
+# Start dev server (default port 3000)
 npm run dev
+
+# Start dev server on port 3015 (for testing)
+npm run dev:test
 
 # Build for production
 npm run build
 
 # Start production server
 npm start
+
+# TypeScript type checking
+npx tsc --noEmit
+
+# Lint code
+npm run lint
 ```
 
 ### Testing
 ```bash
-# Run unit tests with coverage (목표: 80% 이상)
-npm test -- --coverage
+# Run unit tests (Jest) - not yet configured
+npm test
 
-# Run E2E tests with Playwright
+# Run unit tests with coverage (목표: 80% 이상)
+npm run test:coverage
+
+# Run E2E tests with Playwright (runs on port 3015)
+npm run test:e2e
+# or
 npx playwright test
 
-# Run specific test file
+# Run specific E2E test file
 npx playwright test tests/e2e/auth.spec.ts
 
-# Run tests in UI mode
+# Run E2E tests in UI mode (interactive debugging)
 npx playwright test --ui
 
-# Check test coverage
-npm test -- --coverage --coverageReporters=text-summary
+# Run E2E tests in headed mode (see browser)
+npx playwright test --headed
+
+# Generate Playwright test report
+npx playwright show-report
 ```
 
-### Database Operations
+### Database Operations (Supabase - Not Yet Integrated)
 ```bash
-# Create admin user (after implementation)
+# Create admin user (after Supabase integration)
 npx tsx scripts/create-admin.ts
 
 # Run Supabase migrations (local development)
@@ -86,38 +92,91 @@ supabase migration up
 supabase gen types typescript --local > types/supabase.ts
 ```
 
-### Code Quality
+### Environment Setup
 ```bash
-# TypeScript type checking
-npx tsc --noEmit
+# Generate NextAuth secret for .env.local
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-# Lint
-npm run lint
-
-# Format
-npm run format
+# Copy example env file
+cp .env.example .env.local
+# Then edit .env.local with your credentials
 ```
 
 ---
 
 ## Architecture
 
-### Authentication Components (To Be Implemented)
+### Current Implementation Status
 
-**Core Files**:
-- `lib/auth.ts` - NextAuth configuration with Credentials Provider
-- `app/api/auth/[...nextauth]/route.ts` - NextAuth API handler
-- `middleware.ts` - Route protection and role-based access control
-- `types/next-auth.d.ts` - TypeScript type extensions for session/user
+**Phase 1 Complete** ✅:
+- NextAuth.js v5 configuration with Credentials Provider
+- Basic login/logout functionality with Server Actions
+- JWT-based session management (24-hour duration)
+- Role-based session data (admin/user)
+- E2E tests for authentication flow with Playwright
+- TypeScript type extensions for session/user
+
+**Pending Implementation** (Phases 2+):
+- Supabase integration for real authentication
+- Rate limiting and account lockout
+- Login attempt logging
+- User registration flow
+- Middleware for route protection
+- Error handling with custom error codes
+- Sentry integration for error tracking
+- Pino logging for structured logs
+
+### Authentication Components
+
+**Core Files (Implemented)**:
+- `auth.ts` - NextAuth v5 configuration with Credentials Provider
+  - Currently uses placeholder test accounts (admin@example.com, user@example.com)
+  - JWT callbacks to add `id` and `role` to token
+  - Session callbacks to expose user data to client
+- `app/api/auth/[...nextauth]/route.ts` - NextAuth API route handler (GET/POST)
+- `app/actions/auth.ts` - Server Actions for login/logout
+  - `authenticate()` - Form action for credential validation
+  - `logout()` - Server action for sign out
+- `types/next-auth.d.ts` - TypeScript module augmentation
+  - Extends `Session.user` with `id` and `role`
+  - Extends `JWT` interface with `id` and `role`
+- `app/providers.tsx` - Client-side SessionProvider wrapper
+
+**UI Components (Implemented)**:
+- `app/login/page.tsx` - Login form with email/password fields
+  - Uses `useFormState` for server-side validation errors
+  - Displays test credentials for development
+- `app/admin/page.tsx` - Protected admin dashboard
+  - Shows user email and role
+  - Logout button
+- `app/page.tsx` - Home page with login/admin links
+  - Shows session status
 
 **Key Routes**:
-- `/login` - Login page (public)
-- `/admin` - Protected admin dashboard (requires `role='admin'`)
-- `/api/auth/*` - NextAuth endpoints
+- `/` - Home page (public)
+- `/login` - Login page (public, redirects to `/admin` on success)
+- `/admin` - Admin dashboard (currently not protected by middleware)
+- `/api/auth/*` - NextAuth endpoints (signIn, signOut, session, etc.)
 
-### Supabase Schema
+### Test Accounts (Current Placeholder Auth)
 
-**Tables**:
+The application currently uses hardcoded test accounts in `auth.ts`:
+
+- **Admin Account**:
+  - Email: `admin@example.com`
+  - Password: `Admin1234!`
+  - Role: `admin`
+
+- **User Account**:
+  - Email: `user@example.com`
+  - Password: `User1234!`
+  - Role: `user`
+
+These will be replaced with Supabase authentication in Phase 2.
+
+### Supabase Schema (Not Yet Implemented)
+
+**Tables (To Be Created)**:
 ```sql
 -- profiles table (extends auth.users)
 CREATE TABLE profiles (
@@ -166,36 +225,48 @@ NextAuth.js uses JWT strategy with httpOnly cookies:
 - CSRF protection built-in
 - Session duration: 24 hours
 
-### Middleware Protection
+### Middleware Protection (To Be Implemented)
 
-Routes matching `/admin/*` and `/dashboard/*` are protected:
+**Current Status**: No middleware implemented yet. All routes are publicly accessible.
+
+**Planned Implementation**: Routes matching `/admin/*` and `/dashboard/*` will be protected:
 1. Check if session exists → redirect to `/login` if not
 2. Check if `session.user.role === 'admin'` → redirect to `/forbidden` if not
 3. Allow access if both conditions pass
+
+File to create: `middleware.ts` in project root.
 
 ---
 
 ## Environment Variables
 
-Required in `.env.local`:
+**Current Requirements** (Phase 1):
 ```bash
-# Supabase
+# NextAuth.js v5 - Required
+AUTH_SECRET=your-generated-secret-min-32-chars
+AUTH_URL=http://localhost:3000
+
+# Node Environment
+NODE_ENV=development
+```
+
+**Future Requirements** (Phase 2+ with Supabase):
+```bash
+# Supabase - Not yet required
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# NextAuth.js
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-random-secret-min-32-chars
-
-# Generate secret with:
-# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-For production (Vercel):
-- Set `NEXTAUTH_URL` to production domain
-- Use different `NEXTAUTH_SECRET` than development
-- Never commit `.env.local` to git
+**Setup Instructions**:
+1. Copy `.env.example` to `.env.local`
+2. Generate `AUTH_SECRET`: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+3. Set `AUTH_URL=http://localhost:3000` (or your local dev URL)
+
+**Production (Vercel)**:
+- Set `AUTH_URL` to production domain (e.g., `https://your-app.vercel.app`)
+- Use different `AUTH_SECRET` than development
+- Never commit `.env.local` to git (already in `.gitignore`)
 
 ---
 
@@ -265,21 +336,22 @@ CREATE POLICY "Users can update own profile"
 - Test Supabase RLS policies
 
 ### E2E Tests (tests/e2e/) - Playwright
-- **로그인/로그아웃**
-  - Login with valid credentials → success
-  - Login with invalid credentials → error displayed
-  - Logout → session cleared, redirect to `/login`
-- **회원가입**
-  - Register with valid data → success
-  - Register with duplicate email → error
-  - Register with weak password → validation error
-- **계정 잠금/해제**
-  - 5회 로그인 실패 → 계정 잠김
-  - 10분 경과 후 자동 해제
-- **Admin 권한 검증**
-  - Access `/admin` without session → redirect to `/login`
-  - Access `/admin` with non-admin role → redirect to `/forbidden`
-  - Admin can access `/admin` → success
+
+**Implemented** ✅ (`tests/e2e/auth.spec.ts`):
+- ✅ Show login page with email/password fields
+- ✅ Login with admin credentials → redirects to `/admin`
+- ✅ Login with user credentials → redirects to `/admin`
+- ✅ Login with invalid credentials → shows error message
+- ✅ Access `/admin` without auth → redirects to `/login` (currently NOT working - no middleware)
+- ✅ Logout → redirects to home page
+- ✅ Show user status on home page when logged in
+
+**To Be Implemented** (Future Phases):
+- 회원가입 flow (register with valid/invalid data)
+- 계정 잠금/해제 (5 failed attempts → lockout)
+- Admin 권한 검증 (non-admin cannot access `/admin`)
+- Rate limiting enforcement
+- Password validation errors
 
 **Critical Test**: Admin role enforcement
 ```typescript
@@ -351,74 +423,100 @@ This project is located in the global workflow repository at `D:\AI\claude01\`. 
 ## Common Issues & Solutions
 
 ### Issue: NextAuth session undefined in Server Components
-**Solution**: Use `await auth()` from `@/lib/auth`, not `useSession()` hook
+**Solution**: Use `await auth()` from `@/auth`, not `useSession()` hook (which is client-side only)
 
-### Issue: Supabase RLS blocking queries
-**Solution**: Use service role key in `lib/auth.ts` for admin operations, anon key elsewhere
-
-### Issue: Middleware not protecting routes
-**Solution**: Check `matcher` config in `middleware.ts` includes the route pattern
+### Issue: CSRF error during login
+**Solution**: Ensure you're using Server Actions (not API routes) for form submission. The current implementation uses `app/actions/auth.ts` with Server Actions to avoid CSRF issues.
 
 ### Issue: Role not included in session
-**Solution**: Verify both `jwt()` and `session()` callbacks in `lib/auth.ts` pass role through
+**Solution**: Verify both `jwt()` and `session()` callbacks in `auth.ts` pass role through:
+- JWT callback: `token.role = (user as ExtendedUser).role || "user"`
+- Session callback: `session.user.role = token.role as string`
+
+### Issue: TypeScript errors on `session.user.role`
+**Solution**: Ensure `types/next-auth.d.ts` is included in `tsconfig.json`. The type extensions should be automatically picked up.
+
+### Known Limitation: No route protection yet
+**Status**: Middleware is not implemented. Anyone can access `/admin` without authentication.
+**Fix**: Implement `middleware.ts` in Phase 4 following NextAuth.js v5 middleware pattern.
 
 ---
 
 ## Quick Reference
 
-### File Locations (Once Implemented)
+### File Structure (Current vs Planned)
+
+**Implemented** ✅:
 ```
 app/
+├── actions/
+│   └── auth.ts                     # ✅ Server Actions (authenticate, logout)
 ├── api/
 │   └── auth/
-│       ├── [...nextauth]/route.ts  # NextAuth handler
-│       └── register/route.ts       # 회원가입 API (신규)
-├── login/page.tsx                  # Login UI
-├── register/page.tsx               # 회원가입 UI (신규)
-├── admin/page.tsx                  # Protected admin page
-└── layout.tsx                      # Root layout with SessionProvider
+│       └── [...nextauth]/route.ts  # ✅ NextAuth handler (GET/POST)
+├── admin/
+│   └── page.tsx                    # ✅ Admin dashboard (not protected yet)
+├── login/
+│   └── page.tsx                    # ✅ Login form UI
+├── globals.css                     # ✅ TailwindCSS styles
+├── layout.tsx                      # ✅ Root layout
+├── page.tsx                        # ✅ Home page
+└── providers.tsx                   # ✅ SessionProvider wrapper
 
-lib/
-├── auth.ts                         # NextAuth config
-├── supabase.ts                     # Supabase client
-├── validators.ts                   # Zod schemas
-├── errors.ts                       # Error codes (신규)
-└── rate-limiter.ts                 # Rate limiting (신규)
-
-middleware.ts                       # Route protection
-types/next-auth.d.ts                # Type extensions
-
-supabase/migrations/
-├── 20240101_create_profiles.sql
-├── 20240102_create_trigger.sql
-├── 20240103_login_attempts.sql     # 신규
-└── 20240104_account_lockouts.sql   # 신규
-
-scripts/create-admin.ts             # Admin user creation
-tests/
-├── unit/
-│   ├── rate-limiter.test.ts        # 신규
-│   └── validators.test.ts          # 신규
-└── e2e/
-    ├── auth.spec.ts
-    ├── register.spec.ts            # 신규
-    └── rate-limiting.spec.ts       # 신규
+auth.ts                             # ✅ NextAuth v5 config (root level)
+types/next-auth.d.ts                # ✅ Type extensions
+tests/e2e/auth.spec.ts              # ✅ E2E tests with Playwright
+playwright.config.ts                # ✅ Playwright configuration
+next.config.js                      # ✅ Next.js config
+tsconfig.json                       # ✅ TypeScript config
+tailwind.config.ts                  # ✅ TailwindCSS config
+.env.example                        # ✅ Environment variable template
 ```
 
-### Key Functions (To Be Implemented)
-**Authentication**:
-- `auth()` - Get session in Server Components
-- `signIn(credentials, { email, password })` - Login
-- `signOut()` - Logout
+**To Be Implemented** ⏳:
+```
+lib/
+├── supabase.ts                     # ⏳ Supabase client factory
+├── validators.ts                   # ⏳ Zod schemas (password, email)
+├── errors.ts                       # ⏳ Custom error codes (AUTH001-007)
+└── rate-limiter.ts                 # ⏳ Rate limiting logic
 
-**Supabase**:
+middleware.ts                       # ⏳ Route protection (Phase 4)
+
+app/
+├── api/auth/register/route.ts      # ⏳ User registration API
+└── register/page.tsx               # ⏳ Registration form UI
+
+supabase/migrations/                # ⏳ Database migrations
+├── 20240101_create_profiles.sql
+├── 20240102_create_trigger.sql
+├── 20240103_login_attempts.sql
+└── 20240104_account_lockouts.sql
+
+scripts/create-admin.ts             # ⏳ Admin user creation utility
+
+tests/
+├── unit/                           # ⏳ Jest unit tests
+│   ├── rate-limiter.test.ts
+│   └── validators.test.ts
+└── e2e/
+    ├── register.spec.ts            # ⏳ Registration E2E tests
+    └── rate-limiting.spec.ts       # ⏳ Rate limit E2E tests
+```
+
+### Key Functions
+
+**Currently Implemented** ✅:
+- `auth()` - Get session in Server Components (from `@/auth`)
+- `signIn(provider, options)` - NextAuth sign in (internal use)
+- `signOut(options)` - NextAuth sign out (internal use)
+- `authenticate(prevState, formData)` - Server Action for login form (from `@/app/actions/auth`)
+- `logout()` - Server Action for logout button (from `@/app/actions/auth`)
+
+**To Be Implemented** ⏳:
 - `createClient()` - Supabase client factory
-
-**Rate Limiting (신규)**:
 - `checkAccountLockout(email)` - 계정 잠금 여부 확인
 - `recordLoginAttempt(email, ip, userAgent, success, failureReason)` - 로그인 시도 기록
-
-**Error Handling (신규)**:
 - `AuthError(code, message)` - 인증 에러 클래스
 - `ERROR_MESSAGES` - 에러 코드별 메시지 매핑
 
@@ -426,12 +524,20 @@ tests/
 
 ## Next Steps
 
-PRD v2.0 완료 후 다음 단계:
+**Completed** ✅:
+- ✅ Phase 0: 환경 설정 및 Next.js 프로젝트 생성
+- ✅ Phase 1: NextAuth.js 기본 설정 (placeholder auth)
+- ✅ Feature branch: `feature/PRD-0004-nextauth-supabase-v2`
+- ✅ Basic E2E tests with Playwright
 
-1. **Task 생성**: `python ../scripts/generate_tasks.py docs/prd.md`
-2. **Feature branch 생성**: `git checkout -b feature/PRD-0004-nextauth-supabase-v2`
-3. **Next.js 프로젝트 초기화**: `npx create-next-app@latest`
-4. **Task 리스트 따라 구현**
+**Current Phase**: Phase 1.5 - 2 (보안 강화 및 Supabase 통합)
+
+**Immediate Next Steps**:
+1. **Implement middleware** - Protect `/admin` routes (Phase 4)
+2. **Supabase integration** - Replace placeholder auth with real Supabase (Phase 2)
+3. **Rate limiting** - Add account lockout logic (Phase 1.5)
+4. **User registration** - Implement signup flow (Phase 2.5)
+5. **Unit tests** - Configure Jest and add unit tests (Phase 5)
 
 ### 추천 Agent 활용 순서
 1. **context7-engineer** ⭐ - NextAuth v5 beta.29 최신 문서 확인
@@ -450,8 +556,32 @@ PRD v2.0 완료 후 다음 단계:
 
 ---
 
-**Version**: 0.0.0 (PRD v2.0 - 구현 대기 중)
-**Last Updated**: 2025-01-13
+---
+
+## Important Notes for Future Development
+
+### NextAuth.js v5 Specifics
+- **File Location**: `auth.ts` in **project root** (not `lib/auth.ts`)
+- **Server Actions**: Use Server Actions for form submission to avoid CSRF issues
+- **Session in Server Components**: Use `await auth()`, not `useSession()`
+- **Middleware**: NextAuth v5 middleware pattern is different from v4 - consult latest docs
+
+### Project Path Aliases
+- `@/*` maps to project root (configured in `tsconfig.json`)
+- Examples:
+  - `@/auth` → `auth.ts`
+  - `@/app/actions/auth` → `app/actions/auth.ts`
+  - `@/types/next-auth` → `types/next-auth.d.ts`
+
+### Testing Configuration
+- **E2E Tests**: Run on port 3015 (configured in `playwright.config.ts`)
+- **Dev Server**: Use `npm run dev:test` for E2E testing (port 3015)
+- **Regular Dev**: Use `npm run dev` (port 3000)
+
+---
+
+**Version**: 0.1.0 (Phase 1 완료 - 기본 NextAuth.js 구현)
+**Last Updated**: 2025-01-14
 **PRD Version**: 2.0 (보안/모니터링 강화)
-**Estimated Effort**: 12-16 hours
+**Remaining Effort**: 10-14 hours (Phases 2-6)
 **Parent Repository**: D:\AI\claude01 (Global Workflow System)

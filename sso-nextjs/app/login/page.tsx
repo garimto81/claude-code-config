@@ -1,85 +1,107 @@
 "use client"
 
-import { useFormState, useFormStatus } from "react-dom"
-import { authenticate } from "@/app/actions/auth"
-
-function SubmitButton() {
-  const { pending } = useFormStatus()
-
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {pending ? "로그인 중..." : "로그인"}
-    </button>
-  )
-}
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function LoginPage() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined)
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      } else {
+        // 세션 업데이트 후 리다이렉트
+        router.push('/admin')
+        router.refresh()
+      }
+    } catch (err) {
+      setError('로그인 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
-        <div>
-          <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
-            로그인
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">로그인</CardTitle>
+          <CardDescription>
             NextAuth.js v5 + Supabase
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-        <form action={dispatch} className="mt-8 space-y-6">
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                이메일
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                placeholder="user@example.com"
+                disabled={isLoading}
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                비밀번호
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
               />
             </div>
-          </div>
 
-          {errorMessage && (
-            <div className="rounded-md bg-red-50 p-4" role="alert">
-              <p className="text-sm text-red-800">{errorMessage}</p>
-            </div>
-          )}
-
-          <div>
-            <SubmitButton />
-          </div>
-
-          <div className="text-center text-sm text-gray-600">
-            <p>테스트 계정:</p>
-            <p className="mt-1">Admin: admin@example.com / Admin1234!</p>
-            <p>User: user@example.com / User1234!</p>
-          </div>
-        </form>
-      </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? "로그인 중..." : "로그인"}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2 text-sm text-gray-600">
+          <p>테스트 계정:</p>
+          <p>Admin: admin@example.com / Admin1234!</p>
+          <p>User: user@example.com / User1234!</p>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

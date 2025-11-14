@@ -28,7 +28,7 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('span.text-red-600.font-bold:has-text("admin")')).toBeVisible()
   })
 
-  test('should login successfully with user credentials', async ({ page }) => {
+  test('should login successfully with user credentials but redirect to forbidden on admin page', async ({ page }) => {
     await page.goto('/login')
 
     // Fill in user credentials
@@ -38,12 +38,16 @@ test.describe('Authentication Flow', () => {
     // Submit form
     await page.click('button[type="submit"]')
 
-    // Should redirect to admin page
+    // Should redirect to admin page first
     await expect(page).toHaveURL('/admin')
 
-    // Should show user info
-    await expect(page.locator('text=user@example.com')).toBeVisible()
-    await expect(page.locator('span.text-blue-600:has-text("user")')).toBeVisible()
+    // Try to access admin page - should redirect to /forbidden
+    await page.goto('/admin')
+    await expect(page).toHaveURL('/forbidden')
+
+    // Should show 403 error
+    await expect(page.locator('h1')).toContainText('403')
+    await expect(page.locator('text=Admin 권한이 필요합니다')).toBeVisible()
   })
 
   test('should show error with invalid credentials', async ({ page }) => {
@@ -66,8 +70,12 @@ test.describe('Authentication Flow', () => {
   test('should redirect to login when accessing admin without authentication', async ({ page }) => {
     await page.goto('/admin')
 
-    // Should redirect to login
-    await expect(page).toHaveURL('/login')
+    // Should redirect to login with callbackUrl
+    await expect(page).toHaveURL(/\/login/)
+
+    // Check if callbackUrl is set
+    const url = new URL(page.url())
+    expect(url.searchParams.get('callbackUrl')).toBe('/admin')
   })
 
   test('should logout successfully', async ({ page }) => {
@@ -80,13 +88,13 @@ test.describe('Authentication Flow', () => {
     await expect(page).toHaveURL('/admin')
 
     // Logout
-    await page.click('button[type="submit"]:has-text("로그아웃")')
+    await page.click('button:has-text("로그아웃")')
 
-    // Should redirect to home
-    await expect(page).toHaveURL('/')
+    // Should redirect to login
+    await expect(page).toHaveURL('/login')
 
-    // Should show login button
-    await expect(page.locator('a:has-text("로그인")')).toBeVisible()
+    // Should show login form
+    await expect(page.locator('input[name="email"]')).toBeVisible()
   })
 
   test('should show user status on home page when logged in', async ({ page }) => {

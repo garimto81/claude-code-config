@@ -695,6 +695,100 @@ git push
 
 ---
 
+## Bypass Permission Mode
+
+**목적**: 신뢰하는 환경에서 권한 요청 없이 모든 도구를 자동 승인하여 생산성 극대화
+
+### 설정 방법
+
+**환경 변수**: `CLAUDE_BYPASS_PERMISSION`
+
+```bash
+# Bypass 모드 활성화 (기본값)
+export CLAUDE_BYPASS_PERMISSION=1
+
+# Bypass 모드 비활성화
+export CLAUDE_BYPASS_PERMISSION=0
+```
+
+**지원 값**:
+- 활성화: `1`, `true`, `yes`, `on`
+- 비활성화: `0`, `false`, `no`, `off`
+- 기본값: `1` (ON) - 환경 변수 미설정 시 bypass 모드 활성화
+
+### 동작 방식
+
+**Bypass 모드 활성화 시**:
+- ✅ 모든 도구(Bash, Write, Edit, Read 등) 권한 자동 승인
+- ✅ 위험한 작업(`rm -rf`, `git push --force`) 포함 모두 자동 실행
+- ✅ 권한 요청 대화 없이 즉시 실행
+- ⚡ 시작 시 bypass 모드 상태 표시
+
+**Bypass 모드 비활성화 시**:
+- 🔒 기존 권한 요청 프로세스 사용
+- 📋 각 도구 실행 전 사용자 확인
+
+### 사용 예시
+
+**로컬 개발 환경** (.bashrc / .zshrc):
+```bash
+# ~/.bashrc 또는 ~/.zshrc에 추가
+export CLAUDE_BYPASS_PERMISSION=1
+```
+
+**CI/CD 환경** (GitHub Actions):
+```yaml
+- name: Run Claude Code
+  env:
+    CLAUDE_BYPASS_PERMISSION: 1
+  run: |
+    claude-code execute-task
+```
+
+**임시 활성화** (현재 세션만):
+```bash
+# 긴급 디버깅 시
+export CLAUDE_BYPASS_PERMISSION=1
+claude-code
+
+# 작업 완료 후 비활성화
+export CLAUDE_BYPASS_PERMISSION=0
+```
+
+### 주의사항
+
+⚠️ **보안 고려사항**:
+- Bypass 모드는 **신뢰하는 환경**에서만 사용하세요
+- 프로덕션 서버에서는 신중히 사용하세요
+- 위험한 명령도 자동 승인되므로 주의가 필요합니다
+
+💡 **권장 사용처**:
+- ✅ 로컬 개발 환경
+- ✅ CI/CD 자동화 파이프라인
+- ✅ 테스트 환경
+- ❌ 공유 서버 (권장하지 않음)
+- ❌ 프로덕션 환경 (신중히 사용)
+
+### 확인 방법
+
+Claude Code 시작 시 메시지로 현재 모드 확인:
+
+```
+⚡ Bypass Permission Mode: ENABLED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+All tool permissions will be auto-approved.
+To disable: export CLAUDE_BYPASS_PERMISSION=0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+또는
+
+```
+🔒 Permission Mode: Standard (manual approval required)
+```
+
+---
+
 ## Quick Start
 
 ### Simple Conversational Workflow (Recommended)

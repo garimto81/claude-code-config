@@ -1,11 +1,13 @@
 // Photo Factory - Gallery Module
-// Supabase data fetching and display
+// RxDB data fetching and display (with Supabase sync)
 
-import { supabase, getCurrentUser } from './auth.js';
+import { getCurrentUser } from './auth-local.js';
+import { jobsAPI } from './rxdb-api.js';
+import { getRxDB } from './rxdb.js';
 import { APP_CONFIG } from './config.js';
 
 /**
- * 전체 작업 목록 조회
+ * 전체 작업 목록 조회 (IndexedDB)
  * @param {Object} filters - 필터 옵션
  * @returns {Promise<Array>}
  */
@@ -16,45 +18,40 @@ export async function fetchJobs(filters = {}) {
   }
 
   try {
-    let query = supabase
-      .from('jobs')
-      .select(`
-        *,
-        photos (
-          id,
-          category,
-          cloudinary_url,
-          thumbnail_url,
-          sequence
-        )
-      `)
-      .eq('technician_id', user.id)
-      .order('created_at', { ascending: false });
+    // IndexedDB API를 통해 데이터 조회
+    const result = await new Promise((resolve, reject) => {
+      jobsAPI.select('*')
+        .eq('technician_id', user.id)
+        .order('created_at', { ascending: false })
+        .then((builder) => builder.then(resolve));
+    });
 
-    // 필터 적용
+    if (result.error) throw new Error(result.error);
+
+    let jobs = result.data;
+
+    // 클라이언트 측 필터 적용
     if (filters.status) {
-      query = query.eq('status', filters.status);
+      jobs = jobs.filter(job => job.status === filters.status);
     }
 
     if (filters.startDate) {
-      query = query.gte('work_date', filters.startDate);
+      jobs = jobs.filter(job => job.work_date >= filters.startDate);
     }
 
     if (filters.endDate) {
-      query = query.lte('work_date', filters.endDate);
+      jobs = jobs.filter(job => job.work_date <= filters.endDate);
     }
 
     if (filters.carModel) {
-      query = query.ilike('car_model', `%${filters.carModel}%`);
+      jobs = jobs.filter(job =>
+        job.car_model.toLowerCase().includes(filters.carModel.toLowerCase())
+      );
     }
 
-    const { data, error } = await query;
+    console.log(`✅ ${jobs.length}개 작업 조회 완료`);
 
-    if (error) throw error;
-
-    console.log(`✅ ${data.length}개 작업 조회 완료`);
-
-    return data;
+    return jobs;
   } catch (error) {
     console.error('❌ 작업 목록 조회 오류:', error);
     throw error;
@@ -62,29 +59,34 @@ export async function fetchJobs(filters = {}) {
 }
 
 /**
- * 특정 작업 상세 조회
+ * 특정 작업 상세 조회 (RxDB)
  * @param {string} jobId - 작업 ID
  */
 export async function fetchJobById(jobId) {
   try {
-    const { data, error } = await supabase
-      .from('jobs')
-      .select(`
-        *,
-        photos (
-          id,
-          category,
-          cloudinary_url,
-          thumbnail_url,
-          file_size,
-          uploaded_at,
-          sequence
-        )
-      `)
-      .eq('id', jobId)
-      .single();
+    const db = await getRxDB();
 
-    if (error) throw error;
+    // Get job with photos
+    const job = await db.jobs.findOne({
+      selector: { id: jobId }
+    }).exec();
+
+    if (!job) {
+      throw new Error('작업을 찾을 수 없습니다.');
+    }
+
+    // Get photos for this job
+    const photos = await db.photos
+      .find({
+        selector: { job_id: jobId }
+      })
+      .sort({ sequence: 'asc' })
+      .exec();
+
+    const data = {
+      ...job.toJSON(),
+      photos: photos.map(p => p.toJSON())
+    };
 
     console.log('✅ 작업 상세 조회:', data.job_number);
 

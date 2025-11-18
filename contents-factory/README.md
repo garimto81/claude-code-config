@@ -6,6 +6,34 @@
 
 ---
 
+## ⚠️ 보안 공지 (중요!)
+
+**API 키가 Git 히스토리에 노출되었습니다!** 즉시 다음 조치를 취하세요:
+
+### 즉시 조치 필요 🚨
+
+1. **Supabase 키 재발급**:
+   - [Supabase Dashboard](https://supabase.com/dashboard) → 프로젝트 선택
+   - Settings → API → "Reset anon key" 클릭
+   - 새 키를 `.env` 파일의 `VITE_SUPABASE_ANON_KEY`에 입력
+
+2. **Cloudinary 프리셋 재생성**:
+   - [Cloudinary Console](https://console.cloudinary.com/) 로그인
+   - Settings → Upload → 기존 `photo-factory` 프리셋 삭제
+   - 새 프리셋 생성: `photo-factory-v2` (Unsigned)
+   - `.env` 파일의 `VITE_CLOUDINARY_UPLOAD_PRESET` 업데이트
+
+3. **환경변수 확인**:
+   ```bash
+   # .env 파일이 .gitignore에 등록되어 있는지 확인
+   cat .gitignore | grep .env
+   # 출력: .env (확인되면 OK)
+   ```
+
+**주의**: `.env` 파일은 절대 Git에 커밋하지 마세요!
+
+---
+
 ## 🚀 빠른 시작
 
 ### 1. 환경 설정
@@ -15,9 +43,15 @@
 git clone https://github.com/garimto81/contents-factory.git
 cd contents-factory
 
-# 2. 환경변수 설정
+# 2. 의존성 설치
+npm install
+
+# 3. 환경변수 설정
 cp .env.example .env
-# .env 파일을 열어 API 키 입력
+# .env 파일을 열어 실제 API 키 입력 (위 "보안 공지" 참고)
+
+# 4. Vite 개발 서버 실행
+npm run dev
 ```
 
 ### 2. Supabase 설정 (15분)

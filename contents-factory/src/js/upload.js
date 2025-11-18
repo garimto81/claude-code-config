@@ -1,8 +1,11 @@
 // Photo Factory - Upload Module
-// Cloudinary API + Supabase integration
+// Cloudinary API + RxDB integration (with Supabase sync)
 
-import { supabase, getCurrentUser } from './auth.js';
+import { getCurrentUser } from './auth-local.js';
+import { jobsAPI, photosAPI, generateJobNumber as dbGenerateJobNumber, fileToBase64 } from './rxdb-api.js';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, APP_CONFIG } from './config.js';
+import { UploadError, ValidationError, DatabaseError, handleError } from './utils/errors.js';
+import { withRetry } from './utils/retry.js';
 
 // 현재 작업 상태
 let currentJob = {
@@ -13,18 +16,14 @@ let currentJob = {
 };
 
 /**
- * 작업번호 자동 생성
+ * 작업번호 자동 생성 (IndexedDB 버전)
  */
 async function generateJobNumber() {
   try {
-    const { data, error } = await supabase.rpc('generate_job_number');
+    const { data, error } = await dbGenerateJobNumber();
 
     if (error) {
-      // 함수가 없으면 클라이언트에서 생성
-      const today = new Date();
-      const yymmdd = today.toISOString().slice(2, 10).replace(/-/g, '');
-      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      return `WHL${yymmdd}${random}`;
+      console.error('작업번호 생성 오류:', error);
     }
 
     return data;
@@ -37,55 +36,72 @@ async function generateJobNumber() {
 }
 
 /**
- * Cloudinary에 이미지 업로드
+ * Cloudinary에 이미지 업로드 (재시도 로직 포함)
  * @param {File} file - 업로드할 파일
  * @returns {Promise<Object>} - { url, publicId, thumbnail }
+ * @throws {ValidationError|UploadError}
  */
 export async function uploadToCloudinary(file) {
-  // 파일 크기 검증
+  // 파일 크기 검증 (재시도 불가능한 에러)
   if (file.size > APP_CONFIG.maxFileSize) {
-    throw new Error(`파일 크기가 너무 큽니다. (최대 ${APP_CONFIG.maxFileSize / 1024 / 1024}MB)`);
-  }
-
-  // 파일 타입 검증
-  if (!APP_CONFIG.allowedFileTypes.includes(file.type)) {
-    throw new Error(`지원하지 않는 파일 형식입니다. (${file.type})`);
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  formData.append('folder', 'photo-factory'); // 선택사항: 폴더 구조
-
-  try {
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-      {
-        method: 'POST',
-        body: formData
-      }
+    throw new ValidationError(
+      `파일 크기가 너무 큽니다. (최대 ${APP_CONFIG.maxFileSize / 1024 / 1024}MB)`,
+      'fileSize'
     );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Cloudinary 업로드 실패: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    return {
-      url: data.secure_url, // 원본 URL
-      publicId: data.public_id, // 삭제/변환용 ID
-      thumbnail: data.secure_url.replace('/upload/', '/upload/c_thumb,w_300,h_300/'), // 300x300 썸네일
-      width: data.width,
-      height: data.height,
-      size: data.bytes,
-      format: data.format
-    };
-  } catch (error) {
-    console.error('Cloudinary 업로드 오류:', error);
-    throw error;
   }
+
+  // 파일 타입 검증 (재시도 불가능한 에러)
+  if (!APP_CONFIG.allowedFileTypes.includes(file.type)) {
+    throw new ValidationError(
+      `지원하지 않는 파일 형식입니다. (${file.type})`,
+      'fileType'
+    );
+  }
+
+  // 업로드 로직 (재시도 가능)
+  return withRetry(
+    async () => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', 'photo-factory');
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new UploadError(
+          `Cloudinary 업로드 실패: ${errorData.error?.message || response.statusText}`,
+          errorData
+        );
+      }
+
+      const data = await response.json();
+
+      return {
+        url: data.secure_url,
+        publicId: data.public_id,
+        thumbnail: data.secure_url.replace('/upload/', '/upload/c_thumb,w_300,h_300/'),
+        width: data.width,
+        height: data.height,
+        size: data.bytes,
+        format: data.format
+      };
+    },
+    {
+      maxRetries: 3,
+      delayMs: 1000,
+      onRetry: (attempt, maxRetries, delay) => {
+        console.log(`📤 업로드 재시도 중... (${attempt}/${maxRetries})`);
+      }
+    }
+  );
 }
 
 /**
@@ -134,7 +150,7 @@ export async function addPhotoToCategory(category, file) {
 }
 
 /**
- * 작업 저장 (Supabase)
+ * 작업 저장 (IndexedDB)
  */
 export async function saveJob() {
   const user = await getCurrentUser();
@@ -162,21 +178,18 @@ export async function saveJob() {
       currentJob.jobNumber = await generateJobNumber();
     }
 
-    const { data: jobData, error: jobError } = await supabase
-      .from('jobs')
-      .insert({
-        job_number: currentJob.jobNumber,
-        work_date: new Date().toISOString().split('T')[0],
-        car_model: currentJob.carModel,
-        location: currentJob.location || '',
-        technician_id: user.id,
-        status: 'uploaded'
-      })
-      .select()
-      .single();
+    const jobResult = await jobsAPI.insert({
+      job_number: currentJob.jobNumber,
+      work_date: new Date().toISOString().split('T')[0],
+      car_model: currentJob.carModel,
+      location: currentJob.location || '',
+      technician_id: user.id,
+      status: 'uploaded'
+    });
 
-    if (jobError) throw jobError;
+    if (jobResult.error) throw new Error(jobResult.error);
 
+    const jobData = jobResult.data;
     console.log('✅ 작업 정보 저장:', jobData);
 
     // 2. photos 테이블에 사진 정보 저장
@@ -196,19 +209,16 @@ export async function saveJob() {
       });
     });
 
-    const { data: photosData, error: photosError } = await supabase
-      .from('photos')
-      .insert(photoInserts)
-      .select();
+    const photosResult = await photosAPI.insert(photoInserts);
 
-    if (photosError) throw photosError;
+    if (photosResult.error) throw new Error(photosResult.error);
 
-    console.log(`✅ ${photosData.length}장 사진 저장 완료`);
+    console.log(`✅ ${photosResult.data.length}장 사진 저장 완료`);
 
     return {
       success: true,
       job: jobData,
-      photos: photosData
+      photos: photosResult.data
     };
   } catch (error) {
     console.error('❌ 작업 저장 오류:', error);
@@ -298,6 +308,9 @@ export function resetJob() {
     photos: {}
   };
 }
+
+// currentJob export
+export { currentJob };
 
 // 전역 함수 노출
 window.currentJob = currentJob;

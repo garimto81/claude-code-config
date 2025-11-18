@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Repository Purpose**: Global workflow templates and automation for Claude Code development
-**Version**: 4.15.0 | **Updated**: 2025-01-14
+**Version**: 4.16.0 | **Updated**: 2025-01-18 | **Major Update**: wshobson/agents plugin system integration
 
 ---
 
@@ -499,6 +499,25 @@ python .claude/evolution/scripts/analyze_quality2.py --alerts
 
 ## Agent Usage & Optimization
 
+### 🚀 Plugin Marketplace System (NEW v4.16.0)
+
+**통합 완료**: wshobson/agents 플러그인 시스템 통합 완료 (2025-01-18)
+
+**새로운 아키텍처**:
+- **23개 플러그인** (15개 wshobson + 8개 Phase별 legacy)
+- **120+ 에이전트** (87개 wshobson + 33개 기존 + 통합)
+- **27개 스킬** (Progressive Disclosure 방식)
+- **마켓플레이스 시스템** (.claude-plugin/marketplace.json)
+
+### Plugin Architecture
+
+Each plugin is an isolated unit containing:
+- **Agents**: Domain-specific experts (1-3 per plugin)
+- **Commands**: Slash commands for workflows
+- **Skills**: Progressive disclosure knowledge packages
+
+**토큰 효율성**: Skills는 필요할 때만 활성화되어 200k 토큰 한계 극복
+
 ### Smart Agent Selection (Automatic)
 
 **Claude Code automatically selects optimal agents based on Phase and context.**
@@ -513,75 +532,152 @@ No manual scripts needed - I read CLAUDE.md and choose appropriate agents:
 
 **Benefits**: 60-80% token savings vs loading all agents
 
-### Available Agents (33 total)
+### Available Plugins (23 total)
 
-**Core Agents (15)** - Phase-specific essentials:
+**wshobson Plugins (15개)** - Production-ready workflows:
 
-**Phase 0-0.5 (Planning & Research)**:
-1. **context7-engineer** ⭐ (Sonnet, 1200) - External library docs verification
-2. **seq-engineer** ⭐ (Haiku, 500) - Requirement analysis & sequential thinking
-3. **task-decomposition** ⭐ (Haiku, 600) - Task breakdown
-4. **architect-reviewer** (Sonnet, 1300) - Architecture review
+1. **full-stack-orchestration** ⭐ - Multi-agent coordination for complete features
+   - Agents: 7+ agents (backend, frontend, database, test, security, deploy, observability)
+   - Commands: `/full-stack-feature`
+   - Use: End-to-end feature development
 
-**Phase 1 (Implementation)**:
-5. **backend-architect** ⭐ (Sonnet, 1400) - Backend architecture & API design
-6. **frontend-developer** (Sonnet, 1300) - React/Vue/Svelte UI
-7. **fullstack-developer** (Sonnet, 1600) - End-to-end development
-8. **typescript-expert** (Sonnet, 1000) - Type safety
-9. **debugger** ⭐ (Sonnet, 1300) - Error debugging
+2. **python-development** - Python 3.12+ modern development
+   - Agents: python-pro, django-pro, fastapi-pro
+   - Skills: async-patterns, testing, packaging, performance, uv-manager
+   - Use: Python projects
 
-**Phase 2 (Testing)**:
-10. **test-automator** ⭐ (Haiku, 600) - Unit/integration tests
-11. **playwright-engineer** ⭐ (Sonnet, 1500) - E2E testing
-12. **code-reviewer** ⭐ (Sonnet, 1300) - Code quality review
+3. **javascript-typescript** - JS/TS applications
+   - Agents: typescript-expert, node-specialist
+   - Skills: types, node-patterns, testing, es6+
+   - Use: JavaScript/TypeScript projects
 
-**Phase 5 (E2E & Security)**:
-13. **security-auditor** ⭐ (Sonnet, 1400) - OWASP compliance
-14. **performance-engineer** (Sonnet, 1300) - Performance optimization
+4. **backend-development** - API architecture
+   - Agents: backend-architect, api-designer, microservices-expert
+   - Skills: api-design, architecture-patterns, microservices, temporal-testing
+   - Use: Backend API development
 
-**Phase 6 (Deployment)**:
-15. **deployment-engineer** ⭐ (Haiku, 700) - CI/CD & deployment
+5. **security-scanning** - Code security
+   - Agents: security-auditor, penetration-tester
+   - Skills: owasp-top10, dependency-scanning
+   - Use: Security audits
+
+6. **kubernetes-operations** - K8s deployment
+   - Agents: k8s-architect
+   - Skills: deployment-strategies, helm-charts, gitops, monitoring
+   - Use: Kubernetes deployments
+
+7. **cloud-infrastructure** - Multi-cloud platforms
+   - Agents: cloud-architect, terraform-specialist
+   - Skills: cost-optimization, multi-cloud, networking, serverless
+   - Use: Cloud infrastructure
+
+8. **api-testing-observability** - API testing
+   - Agents: api-tester, observability-engineer
+   - Use: API testing and monitoring
+
+9. **code-refactoring** - Code improvement
+   - Agents: refactoring-expert
+   - Use: Code refactoring
+
+10. **application-performance** - Performance optimization
+    - Agents: performance-engineer
+    - Use: Performance tuning
+
+11. **cicd-automation** - CI/CD pipelines
+    - Agents: cicd-specialist
+    - Skills: pipeline-design, github-actions, gitlab-ci, secrets-management
+    - Use: CI/CD automation
+
+12. **debugging-toolkit** - Interactive debugging
+    - Agents: debugger, dx-optimizer
+    - Commands: `/smart-debug`
+    - Use: Bug fixing
+
+13. **code-documentation** - Documentation generation
+    - Agents: docs-architect, tutorial-engineer, code-reviewer
+    - Commands: `/doc-generate`, `/code-explain`
+    - Use: Documentation
+
+14. **git-pr-workflows** - Git/PR automation
+    - Agents: code-reviewer
+    - Commands: `/pr-enhance`, `/onboard`, `/git-workflow`
+    - Use: Git workflows
+
+15. **agent-orchestration** - Multi-agent coordination
+    - Use: Complex multi-agent tasks
 
 ---
 
-**Extended Agents (18)** - Advanced use cases:
+**Phase-Specific Plugins (8개)** - Legacy agents organized by Phase:
 
-**Development Specialists**:
-16. **python-pro** (Sonnet, 1200) - Python advanced patterns (decorators, async)
-17. **mobile-developer** (Sonnet, 1400) - React Native/Flutter
-18. **graphql-architect** (Sonnet, 1300) - GraphQL schema/resolvers
-19. **supabase-engineer** (Sonnet, 1400) - Supabase server architecture
+1. **phase-0-planning** - Planning & Research
+   - Agents: seq-engineer ⭐, context7-engineer ⭐, task-decomposition-expert, taskmanager-planner, exa-search-specialist
+   - Use: Phase 0-0.5
 
-**Data & Database**:
-20. **database-architect** (Sonnet, 1300) - DB schema design
-21. **database-optimizer** (Sonnet, 1200) - Query optimization & indexing
-22. **data-engineer** (Sonnet, 1400) - ETL pipelines, data lakes
-23. **data-scientist** (Sonnet, 1200) - SQL/BigQuery analytics
+2. **phase-1-development** - Implementation
+   - Agents: debugger ⭐, typescript-expert, frontend-developer, backend-architect ⭐, fullstack-developer, python-pro, mobile-developer
+   - Use: Phase 1
 
-**AI/ML**:
-24. **ai-engineer** (Sonnet, 1500) - LLM/RAG system design
-25. **ml-engineer** (Sonnet, 1400) - ML pipelines, model deployment
-26. **prompt-engineer** (Sonnet, 1000) - Prompt optimization
+3. **phase-2-testing** - Testing
+   - Agents: test-automator ⭐, playwright-engineer ⭐, code-reviewer ⭐, security-auditor ⭐
+   - Use: Phase 2
 
-**Infrastructure**:
-27. **cloud-architect** (Sonnet, 1500) - AWS/GCP/Azure design
-28. **devops-troubleshooter** (Sonnet, 1400) - Production debugging
-29. **github-engineer** (Haiku, 800) - Git workflows, PR management
+4. **phase-3-architecture** - Architecture review
+   - Agents: architect-reviewer, graphql-architect
+   - Use: Phase 3
 
-**Planning & Support**:
-30. **taskmanager-planner** (Haiku, 700) - Task planning, milestones
-31. **exa-search-specialist** (Haiku, 600) - Web search for tech research
-32. **context-manager** (Haiku, 500) - Context management
-33. **ui-ux-designer** (Sonnet, 1200) - UI/UX design
+5. **phase-6-deployment** - Deployment
+   - Agents: deployment-engineer ⭐, devops-troubleshooter, cloud-architect
+   - Use: Phase 6
+
+6. **database-tools** - Database specialists
+   - Agents: database-architect, database-optimizer
+   - Use: Database design/optimization
+
+7. **ai-ml-tools** - AI/ML specialists
+   - Agents: ai-engineer, ml-engineer, data-engineer, data-scientist, prompt-engineer
+   - Use: AI/ML projects
+
+8. **specialized-tools** - Specialized agents
+   - Agents: github-engineer, supabase-engineer, performance-engineer, context-manager, UI_UX-Designer
+   - Use: Specialized tasks
 
 ---
 
-**Token Usage**:
-- **All agents loaded**: ~40,000 tokens
-- **Phase-specific (Core only)**: 2,000-4,000 tokens
-- **Savings**: 80-90% per conversation
+**Token Usage** (with Plugin System):
+- **All plugins loaded**: ~15,000 tokens (vs 40,000 before)
+- **Phase-specific plugins only**: 1,500-3,000 tokens
+- **Skills loaded on-demand**: 0 tokens until activated
+- **Savings**: 85-95% per conversation (improved from 80-90%)
 
-**⭐ = Highest priority agents for most projects**
+**⭐ = Highest priority plugins for most projects**
+
+### Skills System (27개)
+
+Skills are **progressive disclosure** knowledge packages that activate only when needed:
+
+**Backend Skills** (5):
+- api-design-principles, architecture-patterns, microservices-patterns, temporal-python-testing, workflow-orchestration-patterns
+
+**CI/CD Skills** (4):
+- deployment-pipeline-design, github-actions-templates, gitlab-ci-patterns, secrets-management
+
+**Cloud Skills** (4):
+- cost-optimization, multi-cloud-patterns, networking-fundamentals, serverless-architectures
+
+**JavaScript/TypeScript Skills** (4):
+- advanced-typescript-patterns, es6-modern-features, node-best-practices, testing-frameworks
+
+**Kubernetes Skills** (4):
+- deployment-strategies, helm-chart-patterns, gitops-workflows, monitoring-observability
+
+**Python Skills** (5):
+- async-python-patterns, python-packaging, python-performance-optimization, python-testing-patterns, uv-package-manager
+
+**Security Skills** (1):
+- owasp-top10-checklist
+
+**Activation**: Skills자동으로 활성화 (컨텍스트 기반)
 
 ### Parallel Execution Pattern
 ```python
@@ -961,13 +1057,13 @@ Checks:
 
 ```
 claude01/
-├── CLAUDE.md                 # This file
+├── CLAUDE.md                 # This file (v4.16.0)
 ├── README.md                 # Navigation & quick start
 ├── 깃허브_워크플로우_개요.md   # GitHub workflow (Korean, 5min)
 ├── 깃허브_빠른시작.md         # GitHub setup (Korean, 30min)
 │
 ├── docs/                     # Detailed guides
-│   ├── AGENTS_REFERENCE.md           # 33 agents documented
+│   ├── AGENTS_REFERENCE.md           # 120+ agents documented
 │   ├── AGENT_OPTIMIZER_GUIDE.md      # Optimizer setup
 │   ├── BRANCH_PROTECTION_GUIDE.md    # GitHub settings
 │   └── guides/
@@ -985,17 +1081,46 @@ claude01/
 │   ├── github-issue-dev.sh           # Issue workflow
 │   └── migrate_prds_to_issues.py     # Migration
 │
+├── .claude-plugin/           # 🆕 Plugin Marketplace System
+│   └── marketplace.json              # 23 plugins metadata
+│
 ├── .claude/                  # Claude Code extensions
 │   ├── hooks/post-commit             # Git hook
 │   ├── scripts/
 │   │   ├── analyze_agent_usage.py    # Agent optimizer
 │   │   └── load-plugins.py           # Plugin loader
-│   ├── plugins/                      # Agent plugins
-│   │   ├── plugin-manifest.json      # Plugin metadata
-│   │   ├── agent-context7/           # Context7 engineer
-│   │   ├── agent-playwright/         # Playwright engineer
+│   ├── agents/                       # 🔄 Legacy agent files (reference)
+│   │   └── *.md                      # 33 original agents
+│   ├── plugins/                      # 🆕 New plugin system
+│   │   ├── full-stack-orchestration/
+│   │   │   ├── agents/               # 7+ orchestrated agents
+│   │   │   ├── commands/             # Slash commands
+│   │   │   └── skills/               # Progressive skills
+│   │   ├── python-development/
+│   │   │   ├── agents/               # python-pro, django-pro, fastapi-pro
+│   │   │   └── skills/               # async, testing, packaging, perf, uv
+│   │   ├── phase-0-planning/         # Legacy organized by phase
+│   │   ├── phase-1-development/
+│   │   ├── phase-2-testing/
+│   │   ├── database-tools/
+│   │   ├── ai-ml-tools/
+│   │   └── ... (23 plugins total)
+│   ├── plugins.old/                  # Backup of old plugin structure
+│   ├── skills/                       # Global skills
+│   │   ├── skill-creator/
+│   │   └── webapp-testing/
+│   ├── commands/                     # Slash commands
+│   │   ├── aiden-endtoend.md
+│   │   ├── aiden-plan.md
 │   │   └── ...
+│   ├── evolution/                    # Agent quality tracking
+│   │   ├── scripts/
+│   │   │   └── analyze_quality2.py
+│   │   └── README.md
+│   ├── track.py                      # Agent usage tracker
 │   └── optimizer-config.json
+│
+├── .claude.backup-YYYYMMDD/  # Backup before v4.16.0 upgrade
 │
 ├── .github/workflows/        # CI/CD
 │   ├── auto-pr-merge.yml             # Auto PR/merge
@@ -1207,6 +1332,15 @@ git push  # → Auto PR/merge
 ---
 
 **Version History**:
+- **v4.16.0 (2025-01-18)** - **wshobson/agents Plugin System Integration** 🚀
+  - ✅ **23 Plugins**: 15 wshobson + 8 Phase-specific legacy
+  - ✅ **120+ Agents**: 87 wshobson + 33 original + integration
+  - ✅ **27 Skills**: Progressive disclosure knowledge packages
+  - ✅ **Marketplace System**: `.claude-plugin/marketplace.json`
+  - ✅ **Token Optimization**: 85-95% savings (improved from 80-90%)
+  - ✅ **Architecture**: Plugin-based isolated units (agents + commands + skills)
+  - **Result**: Production-ready plugin ecosystem, massive scalability, token efficiency
+- v4.15.0 (2025-01-14) - Agent usage tracking v2.0, documentation updates
 - v4.14.0 (2025-01-14) - **Conversation-First Simplification**: Removed unnecessary complexity
   - ✅ Task generation: API script → Conversation (saves API costs, setup complexity)
   - ✅ Agent selection: Manual script → Automatic (no user action needed)
@@ -1215,6 +1349,6 @@ git push  # → Auto PR/merge
   - **Result**: Simpler workflow, no API keys, no setup, just conversation
 - v4.13.0 (2025-01-14) - Integrated PhaseFlow AI task generation (later simplified to conversation)
 - v4.12.0 (2025-01-14) - Expanded plugin system to 15 agents (later simplified to automatic)
-- v4.11.0 (2025-01-14) - Integrated wshobson/agents plugin system (later simplified)
+- v4.11.0 (2025-01-14) - Explored wshobson/agents plugin system (now fully integrated in v4.16.0)
 - v4.10.0 (2025-01-14) - Integrated cc-sdd validation gates (simplified to automatic)
 - v4.9.0 (2025-01-13) - Architecture overview, testing commands

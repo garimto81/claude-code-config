@@ -1,4 +1,5 @@
 # 프로젝트 폴더들 (전역 설정과 무관)
+archive-mam/
 actiontracker/
 ai-production/
 broadcast-qc/
@@ -41,14 +42,21 @@ nul
 !.claude/scripts/
 !.claude/hooks/
 !.claude/plugins/
+!.claude/agents/
+!.claude/commands/
+!.claude/skills/
 !.claude/optimizer-config.json
 !.claude/evolution/
+!.claude/track.py
+!.claude/settings.json
 .claude/evolution/.env
 .claude/evolution/data/
 .claude/evolution/feedback/*.jsonl
 .claude/improvement-suggestions.md
 .claude/optimizer-error.log
 .claude-global/
+.claude.backup-*/
+.claude/plugins.old/
 
 # 구버전 문서들
 create-prd.md

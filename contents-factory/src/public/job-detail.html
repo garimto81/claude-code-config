@@ -354,12 +354,15 @@
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Service Worker Registration -->
+  <script type="module" src="../js/sw-register.js"></script>
+
   <!-- App JS -->
   <script type="module">
-    import { requireAuth } from '../js/auth.js';
+    import { requireAuth } from '../js/auth-local.js';
     import { fetchJobById } from '../js/gallery.js';
+    import { jobsAPI } from '../js/rxdb-api.js';
     import { APP_CONFIG } from '../js/config.js';
-    import { supabase } from '../js/auth.js';
 
     // 로그인 확인
     const user = await requireAuth();
@@ -562,17 +565,14 @@
       }
     };
 
-    // 작업 삭제
+    // 작업 삭제 (RxDB)
     window.deleteJob = async function() {
-      if (!confirm('정말 이 작업을 삭제하시겠습니까?\n사진은 Imgur에 남아있습니다.')) return;
+      if (!confirm('정말 이 작업을 삭제하시겠습니까?\n사진은 Cloudinary에 남아있습니다.')) return;
 
       try {
-        const { error } = await supabase
-          .from('jobs')
-          .delete()
-          .eq('id', jobId);
+        const result = await jobsAPI.delete(jobId);
 
-        if (error) throw error;
+        if (result.error) throw new Error(result.error);
 
         alert('작업이 삭제되었습니다.');
         window.location.href = '/public/gallery.html';

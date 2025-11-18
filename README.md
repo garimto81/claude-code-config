@@ -24,6 +24,7 @@
 
 ### 워크플로우 (필수)
 - **[CLAUDE.md](CLAUDE.md)** - Phase 0-6 개발 사이클, 23개 플러그인 시스템
+- **[Quick Start Guide](docs/QUICK_START_GUIDE.md)** ⭐ - v4.16.0 빠른 시작 (5분 완성)
 
 ### GitHub 네이티브
 - [깃허브_워크플로우_개요.md](깃허브_워크플로우_개요.md) - 5분 개요, ROI

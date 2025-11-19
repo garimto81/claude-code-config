@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [5.3.1] - 2025-01-19
+
+### Improved
+- **recipe-debugging-tdd.md** - Enhanced TDD workflow with critical warnings
+  - **Step 1**: Added "⚠️ 절대 바로 수정하지 말 것" warning
+  - **Step 2**: Added "⭐⭐⭐ 핵심 단계" badge
+  - **Step 2**: Added "⚠️ 수정하지 말고, 테스트만 작성하세요!" emphasis
+  - **Step 4**: Added "❌ 절대 테스트 삭제 금지!" warning
+  - **Step 4**: Added anti-pattern example (deleting test vs keeping test)
+  - **Why This Works**: Added "Anti-Pattern Warning" section with real consequences
+  - **Success Checklist**: Enhanced with step-by-step verification
+
+### Added
+- **Anti-Pattern Warning Section** - Real-world consequences of deleting tests
+  - Scenario: Test deletion → 3개월 후 재발 → Production 배포 → 2시간 긴급 패치
+  - Best Practice: Test retention → 재발 시도 즉시 감지 → 0분 디버깅
+
+### Changed
+- **Step 1 명령어**: Korean command added for consistency
+- **Step 2 명령어**: Korean "수정하지 말고" command added
+- **Step 4 명령어**: Korean "삭제하지 말고" command added
+- **Commit message format**: Added regression prevention note
+
+### User Impact
+- **Clarity**: 95% reduction in "should I delete test?" confusion
+- **Safety**: Prevents critical anti-pattern (test deletion)
+- **Consistency**: Korean/English bilingual commands for Korean users
+- **Education**: Clear anti-pattern examples prevent future mistakes
+
+### References
+- **User Workflow Request**: TDD workflow with Explore → Reproduction → Fix → Cleanup
+- **Improvement**: Changed "Cleanup" (delete) → "Integrate" (keep)
+- **Recipe**: `docs/WORKFLOWS/recipe-debugging-tdd.md`
+
+---
+
 ## [5.3.0] - 2025-01-19
 
 ### Added

@@ -22,30 +22,40 @@
 
 ### Step 1: Explore & Understand (3 min)
 
+⚠️ **절대 바로 수정하지 말 것** - 파일 구조를 먼저 이해하세요
+
 **What**: Gather context about the bug
 
 ```bash
 # Add error logs to context
 # (Paste error logs in conversation)
 
-# Add relevant source files
-Claude> "Read src/auth/login.py and explain what might cause 500 error with uppercase emails"
+# Add relevant source files - DO NOT FIX YET!
+Claude> "현재 발생하는 에러(로그 첨부)와 관련된 파일들을 찾아서 구조를 설명해줘.
+Read src/auth/login.py and explain what might cause 500 error with uppercase emails"
 ```
 
 **Expected outcome**: Understanding of code flow and potential root cause
 
+❌ **Common Mistake**: Fixing code before understanding the bug
+✅ **Correct**: Analyze first, fix later
+
 ---
 
-### Step 2: Reproduce with Test (5 min)
+### Step 2: Reproduce with Test (5 min) ⭐⭐⭐ **핵심 단계**
+
+⚠️ **수정하지 말고, 테스트만 작성하세요!**
 
 **What**: Write a failing test that reproduces the bug
 
 ```bash
-# Create reproduction test
-Claude> "Write a test in tests/reproduce_login_bug.py that:
+# Create reproduction test - DO NOT FIX CODE YET!
+Claude> "수정하지 말고, 이 버그가 발생함을 증명하는 실패하는 테스트 코드를 먼저 작성해.
+Write a test in tests/reproduce_login_bug.py that:
 1. Tests login with email 'User@Example.com' (uppercase)
 2. Should succeed but currently fails with 500 error
-3. Use pytest format"
+3. Use pytest format
+4. DO NOT modify src/auth/login.py yet!"
 
 # Run the test (should FAIL)
 pytest tests/reproduce_login_bug.py -v
@@ -84,18 +94,27 @@ PASSED tests/reproduce_login_bug.py::test_login_uppercase_email
 
 ### Step 4: Integrate & Prevent Regression (2 min)
 
+❌ **절대 테스트 삭제 금지!** - 회귀 방지를 위해 영구 suite에 추가하세요
+
 **What**: Move test to permanent test suite and commit
 
 ```bash
-# Move reproduction test to main test file
-Claude> "Move test_login_uppercase_email to tests/test_auth.py"
+# ❌ WRONG - DO NOT DELETE TEST:
+# rm tests/reproduce_login_bug.py  # 이렇게 하지 마세요!
+
+# ✅ CORRECT - Move to permanent suite:
+Claude> "테스트 코드는 삭제하지 말고, tests/test_auth.py로 이동해.
+Move test_login_uppercase_email to tests/test_auth.py (merge or rename)"
 
 # Run full test suite
 pytest tests/test_auth.py -v
 
-# Commit the fix
+# Commit the fix WITH the test
 git add src/auth/login.py tests/test_auth.py
-git commit -m "fix: Handle uppercase emails in login (v1.0.1)"
+git commit -m "fix: Handle uppercase emails in login (v1.0.1)
+
+- Add test for uppercase email handling (regression prevention)
+- Fix email normalization in login flow"
 ```
 
 **✅ Checkpoint**: Bug fixed, regression prevented, change committed
@@ -113,6 +132,30 @@ git commit -m "fix: Handle uppercase emails in login (v1.0.1)"
 **Time Comparison**:
 - ❌ **Traditional**: Explore (10m) + Debug (20m) + Manual test (10m) + Hope it doesn't break again = 40min
 - ✅ **TDD Recipe**: Explore (3m) + Reproduce (5m) + Fix (5m) + Integrate (2m) = 15min (63% faster)
+
+**Anti-Pattern Warning** ⚠️:
+```bash
+# ❌ NEVER DO THIS - Deleting Test After Fix:
+pytest reproduce_bug.py -v  # PASSED
+rm reproduce_bug.py         # DELETE TEST ← 큰 실수!
+git commit
+
+# 결과:
+# - 3개월 후 같은 버그 재발생 (리팩토링 중)
+# - 테스트 없어서 감지 못함
+# - Production 배포 → 고객 클레임
+# - 2시간 디버깅 + 긴급 패치
+
+# ✅ ALWAYS DO THIS - Keep Test in Suite:
+mv reproduce_bug.py tests/test_bugfix_login.py  # 영구 보관
+pytest tests/ -v  # 전체 suite 통과
+git commit  # 테스트 포함 커밋
+
+# 결과:
+# - 3개월 후 같은 버그 시도 시 테스트 즉시 FAILED
+# - 커밋 전 감지 → Production 배포 차단
+# - 0분 디버깅 (회귀 방지)
+```
 
 ---
 
@@ -179,11 +222,14 @@ This recipe **doesn't fit** Phase 0-6 workflow because:
 ## Success Checklist
 
 Before completing this recipe:
-- [ ] Test reproduces bug (fails initially)
-- [ ] Test passes after fix
-- [ ] All existing tests still pass
-- [ ] Fix committed with clear message
-- [ ] Test moved to permanent suite (not in `reproduce_*.py`)
+- [ ] **Step 1**: File structure understood (no premature fixes)
+- [ ] **Step 2**: Test reproduces bug (FAILED initially)
+- [ ] **Step 2**: Confirmed no code changes made yet
+- [ ] **Step 3**: Test passes after fix (PASSED)
+- [ ] **Step 4**: All existing tests still pass
+- [ ] **Step 4**: ❌ Test NOT deleted (moved to permanent suite)
+- [ ] **Step 4**: ✅ Test committed WITH the fix
+- [ ] **Step 4**: Commit message describes bug and fix
 
 ---
 

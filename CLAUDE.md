@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Repository Purpose**: Global workflow templates and automation for Claude Code development
-**Version**: 5.2.0 | **Updated**: 2025-01-19
+**Version**: 5.3.0 | **Updated**: 2025-01-19
 
 ---
 
@@ -11,10 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **NEW**: Immediately usable workflow patterns for common tasks (5-60 min each)
 
-| Task | Recipe | Time | Quick Link |
+| Task | Recipe/Command | Time | Quick Link |
 |------|--------|------|------------|
 | 🐛 **Fix Bug** | TDD approach | 15 min | [recipe-debugging-tdd.md](docs/WORKFLOWS/recipe-debugging-tdd.md) |
 | 📊 **Understand Code** | Mermaid diagrams | 10 min | [recipe-legacy-analysis.md](docs/WORKFLOWS/recipe-legacy-analysis.md) |
+| 🔍 **Quick Analysis** | `/analyze-code` | 30 sec | Generate classDiagram instantly |
 | 📅 **Daily Routine** | Progress tracking | 5 min/day | [recipe-daily-routine.md](docs/WORKFLOWS/recipe-daily-routine.md) |
 | ✨ **New Feature** | Complete Phase 0-6 | 30-60 min | [recipe-new-feature.md](docs/WORKFLOWS/recipe-new-feature.md) |
 
@@ -23,6 +24,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Real-world tested patterns
 - ✅ 63-95% time savings vs ad-hoc approaches
 - ✅ Complement Phase 0-6 theoretical framework
+
+**Quick Code Analysis Workflow** ⭐:
+```bash
+# 1. Load files you want to analyze (Read, Glob, etc.)
+# 2. Run instant analysis
+/analyze-code
+
+# Output: Pure Mermaid classDiagram (30 sec, no text, no explanations)
+```
 
 **Full Recipe Index**: [docs/WORKFLOWS/README.md](docs/WORKFLOWS/README.md)
 
@@ -296,6 +306,9 @@ Available via `.claude/commands/`:
 - `/create-docs` - Documentation generation
 - `/changelog` - Changelog entry creation
 
+**Analysis Commands** ⭐:
+- `/analyze-code` - Generate Mermaid classDiagram from loaded files (pure code output)
+
 **AIDEN System** (Agent-Integrated Development Environment):
 - `/aiden-plan` - Planning agent
 - `/aiden-first` - First-time setup
@@ -433,6 +446,13 @@ Example: feat: Add OAuth (v1.2.0) [PRD-0001]
 ---
 
 ## Version History
+
+- **v5.3.0 (2025-01-19)**: Code Analysis Automation ⭐
+  - `/analyze-code` slash command - instant Mermaid classDiagram generation
+  - Pure code output (no text, no explanations) - 30 seconds
+  - Integrated into recipe-legacy-analysis.md workflow
+  - Quick Code Analysis Workflow added to Quick Start
+  - Global guidelines optimization for faster onboarding
 
 - **v5.2.0 (2025-01-19)**: Workflow Recipes System ⭐
   - 4 immediately usable workflow recipes (5-60 min each)

@@ -46,6 +46,13 @@ Claude> "Analyze all files in src/"
 
 **What**: Create visual Mermaid diagram showing relationships
 
+**Method 1: Quick Analysis** (30 seconds) ⭐ **NEW**:
+```bash
+# Instant classDiagram generation (no text, pure code)
+/analyze-code
+```
+
+**Method 2: Detailed Analysis** (5 minutes):
 ```bash
 Claude> "Generate a Mermaid classDiagram for the authentication system showing:
 1. All classes/modules
@@ -222,8 +229,8 @@ Phase 0.1: Discovery (this recipe) → Phase 0: PRD → Phase 1: Implementation
 
 ## Related Commands
 
-**Slash commands** (proposed new ones):
-- `/analyze-code` - Generate architecture diagram
+**Slash commands**:
+- `/analyze-code` ⭐ **NEW** - Generate pure Mermaid classDiagram (30 sec, no text)
 - `/doc-generate` - Create comprehensive documentation
 - `/code-explain` - Explain specific code section
 

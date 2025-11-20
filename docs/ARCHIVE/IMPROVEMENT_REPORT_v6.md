@@ -5,6 +5,8 @@
 **작업 시간**: ~2시간
 **작업자**: Claude Code (Deep Analysis + Implementation)
 
+> **🗣️ 언어 규칙**: CLAUDE.md Core Rules에 명시된 **“항상 한글로 말할 것”** 지침을 모든 사용자 응답·문서·커밋 설명에 최우선으로 적용하세요.
+
 ---
 
 ## 📊 개선 결과 요약

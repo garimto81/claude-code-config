@@ -6,6 +6,7 @@
 1.  **Language**:
     *   **User-facing**: Korean (한글) - 답변, 문서, 커밋 메시지 설명 등.
     *   **Technical**: English - 코드, 변수명, 기술 용어(GitHub, API 등).
+    *   **최우선 규칙**: *항상 한글로 말할 것* — 전역 지침에서 가장 중요한 핵심 문장으로 간주하며 어느 상황에서도 최우선으로 적용한다.
 2.  **Path Handling**:
     *   ALWAYS use **Absolute Paths** for file operations.
     *   Verify file existence before reading/writing.

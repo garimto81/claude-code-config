@@ -1,197 +1,57 @@
+
 ---
 name: create-docs
-description: Analyze code structure to create comprehensive documentation
+description: Create release note skeleton under docs/releases
 ---
 
-# /create-docs - Automatic Documentation Generator
+# /create-docs - Release Notes Template Generator
 
-Analyze code structure and create comprehensive documentation with examples.
+`docs/releases/{version}.md` 파일이 없으면 자동으로 생성해 릴리스 메모 뼈대를 만든다. 실제 API/클래스 문서를 작성하지는 않으며, 템플릿은 사용자가 직접 채워 넣을 수 있도록 간단한 섹션을 포함한다.
 
 ## Usage
 
 ```
-/create-docs [path] [--format=markdown|html|sphinx]
+/create-docs [version-tag]
 ```
 
-Default format: `markdown`
+Phase Controller 예시:
 
-## Documentation Types
-
-### 1. API Documentation
-
-**For Functions/Methods**:
-```markdown
-## `login(email: str, password: str) -> User`
-
-Authenticates user with email and password.
-
-### Parameters
-- `email` (str): User email address
-- `password` (str): Plain text password
-
-### Returns
-- `User`: Authenticated user object
-
-### Raises
-- `AuthenticationError`: Invalid credentials
-- `AccountLocked`: Too many failed attempts
-
-### Example
-```python
-user = login("test@example.com", "password123")
-print(f"Logged in as {user.name}")
+```
+python scripts/phase_controller.py --version v1.2.0 --phases 6 --auto-skills
 ```
 
-### Edge Cases
-- Empty email/password → raises ValueError
-- Non-existent user → raises AuthenticationError
-- Account locked → raises AccountLocked (retry after 10min)
+## Behavior
+
+- 대상 경로: `docs/releases/{version}.md`
+- 파일이 이미 있으면 “기존 문서 유지” 메시지 출력
+- 없으면 다음 템플릿 생성:
+
+```
+# Release Notes - vX.Y.Z
+
+## Highlights
+- TODO
+
+## Verification
+- Tests: TBD
+- Security: TBD
+
+## Deployment
+- Checklist 항목을 채워주세요.
 ```
 
-### 2. Class Documentation
+버전 태그가 없으면 `PRD-0001` 등 PRD 번호를 사용한다.
 
-```markdown
-## Class: `UserManager`
+## Language
 
-Manages user accounts and authentication.
-
-### Attributes
-- `session`: Database session
-- `cache`: Redis cache instance
-
-### Methods
-- `create_user()`: Create new user
-- `authenticate()`: Verify credentials
-- `reset_password()`: Send reset email
-
-### Usage
-```python
-manager = UserManager(session=db.session)
-user = manager.create_user(
-    email="test@example.com",
-    password="secure123"
-)
-```
-```
-
-### 3. Module Documentation
-
-```markdown
-# auth Module
-
-User authentication and session management.
-
-## Overview
-Provides OAuth2 and email/password authentication with session handling.
-
-## Quick Start
-```python
-from auth import login, logout
-
-user = login("test@example.com", "password")
-logout(user.session_id)
-```
-
-## Components
-- `login()`: User authentication
-- `logout()`: Session termination
-- `UserManager`: User account management
-- `SessionStore`: Session persistence
-```
-
-## Auto-Generated Content
-
-### Inputs/Outputs Analysis
-- Analyzes function signatures
-- Extracts type hints
-- Documents return values
-
-### Edge Cases Detection
-- None/null handling
-- Empty strings/lists
-- Boundary conditions
-- Error scenarios
-
-### Code Examples
-- Basic usage
-- Advanced patterns
-- Error handling
-- Integration examples
+- Release notes와 모든 출력은 CLAUDE.md Core Rules의 사용자 응답=한글 규칙을 따른다.
+- 동일한 경고 블록을 문서마다 반복하지 말고, CLAUDE.md를 전역 규칙의 단일 출처로 유지한다.
 
 ## Phase Integration
 
-### Phase 0: Requirements
-- Document PRD specifications
-- Create architecture diagrams
-
-### Phase 1: Implementation
-- `/create-docs` for each module
-- Keep docs synced with code
-
-### Phase 3: Versioning
-- Update docs with version changes
-- Changelog integration
-
-## Output Structure
-
-```
-docs/
-├── api/
-│   ├── auth.md
-│   ├── users.md
-│   └── sessions.md
-├── guides/
-│   ├── quickstart.md
-│   ├── authentication.md
-│   └── deployment.md
-├── reference/
-│   ├── configuration.md
-│   └── environment.md
-└── index.md
-```
-
-## Templates
-
-### README Template
-```markdown
-# Project Name
-
-Brief description
-
-## Installation
-\`\`\`bash
-npm install
-\`\`\`
-
-## Quick Start
-\`\`\`javascript
-// Example code
-\`\`\`
-
-## Documentation
-- [API Reference](docs/api/)
-- [Guides](docs/guides/)
-
-## License
-MIT
-```
-
-### API Reference Template
-- Function signature
-- Description
-- Parameters
-- Returns
-- Examples
-- Edge cases
-
-## Integration with Agents
-
-- **code-documentation** plugin: Deep analysis
-- **docs-architect**: Structure design
-- **tutorial-engineer**: Guide creation
+- **Phase 6 (Deployment)**: 릴리스 메모 초안을 자동으로 만들고 채워 넣기만 하면 됨
 
 ## Related
 
-- `/changelog` - Update changelog
-- `code-documentation` plugin
-- Phase 1 documentation requirement
+- `/changelog` – CHANGELOG 항목 생성
+- `docs/releases/` – 릴리스 문서 저장소

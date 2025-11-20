@@ -4,8 +4,6 @@
 **출처**: PhaseFlow AI task generation (MIT License)
 **적용**: claude01 Phase 0-6 workflow
 
-> **🗣️ 언어 규칙**: CLAUDE.md Core Rules에 명시된 **“항상 한글로 말할 것”** 지침을 모든 사용자 응답·문서·커밋 설명에 최우선으로 적용하세요.
-
 ---
 
 ## 📋 개요

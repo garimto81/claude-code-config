@@ -2,11 +2,29 @@
 # 실제 프로젝트 코드는 절대 이 레포에 추가하지 마세요!
 # 프로젝트는 별도 레포지토리에서 관리하세요.
 
-# 예시: 실제 프로젝트 폴더명 패턴 (필요시 추가)
-# VTC_Logger/
-# contents-factory/
-# sso-nextjs/
-# my-project/
+# 실제 프로젝트 폴더들 (전역 워크플로우와 무관)
+VTC_Logger/
+actiontracker/
+ai-production/
+archive-mam/
+broadcast-qc/
+classic-isekai/
+claude-code-config/
+commercial/
+config/
+contents-factory/
+handlogger/
+keyplayer_manager/
+man_subclip/
+ojt-platform/
+pd-note/
+qwen_hand_analysis/
+repo-analyzer/
+softsender/
+sso-nextjs/
+sso-system/
+table_analysis/
+table_tracker/
 
 # 개발 환경
 .venv/

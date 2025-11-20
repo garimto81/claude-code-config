@@ -4,6 +4,8 @@
 
 Data-driven guide for selecting the right agent for the right task, based on actual performance metrics.
 
+> **🗣️ 언어 규칙**: CLAUDE.md Core Rules에 명시된 **“항상 한글로 말할 것”** 지침을 모든 사용자 응답·문서·커밋 설명에 최우선으로 적용하세요.
+
 ---
 
 ## Overview

@@ -4,6 +4,8 @@
 **Version**: 1.0.0 | **Date**: 2025-11-10
 **Target User**: Solo Developer (Vibe Coder) | **Context**: SSO System + Multi-App Architecture
 
+> **🗣️ 언어 규칙**: CLAUDE.md Core Rules에 명시된 **“항상 한글로 말할 것”** 지침을 모든 사용자 응답·문서·커밋 설명에 최우선으로 적용하세요.
+
 ---
 
 ## Executive Summary

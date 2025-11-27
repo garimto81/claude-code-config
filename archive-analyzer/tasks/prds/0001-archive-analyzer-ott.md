@@ -1,0 +1,301 @@
+# PRD-0001: Archive Analyzer for OTT Solution
+
+## 1. Overview
+
+### 1.1 배경 (Background)
+GGP NAS 아카이브(`\\GGPWSOP\docker\GGPNAs\ARCHIVE`)에 저장된 미디어 파일들을 분석하여 B2C OTT 솔루션에 활용 가능한 형태로 정보를 정리해야 함.
+
+### 1.2 목적 (Purpose)
+- 아카이브 내 모든 미디어 파일 및 메타데이터 파일 스캔
+- OTT 서비스용 콘텐츠 카탈로그 생성
+- 스트리밍에 필요한 기술 정보 추출
+
+### 1.3 범위 (Scope)
+| 포함 | 제외 |
+|------|------|
+| 비디오 파일 분석 (MP4, MKV, AVI 등) | 실시간 트랜스코딩 구현 |
+| 메타데이터 파일 파싱 | DRM 시스템 구축 |
+| 콘텐츠 카탈로그 JSON/DB 생성 | 실제 스트리밍 서버 구축 |
+| 기술 사양 추출 (코덱, 해상도, 비트레이트) | CDN 연동 |
+
+---
+
+## 2. Requirements
+
+### 2.1 기능 요구사항 (Functional Requirements)
+
+#### FR-001: 아카이브 스캔
+- **설명**: 지정된 네트워크 경로의 모든 하위 폴더 및 파일 탐색
+- **입력**: 네트워크 경로 (`\\10.10.100.122\...` 또는 로컬 복사본)
+- **출력**: 파일 목록 (경로, 크기, 수정일, 파일 유형)
+- **우선순위**: P0 (필수)
+
+#### FR-002: 미디어 메타데이터 추출
+- **설명**: 비디오 파일에서 기술 정보 추출
+- **추출 항목**:
+  - 코덱 (비디오/오디오)
+  - 해상도 (width x height)
+  - 비트레이트
+  - 재생 시간 (duration)
+  - 프레임레이트
+  - 오디오 채널/샘플레이트
+- **도구**: FFprobe, MediaInfo
+- **우선순위**: P0 (필수)
+
+#### FR-003: 콘텐츠 정보 파싱
+- **설명**: 메타데이터 파일(NFO, XML, JSON)에서 콘텐츠 정보 추출
+- **추출 항목**:
+  - 제목 (title)
+  - 설명 (description)
+  - 장르 (genre)
+  - 출연진 (cast)
+  - 제작년도 (year)
+  - 썸네일/포스터 경로
+  - 자막 파일 경로
+- **우선순위**: P0 (필수)
+
+#### FR-004: 카탈로그 생성
+- **설명**: 추출된 정보를 OTT 서비스용 데이터 구조로 변환
+- **출력 포맷**:
+  ```json
+  {
+    "contents": [{
+      "id": "uuid",
+      "title": "콘텐츠 제목",
+      "description": "설명",
+      "genre": ["장르1", "장르2"],
+      "duration": 7200,
+      "thumbnail": "path/to/thumb.jpg",
+      "streams": [{
+        "quality": "1080p",
+        "codec": "h264",
+        "bitrate": 8000000,
+        "path": "path/to/video.mp4"
+      }],
+      "subtitles": [{
+        "language": "ko",
+        "path": "path/to/sub.srt"
+      }]
+    }]
+  }
+  ```
+- **우선순위**: P0 (필수)
+
+#### FR-005: 분석 리포트 생성
+- **설명**: 아카이브 전체 분석 결과 요약 리포트
+- **포함 내용**:
+  - 총 콘텐츠 수
+  - 파일 유형별 통계
+  - 해상도별 분포
+  - 총 저장 용량
+  - 스트리밍 적합성 평가
+- **우선순위**: P1 (중요)
+
+### 2.2 비기능 요구사항 (Non-Functional Requirements)
+
+#### NFR-001: 성능
+- 대용량 아카이브(10TB+) 처리 가능
+- 병렬 처리로 분석 시간 최소화
+- 진행률 표시 및 재개 기능
+
+#### NFR-002: 확장성
+- 새로운 파일 포맷 지원 용이
+- 플러그인 방식의 메타데이터 파서
+
+#### NFR-003: 신뢰성
+- 분석 실패 시 로그 기록
+- 부분 실패해도 전체 프로세스 계속 진행
+- 결과 데이터 검증
+
+---
+
+## 3. Technical Specifications
+
+### 3.1 기술 스택
+| 구성요소 | 기술 | 이유 |
+|----------|------|------|
+| 언어 | Python 3.11+ | 풍부한 미디어 처리 라이브러리 |
+| 미디어 분석 | FFprobe / pymediainfo | 산업 표준 도구 |
+| 데이터 저장 | SQLite + JSON export | 로컬 실행, 이식성 |
+| 파일 탐색 | pathlib + asyncio | 비동기 대용량 처리 |
+
+### 3.2 아키텍처
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Archive Analyzer                          │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   Scanner   │──│  Extractor  │──│  Exporter   │         │
+│  │  (파일탐색)  │  │ (메타추출)   │  │ (카탈로그)   │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│         │                │                │                  │
+│         ▼                ▼                ▼                  │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │              SQLite Database                     │        │
+│  │  (files, media_info, content_metadata, catalog) │        │
+│  └─────────────────────────────────────────────────┘        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.3 지원 파일 포맷
+| 유형 | 확장자 |
+|------|--------|
+| 비디오 | .mp4, .mkv, .avi, .mov, .wmv, .flv, .webm |
+| 오디오 | .mp3, .aac, .flac, .wav, .m4a |
+| 자막 | .srt, .ass, .ssa, .vtt, .sub |
+| 메타데이터 | .nfo, .xml, .json |
+| 이미지 | .jpg, .png, .webp (썸네일/포스터) |
+
+---
+
+## 4. Data Model
+
+### 4.1 파일 테이블 (files)
+```sql
+CREATE TABLE files (
+    id INTEGER PRIMARY KEY,
+    path TEXT UNIQUE NOT NULL,
+    filename TEXT NOT NULL,
+    extension TEXT,
+    size_bytes INTEGER,
+    modified_at DATETIME,
+    file_type TEXT, -- video, audio, subtitle, metadata, image
+    parent_folder TEXT,
+    scan_status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 4.2 미디어 정보 테이블 (media_info)
+```sql
+CREATE TABLE media_info (
+    id INTEGER PRIMARY KEY,
+    file_id INTEGER REFERENCES files(id),
+    video_codec TEXT,
+    audio_codec TEXT,
+    width INTEGER,
+    height INTEGER,
+    duration_seconds REAL,
+    bitrate INTEGER,
+    framerate REAL,
+    audio_channels INTEGER,
+    audio_sample_rate INTEGER,
+    container_format TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 4.3 콘텐츠 메타데이터 테이블 (content_metadata)
+```sql
+CREATE TABLE content_metadata (
+    id INTEGER PRIMARY KEY,
+    content_id TEXT UNIQUE,
+    title TEXT,
+    original_title TEXT,
+    description TEXT,
+    genre TEXT, -- JSON array
+    cast TEXT,  -- JSON array
+    director TEXT,
+    year INTEGER,
+    rating TEXT,
+    thumbnail_path TEXT,
+    poster_path TEXT,
+    source_file TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 5. User Stories
+
+### US-001: 아카이브 스캔
+> **As a** 콘텐츠 관리자
+> **I want to** 아카이브의 모든 파일을 자동으로 스캔하고 싶다
+> **So that** 보유 콘텐츠를 파악할 수 있다
+
+**Acceptance Criteria:**
+- [ ] 지정 경로의 모든 하위 폴더 탐색
+- [ ] 파일 유형별 자동 분류
+- [ ] 스캔 진행률 표시
+- [ ] 스캔 결과 저장
+
+### US-002: 메타데이터 추출
+> **As a** 콘텐츠 관리자
+> **I want to** 비디오 파일의 기술 정보를 자동 추출하고 싶다
+> **So that** 스트리밍 적합성을 평가할 수 있다
+
+**Acceptance Criteria:**
+- [ ] 코덱, 해상도, 비트레이트 추출
+- [ ] 재생 시간 정보 추출
+- [ ] 분석 실패 시 로그 기록
+
+### US-003: 카탈로그 내보내기
+> **As a** OTT 개발자
+> **I want to** 분석 결과를 JSON 포맷으로 내보내고 싶다
+> **So that** OTT 백엔드에서 바로 사용할 수 있다
+
+**Acceptance Criteria:**
+- [ ] 표준 JSON 스키마로 출력
+- [ ] 콘텐츠별 스트림 정보 포함
+- [ ] 자막/썸네일 경로 포함
+
+---
+
+## 6. Milestones
+
+| 마일스톤 | 설명 | 산출물 |
+|----------|------|--------|
+| M1 | 기본 스캐너 구현 | 파일 목록 DB |
+| M2 | 미디어 분석기 구현 | 기술 정보 추출 |
+| M3 | 메타데이터 파서 구현 | 콘텐츠 정보 추출 |
+| M4 | 카탈로그 생성기 구현 | JSON 카탈로그 |
+| M5 | 리포트 생성기 구현 | 분석 리포트 |
+
+---
+
+## 7. Risks & Mitigations
+
+| 리스크 | 영향 | 대응 방안 |
+|--------|------|-----------|
+| 네트워크 접속 불안정 | 스캔 중단 | 로컬 복사본 사용, 재개 기능 |
+| 대용량 파일 처리 | 메모리 부족 | 스트리밍 방식 처리 |
+| 다양한 메타데이터 포맷 | 파싱 실패 | 플러그인 파서, 폴백 로직 |
+| 손상된 미디어 파일 | 분석 실패 | 에러 로깅, 건너뛰기 |
+
+---
+
+## 8. Success Metrics
+
+| 지표 | 목표 | 측정 방법 |
+|------|------|-----------|
+| 스캔 완료율 | 100% | 전체 파일 vs 스캔된 파일 |
+| 메타데이터 추출률 | >95% | 분석 성공 vs 전체 미디어 파일 |
+| 카탈로그 생성 | 유효한 JSON | JSON 스키마 검증 |
+| 처리 속도 | >100 files/min | 처리량 측정 |
+
+---
+
+## Appendix
+
+### A. 네트워크 접속 정보
+- **서버**: 10.10.100.122 (GGPWSOP)
+- **경로**: `\\GGPWSOP\docker\GGPNAs\ARCHIVE`
+- **인증**: GGP / !@QW12qw
+
+### B. 참조 문서
+- FFprobe 공식 문서: https://ffmpeg.org/ffprobe.html
+- MediaInfo 라이브러리: https://mediaarea.net/en/MediaInfo
+
+### C. 용어 정의
+| 용어 | 정의 |
+|------|------|
+| OTT | Over-The-Top, 인터넷 기반 미디어 스트리밍 서비스 |
+| 카탈로그 | 콘텐츠 메타데이터 모음 |
+| 트랜스코딩 | 미디어 포맷/코덱 변환 |
+
+---
+
+**작성일**: 2025-11-27
+**작성자**: Claude (AI Assistant)
+**버전**: 1.0.0

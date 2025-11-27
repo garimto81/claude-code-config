@@ -1,0 +1,125 @@
+flowchart TD
+    ARCHIVE["📁 ARCHIVE"]
+
+    ARCHIVE --> WSOP["📁 WSOP"]
+    ARCHIVE --> HCL["📁 HCL"]
+    ARCHIVE --> PAD["📁 PAD"]
+    ARCHIVE --> MPP["📁 MPP"]
+    ARCHIVE --> GGMillions["📁 GGMillions"]
+
+    %% WSOP 하위
+    WSOP --> PRE2016["📁 WSOP ARCHIVE (PRE-2016)"]
+    WSOP --> WSOP_BR["📁 WSOP-BR"]
+    WSOP --> WSOP_C["📁 WSOP-C"]
+    WSOP --> WSOP_SC["📁 WSOP-SC"]
+
+    %% PRE-2016 하위
+    PRE2016 --> Y2003_2010["📁 WSOP Archive (2003-2010)"]
+    PRE2016 --> Y2011_2016["📁 WSOP Archive (2011-2016)"]
+    PRE2016 --> Y1973_2002["📁 WSOP Archive (1973-2002)"]
+
+    %% 2003-2010 하위
+    Y2003_2010 --> W2003["📁 WSOP 2003"]
+    Y2003_2010 --> W2004["📁 WSOP 2004"]
+    Y2003_2010 --> W2005["📁 WSOP 2005"]
+    Y2003_2010 --> W2006["📁 WSOP 2006"]
+    Y2003_2010 --> W2007["📁 WSOP 2007"]
+    Y2003_2010 --> W2008["📁 WSOP 2008"]
+    Y2003_2010 --> W2009["📁 WSOP 2009"]
+    Y2003_2010 --> W2010["📁 WSOP 2010"]
+
+    %% 2004 하위
+    W2004 --> W2004_MXF["📁 MXFs"]
+    W2004 --> W2004_MOV["📁 MOVs"]
+    W2004 --> W2004_GEN["📁 Generics"]
+
+    %% 2005 하위
+    W2005 --> W2005_MXF["📁 MXFs"]
+    W2005 --> W2005_MOV["📁 MOVs"]
+    W2005 --> W2005_GEN["📁 Generic"]
+
+    %% 2009, 2010 하위
+    W2009 --> W2009_M["📁 Masters"]
+    W2010 --> W2010_M["📁 Masters"]
+
+    %% 2011-2016 하위
+    Y2011_2016 --> W2011["📁 WSOP 2011"]
+    Y2011_2016 --> W2012["📁 WSOP 2012"]
+    Y2011_2016 --> W2013["📁 WSOP 2013"]
+    Y2011_2016 --> W2014["📁 WSOP 2014"]
+    Y2011_2016 --> W2015["📁 WSOP 2015"]
+    Y2011_2016 --> W2016["📁 WSOP 2016"]
+
+    %% 2015, 2016 하위
+    W2015 --> W2015_ME["📁 Main Event MOVs"]
+    W2016 --> W2016_MXF["📁 Main Event MXFs"]
+
+    %% 1973-2002 하위
+    Y1973_2002 --> Y1981["📁 1981"]
+    Y1973_2002 --> Y1983["📁 1983"]
+    Y1973_2002 --> Y1987["📁 1987"]
+    Y1973_2002 --> Y1988["📁 1988"]
+    Y1973_2002 --> Y1989["📁 1989"]
+    Y1973_2002 --> Y1993["📁 1993"]
+    Y1973_2002 --> Y1995["📁 1995"]
+    Y1973_2002 --> Y1997["📁 1997"]
+    Y1973_2002 --> Y1998["📁 1998"]
+    Y1973_2002 --> Y2002["📁 2002"]
+
+    %% WSOP-BR 하위
+    WSOP_BR --> EUROPE["📁 WSOP-EUROPE"]
+    WSOP_BR --> PARADISE["📁 WSOP-PARADISE"]
+    WSOP_BR --> LASVEGAS["📁 WSOP-LAS VEGAS"]
+
+    %% EUROPE 하위
+    EUROPE --> EU2024["📁 2024 WSOP-Europe"]
+    EUROPE --> EU2025["📁 2025 WSOP-Europe"]
+
+    EU2025 --> EU2025_ME["📁 2025 WSOP-EUROPE MAIN EVENT"]
+    EU2025 --> EU2025_MS["📁 2025 WSOP-EUROPE 2K MONSTERSTACK FINAL"]
+    EU2025 --> EU2025_PLO["📁 2025 WSOP-EUROPE 10K PLO MY.BO FINAL"]
+
+    EU2025_ME --> EU2025_ME_NC["📁 NO COMMENTARY WITH GRAPHICS VER"]
+    EU2025_ME_NC --> EU2025_D1A["📁 Day 1 A"]
+    EU2025_ME_NC --> EU2025_D1B["📁 Day 1 B"]
+    EU2025_ME_NC --> EU2025_D2["📁 Day 2"]
+    EU2025_ME_NC --> EU2025_D3["📁 Day 3"]
+    EU2025_ME_NC --> EU2025_D4["📁 Day 4"]
+
+    %% PARADISE 하위
+    PARADISE --> PAR2023["📁 2023 WSOP-PARADISE"]
+    PARADISE --> PAR2024["📁 2024 WSOP-PARADISE SUPER MAIN EVENT"]
+
+    %% LAS VEGAS 하위
+    LASVEGAS --> LV2024["📁 2024 WSOP-LAS VEGAS (PokerGo Clip)"]
+    LASVEGAS --> LV2025["📁 2025 WSOP-LAS VEGAS"]
+
+    %% WSOP-C 하위
+    WSOP_C --> WSOP_C_LA["📁 2024 WSOP-C LA"]
+    WSOP_C_LA --> WSOP_C_LA_STR["📁 2024 WSOP-C LA STREAM"]
+    WSOP_C_LA --> WSOP_C_LA_SUB["📁 2024 WSOP-C LA SUBCLIP"]
+
+    %% WSOP-SC 하위
+    WSOP_SC --> SC2025["📁 2025 WSOP-SC (Cyprus)"]
+    SC2025 --> SC2025_ME["📁 $5M GTD WSOP Super Circuit Cyprus Main Event 2025"]
+
+    %% HCL 하위
+    HCL --> HCL2025["📁 2025"]
+    HCL --> HCL_CLIP["📁 HCL Poker Clip"]
+
+    %% PAD 하위
+    PAD --> PAD_S12["📁 PAD S12"]
+    PAD --> PAD_S13["📁 PAD S13"]
+
+    %% MPP 하위
+    MPP --> MPP_GF["📁 $2M GTD $2K Luxon Pay Grand Final"]
+    MPP --> MPP_ME["📁 $5M GTD $5K MPP Main Event"]
+    MPP --> MPP_MB["📁 $1M GTD $1K PokerOK Mystery Bounty"]
+
+    %% 스타일
+    style ARCHIVE fill:#1a1a2e,color:#fff
+    style WSOP fill:#16213e,color:#fff
+    style HCL fill:#e94560,color:#fff
+    style PAD fill:#533483,color:#fff
+    style MPP fill:#0f3460,color:#fff
+    style GGMillions fill:#1f4068,color:#fff

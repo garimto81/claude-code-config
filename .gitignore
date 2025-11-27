@@ -70,7 +70,7 @@ nul
 .agent-quality-v2.jsonl
 
 # 구버전 문서들
-create-prd.md
+
 generate-tasks.md
 process-task-list.md
 SUMMARY.md

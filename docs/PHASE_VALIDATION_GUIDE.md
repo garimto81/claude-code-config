@@ -24,32 +24,22 @@ cc-sdd 프로젝트의 검증 게이트 시스템을 claude01에 통합하여, P
 
 ## 🚀 빠른 시작
 
-### 1. 스크립트 권한 부여 (최초 1회)
+### 1. 스크립트 실행 (Windows)
 
-```bash
-# Unix/macOS
-chmod +x scripts/validate-*.sh scripts/validate-test-pairing.py
+Windows 환경에서는 PowerShell 스크립트(`.ps1`)를 사용합니다.
 
-# Windows (Git Bash)
-# 권한 자동 설정됨
-```
-
-### 2. 수동 검증 실행
-
-```bash
+```powershell
 # Phase 0 검증 (PRD 존재?)
-bash scripts/validate-phase-0.sh 0005
+.\scripts\validate-phase-0.ps1 0005
 
 # Phase 0.5 검증 (Task List 생성?)
-bash scripts/validate-phase-0.5.sh 0005
+.\scripts\validate-phase-0.5.ps1 0005
 
 # Phase 1 검증 (1:1 테스트 페어링?)
-bash scripts/validate-phase-1.sh
-# 또는 Python 버전
-python scripts/validate-test-pairing.py
+.\scripts\validate-phase-1.ps1
 ```
 
-### 3. 자동 검증 (GitHub Actions)
+### 2. 자동 검증 (GitHub Actions)
 
 PR 생성 시 자동 실행:
 ```bash
@@ -65,7 +55,7 @@ gh pr create --title "feat: Add repo analyzer (v0.1.0) [PRD-0005]"
 
 ## 📜 검증 스크립트 상세
 
-### Phase 0: `validate-phase-0.sh`
+### Phase 0: `validate-phase-0.ps1`
 
 **검증 항목**:
 - ✅ PRD 파일 존재: `tasks/prds/NNNN-prd-*.md`
@@ -74,20 +64,11 @@ gh pr create --title "feat: Add repo analyzer (v0.1.0) [PRD-0005]"
 - ✅ 최소 50줄 이상 (권장)
 
 **실행**:
-```bash
-bash scripts/validate-phase-0.sh 0005
+```powershell
+.\scripts\validate-phase-0.ps1 0005
 ```
 
-**출력 예시**:
-```
-✅ Phase 0 검증 통과
-   PRD 파일: tasks/prds/0005-prd-repo-analyzer.md
-   라인 수: 949
-```
-
----
-
-### Phase 0.5: `validate-phase-0.5.sh`
+### Phase 0.5: `validate-phase-0.5.ps1`
 
 **검증 항목**:
 - ✅ Task List 존재: `tasks/NNNN-tasks-*.md`
@@ -96,62 +77,33 @@ bash scripts/validate-phase-0.sh 0005
 - ✅ 진행률 계산
 
 **실행**:
-```bash
-bash scripts/validate-phase-0.5.sh 0005
+```powershell
+.\scripts\validate-phase-0.5.ps1 0005
 ```
 
-**출력 예시**:
-```
-✅ Phase 0.5 검증 통과
-   Task List: tasks/0005-tasks-repo-analyzer.md
-   총 Task: 21
-   완료: 5
-   진행률: 19%
-```
-
----
-
-### Phase 1: `validate-phase-1.sh` + `validate-test-pairing.py`
+### Phase 1: `validate-phase-1.ps1`
 
 **검증 항목**:
 - ✅ Python: `src/foo.py` → `tests/test_foo.py`
 - ✅ JS/TS: `src/foo.js` → `tests/foo.test.js`
 - ✅ 모든 구현 파일에 대응 테스트 필수
 
-**실행 (Bash)**:
-```bash
-bash scripts/validate-phase-1.sh
+**실행**:
+```powershell
+.\scripts\validate-phase-1.ps1
 ```
 
-**실행 (Python - 더 상세한 출력)**:
-```bash
-python scripts/validate-test-pairing.py
-```
+### Phase 4: `validate-phase-4.ps1` (Git Ops)
 
-**출력 예시 (성공)**:
-```
-🔍 1:1 테스트 페어링 검증 시작
+**검증 항목**:
+- ✅ Git 설치 확인
+- ✅ Uncommitted Changes 확인 (Clean Tree)
+- ✅ Remote Sync 확인 (Push/Pull 필요 여부)
+- ✅ PR 상태 확인 (Optional, gh cli 필요)
 
-✅ Python 파일 검증 완료: 4개
-✅ JavaScript/TypeScript 파일 검증 완료: 3개
-
-✅ 테스트 페어링 검증 통과
-검증된 파일: 7개
-```
-
-**출력 예시 (실패)**:
-```
-❌ 테스트 페어링 검증 실패
-
-다음 파일에 대응하는 테스트 파일이 없습니다:
-
-  ✗ src/github_fetcher.py → tests/test_github_fetcher.py
-  ✗ src/analyzer.py → tests/test_analyzer.py
-
-📝 1:1 테스트 페어링 규칙:
-  - 모든 구현 파일은 대응 테스트 파일 필요
-  - Python: src/foo.py → tests/test_foo.py
-  - JS/TS: src/foo.js → tests/foo.test.js
+**실행**:
+```powershell
+.\scripts\validate-phase-4.ps1
 ```
 
 ---
@@ -179,23 +131,6 @@ graph TD
     H --> I[PR에 결과 코멘트]
 ```
 
-### PR 코멘트 예시
-
-```markdown
-## 🔍 Phase 검증 결과
-
-**PRD 번호**: 0005
-
-| Phase | 상태 |
-|-------|------|
-| Phase 0 (PRD) | ✅ 통과 |
-| Phase 0.5 (Tasks) | ✅ 통과 |
-| Phase 1 (Tests) | ❌ 실패 |
-
----
-🤖 Automated by claude01 Phase Validation
-```
-
 ---
 
 ## 🛠️ 통합 워크플로우
@@ -204,31 +139,34 @@ graph TD
 
 ```bash
 # 1. PRD 작성
-vim tasks/prds/0006-prd-new-feature.md
+# 템플릿 복사 후 작성
+copy tasks\prds\TEMPLATE.md tasks\prds\0006-prd-new-feature.md
 
 # 2. Phase 0 검증
-bash scripts/validate-phase-0.sh 0006
+.\scripts\validate-phase-0.ps1 0006
 # ✅ 통과 확인
 
 # 3. Task List 생성
 python scripts/generate_tasks.py tasks/prds/0006-*.md
 
 # 4. Phase 0.5 검증
-bash scripts/validate-phase-0.5.sh 0006
+.\scripts\validate-phase-0.5.ps1 0006
 # ✅ 통과 확인
 
 # 5. 브랜치 생성 (Task 0.0)
 git checkout -b feature/PRD-0006-new-feature
 
 # 6. 코딩 시작
-vim src/new_feature.py
-vim tests/test_new_feature.py  # 반드시 함께 작성!
+# src/new_feature.py 작성
+# tests/test_new_feature.py 작성 (반드시 함께!)
 
 # 7. Phase 1 검증
-python scripts/validate-test-pairing.py
+.\scripts\validate-phase-1.ps1
 # ✅ 통과 확인
 
-# 8. PR 생성 (자동 검증 트리거)
+# 8. Phase 4 검증 및 PR 생성
+.\scripts\validate-phase-4.ps1
+git commit -m "feat: Add new feature"
 git push -u origin feature/PRD-0006-new-feature
 gh pr create
 ```

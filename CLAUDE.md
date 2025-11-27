@@ -6,7 +6,6 @@
 1.  **Language**:
     *   **User-facing**: Korean (한글) - 답변, 문서, 커밋 메시지 설명 등.
     *   **Technical**: English - 코드, 변수명, 기술 용어(GitHub, API 등).
-    *   **최우선 규칙**: *항상 한글로 말할 것* — 전역 지침에서 가장 중요한 핵심 문장으로 간주하며 어느 상황에서도 최우선으로 적용한다.
 2.  **Path Handling**:
     *   ALWAYS use **Absolute Paths** for file operations.
     *   Verify file existence before reading/writing.
@@ -33,7 +32,7 @@ Follow this pipeline strictly. Each phase is the **Cause** for the next phase's 
 | **2** | Impl Code | **Verification**<br>Run tests & check coverage. | Pass All Tests | `scripts/validate-phase-2.ps1` |
 | **2.5** | Verified Code | **Review**<br>Code/Design/Security review. | Review Approval | `/pragmatic-code-review` |
 | **3** | Approval | **Versioning**<br>Bump version & update changelog. | `CHANGELOG.md` | `scripts/validate-phase-3.ps1` |
-| **4** | Versioned Code | **Git Ops**<br>Commit & Create PR. | Git Commit / PR | `scripts/validate-phase-5.ps1` |
+| **4** | Versioned Code | **Git Ops**<br>Commit & Create PR. | Git Commit / PR | `scripts/validate-phase-4.ps1` |
 | **5** | PR | **E2E & Security**<br>Full system check. | Security Report | `scripts/validate-phase-5.ps1` |
 | **6** | Passed PR | **Deployment**<br>Production release. | Deployed Artifact | `scripts/validate-phase-6.ps1` |
 
@@ -48,6 +47,7 @@ Select the tool based on your current mode.
 ### 🧠 Planning (Phase 0 - 0.5)
 *   **New Feature**: `/create-prd` → Interactive PRD creation.
 *   **Plan Update**: `/aiden-plan` → Update implementation plan.
+*   **Status Check**: `/status` → `scripts/phase-status.ps1`
 
 ### 💻 Coding (Phase 1)
 *   **TDD Start**: `/tdd` → Generate test boilerplate first.
@@ -68,6 +68,7 @@ Select the tool based on your current mode.
 
 ## 4. 🛠️ Toolchain Reference
 
+*   **Status Check**: `scripts/phase-status.ps1`
 *   **Plugin Manager**: `python scripts/plugin_manager.py`
 *   **Universal Validator**: `python scripts/validate_phase_universal.py`
 *   **Windows Native**: `scripts/*.ps1` (Preferred on Windows)

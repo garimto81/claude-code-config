@@ -18,6 +18,75 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class MediaInfoRecord:
+    """미디어 정보 레코드"""
+    id: Optional[int] = None
+    file_id: Optional[int] = None
+    file_path: str = ""
+
+    # 비디오 정보
+    video_codec: Optional[str] = None
+    video_codec_long: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    framerate: Optional[float] = None
+    video_bitrate: Optional[int] = None
+
+    # 오디오 정보
+    audio_codec: Optional[str] = None
+    audio_codec_long: Optional[str] = None
+    audio_channels: Optional[int] = None
+    audio_sample_rate: Optional[int] = None
+    audio_bitrate: Optional[int] = None
+
+    # 일반 정보
+    duration_seconds: Optional[float] = None
+    bitrate: Optional[int] = None
+    container_format: Optional[str] = None
+    format_long_name: Optional[str] = None
+    file_size: Optional[int] = None
+
+    # 스트림 카운트
+    has_video: bool = False
+    has_audio: bool = False
+    video_stream_count: int = 0
+    audio_stream_count: int = 0
+    subtitle_stream_count: int = 0
+
+    # 메타데이터
+    title: Optional[str] = None
+    creation_time: Optional[str] = None
+
+    # 상태
+    extraction_status: str = "pending"
+    extraction_error: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    @property
+    def resolution(self) -> Optional[str]:
+        if self.width and self.height:
+            return f"{self.width}x{self.height}"
+        return None
+
+    @property
+    def resolution_label(self) -> Optional[str]:
+        if not self.height:
+            return None
+        if self.height >= 2160:
+            return "4K"
+        elif self.height >= 1440:
+            return "1440p"
+        elif self.height >= 1080:
+            return "1080p"
+        elif self.height >= 720:
+            return "720p"
+        elif self.height >= 480:
+            return "480p"
+        else:
+            return f"{self.height}p"
+
+
+@dataclass
 class FileRecord:
     """파일 레코드 데이터 클래스"""
     id: Optional[int] = None
@@ -151,6 +220,44 @@ class Database:
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+        # 미디어 정보 테이블 (Issue #8)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS media_info (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_id INTEGER REFERENCES files(id),
+                file_path TEXT,
+                video_codec TEXT,
+                video_codec_long TEXT,
+                width INTEGER,
+                height INTEGER,
+                framerate REAL,
+                video_bitrate INTEGER,
+                audio_codec TEXT,
+                audio_codec_long TEXT,
+                audio_channels INTEGER,
+                audio_sample_rate INTEGER,
+                audio_bitrate INTEGER,
+                duration_seconds REAL,
+                bitrate INTEGER,
+                container_format TEXT,
+                format_long_name TEXT,
+                file_size INTEGER,
+                has_video INTEGER DEFAULT 0,
+                has_audio INTEGER DEFAULT 0,
+                video_stream_count INTEGER DEFAULT 0,
+                audio_stream_count INTEGER DEFAULT 0,
+                subtitle_stream_count INTEGER DEFAULT 0,
+                title TEXT,
+                creation_time TEXT,
+                extraction_status TEXT DEFAULT 'pending',
+                extraction_error TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(file_id)
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_media_file_id ON media_info(file_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_media_status ON media_info(extraction_status)")
 
         conn.commit()
         logger.info(f"Database schema ensured at {self.db_path}")
@@ -454,9 +561,202 @@ class Database:
         cursor.execute("DELETE FROM files")
         cursor.execute("DELETE FROM scan_checkpoints")
         cursor.execute("DELETE FROM scan_stats")
+        cursor.execute("DELETE FROM media_info")
 
         conn.commit()
         logger.warning("All data cleared from database")
+
+    # === 미디어 정보 (Issue #8) ===
+
+    def insert_media_info(self, info) -> int:
+        """미디어 정보 삽입
+
+        Args:
+            info: MediaInfo 또는 MediaInfoRecord 객체
+
+        Returns:
+            삽입된 레코드 ID
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT OR REPLACE INTO media_info (
+                file_id, file_path, video_codec, video_codec_long,
+                width, height, framerate, video_bitrate,
+                audio_codec, audio_codec_long, audio_channels,
+                audio_sample_rate, audio_bitrate, duration_seconds,
+                bitrate, container_format, format_long_name, file_size,
+                has_video, has_audio, video_stream_count, audio_stream_count,
+                subtitle_stream_count, title, creation_time,
+                extraction_status, extraction_error
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            info.file_id,
+            info.file_path,
+            info.video_codec,
+            getattr(info, 'video_codec_long', None),
+            info.width,
+            info.height,
+            info.framerate,
+            getattr(info, 'video_bitrate', None),
+            info.audio_codec,
+            getattr(info, 'audio_codec_long', None),
+            info.audio_channels,
+            info.audio_sample_rate,
+            getattr(info, 'audio_bitrate', None),
+            info.duration_seconds,
+            info.bitrate,
+            info.container_format,
+            getattr(info, 'format_long_name', None),
+            getattr(info, 'file_size', None),
+            1 if info.has_video else 0,
+            1 if info.has_audio else 0,
+            info.video_stream_count,
+            info.audio_stream_count,
+            info.subtitle_stream_count,
+            getattr(info, 'title', None),
+            getattr(info, 'creation_time', None),
+            info.extraction_status,
+            getattr(info, 'extraction_error', None),
+        ))
+
+        conn.commit()
+        return cursor.lastrowid
+
+    def get_media_info_by_file_id(self, file_id: int) -> Optional[MediaInfoRecord]:
+        """파일 ID로 미디어 정보 조회"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM media_info WHERE file_id = ?", (file_id,))
+        row = cursor.fetchone()
+
+        if row:
+            return MediaInfoRecord(
+                id=row['id'],
+                file_id=row['file_id'],
+                file_path=row['file_path'],
+                video_codec=row['video_codec'],
+                video_codec_long=row['video_codec_long'],
+                width=row['width'],
+                height=row['height'],
+                framerate=row['framerate'],
+                video_bitrate=row['video_bitrate'],
+                audio_codec=row['audio_codec'],
+                audio_codec_long=row['audio_codec_long'],
+                audio_channels=row['audio_channels'],
+                audio_sample_rate=row['audio_sample_rate'],
+                audio_bitrate=row['audio_bitrate'],
+                duration_seconds=row['duration_seconds'],
+                bitrate=row['bitrate'],
+                container_format=row['container_format'],
+                format_long_name=row['format_long_name'],
+                file_size=row['file_size'],
+                has_video=bool(row['has_video']),
+                has_audio=bool(row['has_audio']),
+                video_stream_count=row['video_stream_count'],
+                audio_stream_count=row['audio_stream_count'],
+                subtitle_stream_count=row['subtitle_stream_count'],
+                title=row['title'],
+                creation_time=row['creation_time'],
+                extraction_status=row['extraction_status'],
+                extraction_error=row['extraction_error'],
+                created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None,
+            )
+        return None
+
+    def has_media_info(self, file_id: int) -> bool:
+        """미디어 정보 존재 여부 확인"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT 1 FROM media_info WHERE file_id = ? AND extraction_status = 'success' LIMIT 1",
+            (file_id,)
+        )
+        return cursor.fetchone() is not None
+
+    def get_media_info_count(self, status: Optional[str] = None) -> int:
+        """미디어 정보 수 조회"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        if status:
+            cursor.execute(
+                "SELECT COUNT(*) FROM media_info WHERE extraction_status = ?",
+                (status,)
+            )
+        else:
+            cursor.execute("SELECT COUNT(*) FROM media_info")
+
+        return cursor.fetchone()[0]
+
+    def get_media_statistics(self) -> dict:
+        """미디어 통계 조회"""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        stats = {
+            'total': 0,
+            'successful': 0,
+            'failed': 0,
+            'by_resolution': {},
+            'by_codec': {},
+            'total_duration_seconds': 0,
+        }
+
+        # 추출 상태별 카운트
+        cursor.execute("""
+            SELECT extraction_status, COUNT(*) as count
+            FROM media_info
+            GROUP BY extraction_status
+        """)
+        for row in cursor.fetchall():
+            if row['extraction_status'] == 'success':
+                stats['successful'] = row['count']
+            elif row['extraction_status'] == 'failed':
+                stats['failed'] = row['count']
+            stats['total'] += row['count']
+
+        # 해상도별 분포
+        cursor.execute("""
+            SELECT
+                CASE
+                    WHEN height >= 2160 THEN '4K'
+                    WHEN height >= 1440 THEN '1440p'
+                    WHEN height >= 1080 THEN '1080p'
+                    WHEN height >= 720 THEN '720p'
+                    WHEN height >= 480 THEN '480p'
+                    ELSE 'Other'
+                END as resolution,
+                COUNT(*) as count
+            FROM media_info
+            WHERE extraction_status = 'success' AND height IS NOT NULL
+            GROUP BY resolution
+        """)
+        for row in cursor.fetchall():
+            stats['by_resolution'][row['resolution']] = row['count']
+
+        # 코덱별 분포
+        cursor.execute("""
+            SELECT video_codec, COUNT(*) as count
+            FROM media_info
+            WHERE extraction_status = 'success' AND video_codec IS NOT NULL
+            GROUP BY video_codec
+        """)
+        for row in cursor.fetchall():
+            stats['by_codec'][row['video_codec']] = row['count']
+
+        # 총 재생 시간
+        cursor.execute("""
+            SELECT COALESCE(SUM(duration_seconds), 0) as total
+            FROM media_info
+            WHERE extraction_status = 'success'
+        """)
+        stats['total_duration_seconds'] = cursor.fetchone()['total']
+
+        return stats
 
     def __enter__(self):
         return self

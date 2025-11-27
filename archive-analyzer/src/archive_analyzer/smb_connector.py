@@ -270,6 +270,32 @@ class SMBConnector:
             logger.error(f"Failed to read file {full_path}: {e}")
             raise
 
+    @contextmanager
+    def open_file(self, path: str, mode: str = "rb"):
+        """파일 열기 컨텍스트 매니저
+
+        Args:
+            path: 상대 경로 또는 전체 경로
+            mode: 파일 모드
+
+        Yields:
+            파일 객체
+        """
+        self._ensure_connected()
+
+        # 전체 경로인지 확인
+        if path.startswith("\\\\") or path.startswith("//"):
+            full_path = path
+        else:
+            full_path = self._build_path(path)
+
+        try:
+            with open_file(full_path, mode=mode) as f:
+                yield f
+        except Exception as e:
+            logger.error(f"Failed to open file {full_path}: {e}")
+            raise
+
     def get_connection_status(self) -> dict:
         """연결 상태 정보 반환"""
         return {

@@ -3,7 +3,14 @@
 > 생성일: 2025-11-27
 > 총 용량: 18.03 TB | 총 파일: 1,418개
 
+---
+
 ## 1. 전체 구조 (Mindmap)
+
+![Mindmap](diagrams/01_mindmap.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 mindmap
@@ -47,8 +54,16 @@ mindmap
       Mystery Bounty<br/>27 GB
     GGMillions<br/>18 GB
 ```
+</details>
+
+---
 
 ## 2. 용량 분포 (Pie Chart)
+
+![Content Distribution](diagrams/02_pie_content.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 pie showData
@@ -61,8 +76,16 @@ pie showData
     "WSOP-C/SC" : 161
     "GGMillions" : 18
 ```
+</details>
+
+---
 
 ## 3. 파일 확장자 분포
+
+![Extension Distribution](diagrams/03_pie_extension.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 pie showData
@@ -74,8 +97,16 @@ pie showData
     ".mkv" : 18
     "기타" : 6
 ```
+</details>
+
+---
 
 ## 4. 상세 폴더 구조 (Flowchart)
+
+![Folder Structure](diagrams/04_flowchart.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 flowchart TD
@@ -109,34 +140,16 @@ flowchart TD
     style PAD fill:#533483
     style MPP fill:#0f3460
 ```
+</details>
 
-## 5. 연도별 콘텐츠 타임라인
+---
 
-```mermaid
-timeline
-    title WSOP 아카이브 연도별 분포
-    section 1973-2002
-        1983-1998 : 클래식 영상 1.2 TB
-        2002 : 450 GB
-    section 2003-2010
-        2003 : 287 GB
-        2004 : 841 GB
-        2005 : 1.19 TB
-        2006 : 411 GB
-        2007 : 1.56 TB
-        2008 : 194 GB
-        2009 : 2.78 TB
-        2010 : 2.85 TB
-    section 2011-2016
-        2011-2014 : 538 GB
-        2015 : 748 GB
-        2016 : 470 GB
-    section 2024-2025
-        2024 : WSOP-C LA, PARADISE
-        2025 : EUROPE, Cyprus, HCL
-```
+## 5. 파일 유형별 상세
 
-## 6. 파일 유형별 상세
+![File Types](diagrams/05_filetype.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 flowchart LR
@@ -159,8 +172,16 @@ flowchart LR
     style OTHER fill:#8b4513
     style MXF fill:#ff6b6b
 ```
+</details>
 
-## 7. 주요 폴더 용량 순위 (Top 10)
+---
+
+## 6. 주요 폴더 용량 순위 (Top 10)
+
+![Bar Chart](diagrams/06_bar_chart.png)
+
+<details>
+<summary>Mermaid 코드 보기</summary>
 
 ```mermaid
 xychart-beta
@@ -169,6 +190,7 @@ xychart-beta
     y-axis "용량 (TB)" 0 --> 3
     bar [2.85, 2.78, 1.56, 0.73, 0.72, 0.58, 0.49, 0.44, 0.40, 0.39]
 ```
+</details>
 
 ---
 
@@ -183,3 +205,16 @@ xychart-beta
 | 최대 폴더 | WSOP 2010 Masters (2.85 TB) |
 
 > **참고**: .mxf 파일은 프로페셔널 방송용 비디오 포맷으로, video 유형으로 재분류 권장
+
+---
+
+## 이미지 파일 목록
+
+| 파일명 | 설명 |
+|--------|------|
+| `diagrams/01_mindmap.png` | 전체 폴더 구조 마인드맵 |
+| `diagrams/02_pie_content.png` | 콘텐츠별 용량 분포 |
+| `diagrams/03_pie_extension.png` | 파일 확장자별 용량 분포 |
+| `diagrams/04_flowchart.png` | 상세 폴더 구조 플로우차트 |
+| `diagrams/05_filetype.png` | 파일 유형별 상세 |
+| `diagrams/06_bar_chart.png` | 폴더 용량 순위 차트 |

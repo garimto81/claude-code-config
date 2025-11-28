@@ -357,9 +357,38 @@ Examples:
         validator = Phase2Validator(verbose=args.verbose)
         result = validator.validate(min_coverage=args.coverage)
 
+    elif args.phase == "2":
+        validator = Phase2Validator(verbose=args.verbose)
+        result = validator.validate(min_coverage=args.coverage)
+
+    elif args.phase == "4":
+        # Phase 4: Git Ops (Delegated to PowerShell on Windows, or simple check here)
+        print("\n🔍 Validating Phase 4 (Git Ops)...")
+        if sys.platform == "win32":
+            # Delegate to PowerShell script if available
+            ps_script = pathlib.Path("scripts/validate-phase-4.ps1")
+            if ps_script.exists():
+                print("   Delegating to validate-phase-4.ps1...")
+                res = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", str(ps_script)])
+                sys.exit(res.returncode)
+            else:
+                print("❌ scripts/validate-phase-4.ps1 not found")
+                sys.exit(1)
+        else:
+            # Simple cross-platform check
+            # 1. Check for uncommitted changes
+            res = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+            if res.stdout.strip():
+                print("❌ Uncommitted changes detected")
+                print(res.stdout)
+                sys.exit(1)
+            else:
+                print("✅ Working directory clean")
+                result = ValidationResult.PASS
+
     else:
         print(f"❌ Phase {args.phase} validation not yet implemented")
-        print("   Available: 0, 0.5, 1, 2")
+        print("   Available: 0, 0.5, 1, 2, 4")
         sys.exit(1)
 
     # Print final result

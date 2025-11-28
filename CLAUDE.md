@@ -90,6 +90,7 @@ Available in `.claude/commands/`:
 | `/analyze-code` | Generate Mermaid class diagram |
 | `/optimize` | Performance analysis |
 | `/todo` | Manage project todos |
+| `/issues` | GitHub 이슈 목록 및 상태 조회 |
 | `/issue` | **[Multi-Agent]** 병렬 솔루션 검색 |
 | `/issue-update` | 실패 분석 및 새 해결책 제안 |
 | `/search` | 웹/GitHub 검색 및 추천 |

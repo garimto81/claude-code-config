@@ -53,57 +53,69 @@ python scripts/plugin_manager.py
 
 ---
 
-## 3. Workflow Pipeline
+## 3. Causal Workflow Pipeline
 
-Strict phase-gate workflow. Each phase must pass validation before proceeding.
+Strict phase-gate workflow. Each phase is the **Cause** for the next phase's **Effect**.
 
-| Phase | Action | Output | Validator |
-| :--- | :--- | :--- | :--- |
-| **0** | PRD Creation (8 sections) | `tasks/prds/NNNN-*.md` | `validate-phase-0.ps1 NNNN` |
-| **0.5** | Task Breakdown | `tasks/NNNN-tasks-*.md` | `validate-phase-0.5.ps1 NNNN` |
-| **1** | Implementation + 1:1 tests | `src/*`, `tests/*` | `validate-phase-1.ps1` |
-| **2** | Test & Coverage | All tests pass | `validate-phase-2.ps1` |
-| **2.5** | Code Review | Approval | `/parallel-review` (slash cmd) |
-| **3** | Version Bump | `CHANGELOG.md` | `validate-phase-3.ps1 vX.Y.Z` |
-| **4** | Git Commit/PR | PR Created | `validate-phase-4.ps1` |
-| **5** | E2E & Security | Security Report | `validate-phase-5.ps1` |
-| **6** | Deployment | Released | `validate-phase-6.ps1` |
+| Phase | Input (Cause) | Action (Process) | Output (Effect) | Validator (Gatekeeper) |
+| :--- | :--- | :--- | :--- | :--- |
+| **0** | User Request | PRD Creation (8 sections) | `tasks/prds/NNNN-*.md` | `validate-phase-0.ps1 NNNN` |
+| **0.5** | PRD | Task Breakdown | `tasks/NNNN-tasks-*.md` | `validate-phase-0.5.ps1 NNNN` |
+| **1** | Task List | Implementation + 1:1 tests | `src/*`, `tests/*` | `validate-phase-1.ps1` |
+| **2** | Impl Code | Test & Coverage | All tests pass | `validate-phase-2.ps1` |
+| **2.5** | Verified Code | Code Review | Approval | `/parallel-review` |
+| **3** | Approval | Version Bump | `CHANGELOG.md` | `validate-phase-3.ps1 vX.Y.Z` |
+| **4** | Versioned Code | Git Commit/PR | PR Created | `validate-phase-4.ps1` |
+| **5** | PR | E2E & Security | Security Report | `validate-phase-5.ps1` |
+| **6** | Passed PR | Deployment | Released | `validate-phase-6.ps1` |
 
-> If validation fails, fix in current phase. Do not regress to previous phases.
+> **Feedback Loop**: If validation fails, return to the **Action** step of the *current* phase. Do not regress to previous phases unless requirements change.
 
 ---
 
-## 4. Slash Commands
+## 4. Quick Actions
 
-Available in `.claude/commands/`:
+Select the tool based on your current mode. Commands in `.claude/commands/`.
 
+### 🧠 Planning (Phase 0 - 0.5)
 | Command | Purpose |
 | :--- | :--- |
-| `/create-prd` | Interactive PRD creation (Phase 0) |
-| `/tdd` | TDD workflow - test first (Phase 1) |
+| `/create-prd` | Interactive PRD creation |
+| `/aiden-plan` | 계획 수립 및 문서화 |
+| `/aiden-first` | 작업 시작 시 상세 기록 |
+| `/issues` | GitHub 이슈 목록 조회 |
+
+### 💻 Coding (Phase 1)
+| Command | Purpose |
+| :--- | :--- |
+| `/tdd` | TDD workflow - test first |
 | `/fix-issue` | Structured bug fix workflow |
 | `/check` | Code quality checks |
+| `/parallel-dev` | **[Multi-Agent]** 4-에이전트 병렬 개발 |
+
+### ✅ Verifying (Phase 2 - 2.5)
+| Command | Purpose |
+| :--- | :--- |
+| `/parallel-test` | **[Multi-Agent]** 4-에이전트 병렬 테스트 |
+| `/parallel-review` | **[Multi-Agent]** 4-에이전트 코드 리뷰 |
+| `/optimize` | Performance analysis |
+| `/analyze-code` | Generate Mermaid class diagram |
+
+### 🚀 Ops (Phase 3 - 6)
+| Command | Purpose |
+| :--- | :--- |
 | `/commit` | Conventional commit with emoji |
 | `/changelog` | Update CHANGELOG.md |
 | `/create-pr` | Create GitHub PR |
 | `/create-docs` | Generate documentation |
-| `/analyze-code` | Generate Mermaid class diagram |
-| `/optimize` | Performance analysis |
-| `/todo` | Manage project todos |
-| `/issues` | GitHub 이슈 목록 및 상태 조회 |
+
+### 🔍 Research & Documentation
+| Command | Purpose |
+| :--- | :--- |
 | `/issue` | **[Multi-Agent]** 병렬 솔루션 검색 |
 | `/issue-update` | 실패 분석 및 새 해결책 제안 |
 | `/search` | 웹/GitHub 검색 및 추천 |
 | `/parallel-research` | **[Multi-Agent]** 병렬 리서치 |
-| `/parallel-review` | **[Multi-Agent]** 4-에이전트 코드 리뷰 |
-| `/parallel-dev` | **[Multi-Agent]** 4-에이전트 병렬 개발 (Architect/Coder/Tester/Docs) |
-| `/parallel-test` | **[Multi-Agent]** 4-에이전트 병렬 테스트 (Unit/Integration/E2E/Security) |
-
-### Aiden Commands (작업 문서화)
-| Command | Purpose |
-| :--- | :--- |
-| `/aiden-first` | 작업 시작 시 MD 파일에 상세 기록 |
-| `/aiden-plan` | 계획 수립 및 문서화 |
 | `/aiden-update` | 작업 진행 상황 업데이트 |
 | `/aiden-summary` | 작업 요약 생성 |
 | `/aiden-endtoend` | 전체 프로세스 문서화 |
@@ -197,18 +209,52 @@ python src/agents/test_workflow.py "src/api" "전체"
 
 ---
 
-## 8. Quick Reference
+## 8. Agent Evolution System
+
+Agent 사용 추적 및 피드백 기반 자동 개선 시스템 (Langfuse 기반).
+
+```bash
+# 시작
+cd .claude/evolution
+cp .env.example .env && docker-compose up -d
+
+# 대시보드: http://localhost:3000
+```
+
+```python
+# Agent 추적
+from .claude.evolution.scripts.track_agent_usage import get_tracker
+tracker = get_tracker()
+
+with tracker.track("context7-engineer", phase="Phase 0", task="Verify docs"):
+    result = agent.run()
+
+tracker.collect_feedback(agent="context7-engineer", rating=5, effectiveness=0.9)
+```
+
+| 스크립트 | 용도 |
+| :--- | :--- |
+| `track_agent_usage.py` | Agent 실행 추적 |
+| `collect_feedback.py` | CLI 피드백 수집 |
+| `analyze_quality.py` | 품질 분석 |
+| `llm_judge.py` | LLM 기반 평가 |
+
+상세 가이드: `docs/AGENT_EVOLUTION_GUIDE.md`, `.claude/evolution/README.md`
+
+---
+
+## 9. Quick Reference
 
 - **Bypass Mode**: `.\start-claude-bypass.bat` (skips permission prompts)
 - **Python**: 3.11+ required
 - **Dependencies**: `anthropic>=0.40.0`, `langgraph`, `langchain-anthropic`
 - **Test markers**: `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.slow`
 - **Agent count**: 33 agents in `.claude/agents/`
-- **Plugins**: 7 active (python-development, javascript-typescript, debugging-toolkit, meta-development, workflow-reviews, phase-0/1/2)
+- **Plugins**: 27 categories in `.claude/plugins/` (ai-ml-tools, backend-development, cicd-automation, cloud-infrastructure, security-scanning, etc.)
 
 ---
 
-## 9. Complex Feature Protocol
+## 10. Complex Feature Protocol
 
 ### Planning First
 복잡한 기능은 코드 작성 전 계획 승인 필수. 계획 미승인 시 구현 금지.

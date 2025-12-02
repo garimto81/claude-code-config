@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. **Language**: 한글 출력. 기술 용어(code, GitHub)는 영어.
 2. **Path**: 절대 경로만 사용. `D:\AI\claude01\...`
 3. **Validation**: Phase 검증 필수. 실패 시 STOP.
+4. **Inbox 체크**: 세션 시작 시 `inbox/`에 `processed/`에 없는 파일 있으면 `inbox/IMPROVE_PROCESS.md` 실행.
 
 **Context**: Windows 10/11, PowerShell, Root: `D:\AI\claude01`
 
@@ -63,6 +64,21 @@ PRE_WORK 승인 후:
    - 문서 수정: 이슈 업데이트 → 직접 커밋 허용
 2. **TDD 순서**: Red → Green → Refactor
 3. **브랜치**: `<type>/issue-<num>-<desc>`
+4. **커밋 타이밍**
+   - 테스트 통과 후 즉시 커밋
+   - 이슈 해결: `fix(scope): Resolve #123 🐛`
+   - 기능 완료: `feat(scope): Add feature ✨`
+   - `/commit` 커맨드 또는 수동 커밋
+   - README.md 수정 시: `version`, `updated` 배지 갱신
+5. **병렬 에이전트 (조건부 자동)**
+
+   | 복잡도 | 기준 | 동작 |
+   |--------|------|------|
+   | 단순 | 파일 ≤2, 변경 <50줄 | 단일 에이전트 |
+   | 중간 | 파일 3-5, 변경 50-200줄 | `/parallel-test` 제안 |
+   | 복잡 | 파일 ≥6, 아키텍처 변경 | `/parallel-dev` 제안 |
+
+   > 복잡도는 PRE_WORK 분석 시 자동 판단. validator는 `haiku` 모델 사용 (비용 최적화)
 
 ### FINAL_CHECK (최종 검증) - 자동
 
@@ -70,7 +86,8 @@ PRE_WORK 승인 후:
 
 1. **E2E 테스트**: Playwright/Cypress 또는 `webapp-testing` 스킬
 2. **100% 통과 필수**: 실패 시 수정 후 재실행 (최대 3회)
-3. **최종 보고서**: 변경사항 + 테스트 결과 + PR 링크
+3. **커밋 & 푸시**: `/commit` → `Closes #<issue>` 포함
+4. **최종 보고서**: 변경사항 + 테스트 결과 + PR 링크
 
 ```
 ## 작업 완료 보고
@@ -155,8 +172,39 @@ pytest tests/ -v -m unit
 .\scripts\phase-status.ps1
 
 # Bypass 모드
-.\start-claude-bypass.bat
+.\start-claude.bat
 ```
+
+### 서브프로젝트 실행
+
+```powershell
+# archive-analyzer (API 서버)
+cd D:\AI\claude01\archive-analyzer
+pip install -e ".[dev,media,search]"
+uvicorn src.archive_analyzer.api:app --reload --port 8000
+
+# archive-analyzer (Docker 동기화)
+docker-compose -f D:\AI\claude01\archive-analyzer\docker-compose.sync.yml up -d
+
+# MeiliSearch 인덱싱
+python D:\AI\claude01\archive-analyzer\scripts\index_to_meilisearch.py
+
+# pokervod.db 동기화
+python D:\AI\claude01\archive-analyzer\scripts\sync_to_pokervod.py --dry-run
+```
+
+### 환경 변수 (필수)
+
+| 변수 | 용도 | 예시 |
+|------|------|------|
+| `ANTHROPIC_API_KEY` | Claude API | `sk-ant-...` |
+| `GITHUB_TOKEN` | GitHub CLI | `ghp_...` |
+| `SMB_SERVER` | NAS 접속 | `10.10.100.122` |
+| `SMB_USERNAME` / `SMB_PASSWORD` | NAS 인증 | - |
+| `MEILISEARCH_URL` | 검색 서버 | `http://localhost:7700` |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth (선택) | - |
+
+> 상세: `archive-analyzer/.env.example`, `.env.example`
 
 **Hooks**: 프롬프트 제출 시 규칙 위반 자동 검사 (`.claude/hooks/`)
 
@@ -177,3 +225,17 @@ pytest tests/ -v -m unit
 1. `webapp-testing` 스킬로 기본 스모크 테스트
 2. 불가 시 "⚠️ E2E 미실행" 경고와 함께 보고
 3. 수동 테스트 계획 포함 필수
+
+---
+
+## 8. Do Not (금지 사항)
+
+| 금지 | 이유 |
+|------|------|
+| ❌ Phase validator 없이 다음 Phase 진행 | 품질 보장 실패 |
+| ❌ 상대 경로 사용 (`./`, `../`) | `D:\AI\claude01\...` 절대 경로 필수 |
+| ❌ E2E 테스트 없이 최종 보고 | 불가 시 "⚠️ E2E 미실행" 경고 필수 |
+| ❌ 영어로 일반 응답 | 기술 용어(code, GitHub)만 영어 |
+| ❌ PR 없이 main 직접 커밋 | 코드 수정은 브랜치 → PR 필수 |
+| ❌ 테스트 없이 구현 완료 처리 | TDD: Red → Green → Refactor |
+| ❌ pokervod.db 스키마 무단 변경 | `qwen_hand_analysis` 소유, 협의 필수 |

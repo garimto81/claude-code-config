@@ -11,24 +11,23 @@ Archive Analyzer는 OTT 솔루션을 위한 미디어 아카이브 분석 도구
 ## Build & Test Commands
 
 ```powershell
-# 의존성 설치
-pip install -e ".[dev,media]"
+# 의존성 설치 (용도별)
+pip install -e ".[dev,media]"        # 개발 + 미디어 분석
+pip install -e ".[dev,media,search]" # 전체 (MeiliSearch 포함)
 
 # 테스트 실행
 pytest tests/ -v
 
-# 테스트 (커버리지 포함)
+# 커버리지 포함
 pytest tests/ -v --cov=src/archive_analyzer --cov-report=term
 
-# 단일 테스트 실행
+# 단일 테스트
 pytest tests/test_scanner.py -v
 pytest tests/test_media_extractor.py::test_ffprobe_extract -v
 
-# 린터/포매터
+# 린터/포매터/타입
 ruff check src/
 black --check src/
-
-# 타입 체크
 mypy src/archive_analyzer/
 ```
 
@@ -42,7 +41,10 @@ src/archive_analyzer/
 ├── scanner.py          # 재귀 디렉토리 스캔, 체크포인트 기반 재개
 ├── database.py         # SQLite 저장 (6개 테이블)
 ├── media_extractor.py  # FFprobe 기반 메타데이터 추출
-└── report_generator.py # Markdown/JSON/Console 리포트 생성
+├── report_generator.py # Markdown/JSON/Console 리포트 생성
+├── search.py           # MeiliSearch 인덱싱/검색 서비스
+├── sync.py             # pokervod.db 동기화 모듈
+└── api.py              # FastAPI REST API (검색/동기화)
 ```
 
 ### 데이터 흐름
@@ -51,16 +53,20 @@ src/archive_analyzer/
 2. `ArchiveScanner` → 재귀 스캔, `Database`에 파일 정보 저장
 3. `SMBMediaExtractor` → 파일 일부 다운로드 (512KB) → FFprobe 분석
 4. `ReportGenerator` → 통계 집계, 스트리밍 적합성 평가
+5. `SearchService` → MeiliSearch 인덱싱/검색
+6. `SyncService` → pokervod.db 동기화
 
 ### 주요 클래스
 
 | 클래스 | 역할 | 위치 |
 |--------|------|------|
-| `SMBConnector` | SMB 연결/재시도/디렉토리 스캔 | `smb_connector.py:64` |
-| `ArchiveScanner` | 체크포인트 기반 스캔 | `scanner.py:68` |
-| `FFprobeExtractor` | 로컬 파일 메타데이터 추출 | `media_extractor.py:117` |
-| `SMBMediaExtractor` | SMB 파일 → 임시 다운로드 → 분석 | `media_extractor.py:262` |
-| `ReportGenerator` | DB 쿼리 → 리포트 생성 | `report_generator.py:235` |
+| `SMBConnector` | SMB 연결/재시도/디렉토리 스캔 | `smb_connector.py` |
+| `ArchiveScanner` | 체크포인트 기반 스캔 | `scanner.py` |
+| `FFprobeExtractor` | 로컬 파일 메타데이터 추출 | `media_extractor.py` |
+| `SMBMediaExtractor` | SMB 파일 → 임시 다운로드 → 분석 | `media_extractor.py` |
+| `ReportGenerator` | DB 쿼리 → 리포트 생성 | `report_generator.py` |
+| `SearchService` | MeiliSearch 검색 API | `search.py` |
+| `SyncService` | archive.db → pokervod.db 동기화 | `sync.py` |
 
 ## Key Scripts
 
@@ -71,6 +77,10 @@ python scripts/extract_metadata_netdrive.py   # 네트워크 드라이브 메타
 python scripts/generate_report.py             # 리포트 생성
 python scripts/retry_failed.py                # 실패 항목 재처리
 
+# 검색/동기화
+python scripts/index_to_meilisearch.py        # MeiliSearch 인덱싱
+python scripts/sync_to_pokervod.py            # pokervod.db 동기화
+
 # iconik 메타데이터 통합
 python scripts/import_iconik_metadata.py      # iconik CSV 임포트
 python scripts/clip_matcher.py                # 클립-파일 매칭
@@ -78,7 +88,6 @@ python scripts/match_by_path.py               # 경로 기반 매칭
 
 # 유틸리티
 python scripts/test_smb.py                    # SMB 연결 테스트
-python scripts/count_files.py                 # 파일 카운트
 ```
 
 ## Configuration
@@ -130,7 +139,7 @@ clip_metadata.hand_grade ───────────→ hands.tags (JSON)
 
 **스키마 변경 시 반드시 `docs/DATABASE_SCHEMA.md` 문서 업데이트 필요!**
 
-동기화 스크립트: `scripts/sync_to_pokervod.py` (예정)
+동기화 스크립트: `scripts/sync_to_pokervod.py`
 
 ## External Dependencies
 
@@ -219,18 +228,6 @@ python scripts/sync_to_pokervod.py --catalogs-only
 | `/sync/catalogs` | POST | 카탈로그 동기화 |
 | `/sync/all` | POST | 전체 동기화 |
 
-### 동기화 흐름
-
-```
-archive.db                              pokervod.db
-──────────                              ───────────
-files.path ─────────────────────────→ files.nas_path
-media_info.video_codec ─────────────→ files.codec
-media_info.width/height ────────────→ files.resolution
-media_info.duration_seconds ────────→ files.duration_sec
-파일 경로 패턴 ─────────────────────→ catalogs, subcatalogs
-```
-
 ### 다단계 서브카탈로그 분류
 
 파일 경로에서 자동으로 catalog/subcatalog/depth를 추출합니다 (최대 3단계):
@@ -249,23 +246,9 @@ media_info.duration_seconds ────────→ files.duration_sec
 
 ## Roadmap
 
-### Phase 1: 검색 기능 ✅ 완료
-- [x] MeiliSearch Docker 설정
-- [x] Python SDK 통합 (`search.py`)
-- [x] 인덱싱 스크립트 (`index_to_meilisearch.py`)
-- [x] FastAPI REST API (`api.py`)
-- [x] 테스트 코드
-
-### Phase 2: pokervod.db 동기화 ✅ 완료
-- [x] 동기화 모듈 (`sync.py`)
-- [x] CLI 스크립트 (`sync_to_pokervod.py`)
-- [x] REST API 엔드포인트 (`/sync/*`)
-- [x] 테스트 코드
-
-### Phase 3: AI 기능 (예정)
-- OpenAI Whisper (전사)
-- YOLOv8 (카드 감지)
-- Gemini API 확장
+- **Phase 1: 검색 기능** ✅ (MeiliSearch, FastAPI)
+- **Phase 2: pokervod.db 동기화** ✅ (sync.py, REST API)
+- **Phase 3: AI 기능** (예정) - Whisper 전사, YOLOv8 카드 감지
 
 ## Documentation
 

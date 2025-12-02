@@ -1,7 +1,7 @@
 # Database Schema Documentation
 
 > **Last Updated**: 2025-12-02
-> **Version**: 1.1.0
+> **Version**: 1.2.0
 
 이 문서는 archive-analyzer와 연동 레포지토리 간 DB 스키마를 정의합니다.
 **스키마 변경 시 반드시 이 문서를 업데이트하고 관련 레포에 공유해야 합니다.**
@@ -284,6 +284,7 @@ archive-analyzer                              qwen_hand_analysis
 
 | 날짜 | 버전 | 변경 내용 | 영향 범위 |
 |------|------|----------|----------|
+| 2025-12-02 | 1.2.0 | display_names 테이블, 시청자 친화적 네이밍 설계 | Phase 3 구현 예정 |
 | 2025-12-02 | 1.1.0 | subcatalogs 다단계 구조 (parent_id, depth, path) | sync.py, 마이그레이션 |
 | 2025-12-01 | 1.0.0 | 최초 문서 작성 | - |
 
@@ -475,4 +476,204 @@ print(match.year)                 # "2024"
 match = classify_path_multilevel("WSOP/WSOP ARCHIVE/2008/final_table.mp4")
 print(match.full_subcatalog_id)   # "wsop-archive-2003-2010"
 print(match.depth)                # 2
+```
+
+---
+
+## 6. Viewer-Friendly Naming Design
+
+### 6.1 Problem Statement
+
+Current archive uses **internal management folder/file naming conventions** which are unsuitable for viewers:
+
+| Problem | Current Example | Improvement Needed |
+|---------|-----------------|-------------------|
+| Abbreviations | `WSOP-BR`, `PAD S12` | Full names or familiar expressions |
+| Internal codes | `WSOP-C LA`, `WSOP-SC` | Meaningful names |
+| Inconsistency | `2024 WSOP-Europe` vs `WSOP-LAS VEGAS 2024` | Unified year position |
+| Insufficient info | `main_event.mp4` | Add specific descriptions |
+| Technical terms | `D1A`, `FT` | Viewer-understandable expressions |
+
+### 6.2 Display Names Table
+
+#### display_names (New)
+Separate management of viewer-facing names
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INTEGER PK | Unique identifier |
+| entity_type | VARCHAR(20) | Target type: `catalog`, `subcatalog`, `tournament`, `event`, `file` |
+| entity_id | VARCHAR(200) | Target ID (FK) |
+| display_name | VARCHAR(500) | Viewer display name |
+| display_name_ko | VARCHAR(500) | Korean display name |
+| short_name | VARCHAR(100) | Short name (for UI space constraints) |
+| description | TEXT | Content description |
+| description_ko | TEXT | Korean description |
+| source_type | VARCHAR(20) | Name source: `manual`, `ai_generated`, `rule_based` |
+| confidence | FLOAT | AI generation confidence (0.0~1.0) |
+| verified | BOOLEAN | Review completed flag |
+| created_at | TIMESTAMP | Created datetime |
+| updated_at | TIMESTAMP | Updated datetime |
+
+### 6.3 Catalog Display Name Mapping
+
+#### Catalogs
+
+| catalog_id | internal_name | display_name | display_name_ko |
+|------------|---------------|--------------|-----------------|
+| WSOP | WSOP | World Series of Poker | World Series of Poker |
+| HCL | HCL | Hustler Casino Live | Hustler Casino Live |
+| PAD | PAD | Poker After Dark | Poker After Dark |
+| MPP | MPP | MILLIONS Poker Party | MILLIONS Poker Party |
+| GGMillions | GGMillions | GG MILLIONS | GG MILLIONS |
+
+#### Subcatalogs
+
+| subcatalog_id | internal_name | display_name | display_name_ko |
+|---------------|---------------|--------------|-----------------|
+| wsop-br | WSOP-BR | WSOP Bracelet Series | WSOP Bracelet Series |
+| wsop-europe | WSOP-EUROPE | WSOP Europe | WSOP Europe |
+| wsop-paradise | WSOP-PARADISE | WSOP Paradise | WSOP Paradise |
+| wsop-las-vegas | WSOP-LAS VEGAS | WSOP Las Vegas | WSOP Las Vegas |
+| wsop-archive | WSOP ARCHIVE | WSOP Classic Archive | WSOP Classic Archive |
+| wsop-circuit | WSOP-C | WSOP Circuit | WSOP Circuit |
+| wsop-super-circuit | WSOP-SC | WSOP Super Circuit | WSOP Super Circuit |
+| hcl-2025 | 2025 | HCL Season 2025 | HCL Season 2025 |
+| hcl-clips | Poker Clip | HCL Best Moments | HCL Best Moments |
+| pad-s12 | PAD S12 | Poker After Dark Season 12 | Poker After Dark Season 12 |
+| pad-s13 | PAD S13 | Poker After Dark Season 13 | Poker After Dark Season 13 |
+
+### 6.4 Event/File Naming Rules
+
+#### Event Type Display Names
+
+| Internal Code | display_name |
+|---------------|--------------|
+| ME | Main Event |
+| FT | Final Table |
+| D1, D1A, D1B | Day 1, Day 1A, Day 1B |
+| D2, D3... | Day 2, Day 3... |
+| HU | Heads-Up |
+| SE | Side Event |
+
+#### File Name → Display Name Conversion Rules
+
+```python
+# Rule-based conversion examples
+FILE_NAME_PATTERNS = {
+    # WSOP patterns
+    r"WSOP (\d{4}) Main Event.*Day (\d+)([A-Z]?)":
+        "WSOP {1} Main Event Day {2}{3}",
+    r"WSOP (\d{4}).*Event #(\d+).*\$(\d+[KM]?) (.+)":
+        "WSOP {1} Event #{2} - ${3} {4}",
+
+    # HCL patterns
+    r"HCL.*(\d{4}-\d{2}-\d{2}).*(.+)":
+        "Hustler Casino Live - {2} ({1})",
+
+    # PAD patterns
+    r"PAD S(\d+) EP(\d+)":
+        "Poker After Dark S{1} Episode {2}",
+}
+```
+
+### 6.5 AI-Based Naming Generation (Phase 3 Planned)
+
+#### Process
+
+```
+1. Analyze file path/name
+   ↓
+2. Attempt rule-based matching
+   ↓ (If matching fails or info insufficient)
+3. Request AI analysis (Gemini/GPT)
+   - Pass filename, folder structure, metadata
+   - Request viewer-friendly title generation
+   ↓
+4. Save result (source_type='ai_generated', confidence=0.8)
+   ↓
+5. Await manual review (verified=false)
+   ↓
+6. Admin approval → verified=true
+```
+
+#### AI Prompt Template
+
+```
+Generate a viewer-friendly content title based on the following information:
+
+File path: {file_path}
+Filename: {filename}
+Folder: {parent_folder}
+Content type: {content_type}
+Metadata: {metadata}
+
+Requirements:
+1. Provide both English and Korean titles
+2. Use full names instead of abbreviations
+3. Include event day and table information
+4. Highlight player information if available
+5. Concise title within 100 characters
+
+Output format:
+{
+  "display_name": "...",
+  "display_name_ko": "...",
+  "short_name": "...",
+  "description": "...",
+  "confidence": 0.85
+}
+```
+
+### 6.6 Consistency Management
+
+#### Patterns Requiring Unification
+
+| Inconsistent Pattern | Unified Rule | Example |
+|---------------------|--------------|---------|
+| Year position | `{Series} {Year} {Event}` | WSOP 2024 Main Event |
+| Day notation | `Day {number}` | Day 1, Day 2 |
+| Season notation | `Season {number}` | Season 12 |
+| Episode | `Episode {number}` or `EP{number}` | Episode 5 / EP5 |
+
+#### Synonym Dictionary
+
+```python
+SYNONYMS = {
+    # Abbreviation → Standard English
+    "ME": "Main Event",
+    "FT": "Final Table",
+    "HU": "Heads-Up",
+    "EP": "Episode",
+    "S": "Season",
+    "D1": "Day 1",
+    "D2": "Day 2",
+}
+```
+
+### 6.7 Updated ERD
+
+```
+┌─────────────┐     ┌──────────────────┐
+│  catalogs   │────<│   display_names  │
+│─────────────│     │──────────────────│
+│ id (PK)     │     │ id (PK)          │
+│ name        │     │ entity_type      │
+└─────────────┘     │ entity_id (FK)   │
+       │            │ display_name     │
+       │            │ display_name_ko  │
+┌──────────────┐    │ short_name       │
+│ subcatalogs  │───<│ description      │
+│──────────────│    │ source_type      │
+│ id (PK)      │    │ confidence       │
+│ catalog_id   │    │ verified         │
+└──────────────┘    └──────────────────┘
+       │
+       ▼
+┌─────────────┐
+│    files    │────< display_names
+│─────────────│
+│ id (PK)     │
+│ filename    │
+└─────────────┘
 ```

@@ -1,6 +1,6 @@
 # Phase-Specific Agent Mapping Guide
 
-**Version**: 5.0.0 | **Updated**: 2025-01-18
+**Version**: 5.4.0 | **Updated**: 2025-12-03
 
 Complete guide for selecting optimal agents for each phase of the development cycle.
 
@@ -8,13 +8,185 @@ Complete guide for selecting optimal agents for each phase of the development cy
 
 ## Overview
 
-This document provides detailed agent selection guidance for **Phase 3-6** of the development workflow. For Phase 0-2, see [CLAUDE.md](../CLAUDE.md).
+This document provides detailed agent selection guidance for **all phases (0-6)** of the development workflow.
 
 **Quick Reference**:
+- **Phase 0**: PRD 작성 & 요구사항 분석
+- **Phase 0.5**: Task 분해 & 계획
+- **Phase 1**: 구현 (코드 + 테스트)
+- **Phase 2**: 테스트 실행 & 커버리지
+- **Phase 2.5**: 코드 리뷰 & 품질 검증
 - **Phase 3**: Versioning & Release Tagging
 - **Phase 4**: Git + Automated PR/Merge
 - **Phase 5**: E2E Testing & Security Validation
 - **Phase 6**: Production Deployment
+
+---
+
+## Phase 0: PRD 작성
+
+### context7-engineer (Required)
+**Success Rate**: 100% | **Grade**: S | **Model**: Sonnet
+
+**Use for**:
+- 최신 라이브러리/프레임워크 문서 검색
+- API 문서 검증
+- 기술 스택 최신 정보 확인
+
+**Timing**: PRD 작성 시작 전 기술 조사
+
+### seq-engineer (Recommended)
+**Model**: Sonnet
+
+**Use for**:
+- 요구사항 분석 및 구조화
+- 시퀀스 다이어그램 생성
+- 시스템 흐름 설계
+
+**Timing**: context7-engineer 이후
+
+### architect-reviewer (Optional)
+**Model**: Sonnet
+
+**Use for**:
+- 아키텍처 결정 검토
+- 기술 부채 예방
+- 확장성 검증
+
+**Timing**: PRD 초안 완성 후 검토
+
+---
+
+## Phase 0.5: Task 분해
+
+### task-decomposition (Required)
+**Model**: Haiku
+
+**Use for**:
+- PRD → Task List 변환
+- 작업 의존성 파악
+- 우선순위 결정
+
+**Timing**: Phase 0 완료 직후
+
+### taskmanager-planner (Recommended)
+**Model**: Haiku
+
+**Use for**:
+- Task 세분화 (1-2시간 단위)
+- 체크리스트 생성
+- 진행률 추적 구조 설계
+
+**Timing**: task-decomposition과 병렬 실행 가능
+
+---
+
+## Phase 1: 구현
+
+### backend-architect (Conditional)
+**Grade**: A | **Model**: Sonnet
+
+**Use for**:
+- API 설계 및 구현
+- 데이터베이스 스키마 설계
+- 서버 로직 구현
+
+**Trigger**: 백엔드 작업 시
+
+### frontend-developer (Conditional)
+**Grade**: A | **Model**: Sonnet
+
+**Use for**:
+- UI 컴포넌트 구현
+- 상태 관리 설계
+- 반응형 디자인
+
+**Trigger**: 프론트엔드 작업 시
+
+### fullstack-developer (Recommended)
+**Grade**: A | **Model**: Sonnet
+
+**Use for**:
+- 풀스택 기능 구현
+- API-UI 연동
+- 통합 로직
+
+**Timing**: 대부분의 기능 구현에 적합
+
+### debugger (Required for bugs)
+**Success Rate**: 81% | **Grade**: A | **Model**: Sonnet
+
+**Use for**:
+- TypeError, ValueError 등 에러 수정
+- 런타임 오류 디버깅
+- 로직 오류 추적
+
+**Trigger**: 에러 발생 시 자동 선택
+
+---
+
+## Phase 2: 테스트
+
+### test-automator (Required)
+**Success Rate**: 100% | **Grade**: S | **Model**: Sonnet
+
+**Use for**:
+- 유닛 테스트 자동 생성
+- 테스트 케이스 설계
+- 모킹 및 픽스처 설정
+
+**Timing**: 구현 완료 후 즉시 (1:1 pairing)
+
+### playwright-engineer (Conditional)
+**Success Rate**: 63% | **Model**: Sonnet
+
+**Use for**:
+- E2E 테스트 작성
+- 브라우저 자동화 테스트
+- 사용자 플로우 검증
+
+**Trigger**: UI 기능 테스트 필요 시
+
+**Known Issues**: 복잡한 플로우에서 45초 이상 소요될 수 있음
+
+---
+
+## Phase 2.5: 코드 리뷰
+
+### pragmatic-code-review (Required)
+**Success Rate**: 100% | **Grade**: S | **Model**: Sonnet
+
+**Use for**:
+- 코드 품질 리뷰
+- 아키텍처 일관성 검토
+- 성능 이슈 식별
+- 베스트 프랙티스 준수 확인
+
+**Timing**: Phase 2 테스트 통과 후
+
+**Command**: `/pragmatic-code-review`
+
+### design-review (Conditional)
+**Model**: Sonnet
+
+**Use for**:
+- UI/UX 디자인 리뷰
+- 접근성 검증
+- 시각적 일관성 확인
+
+**Trigger**: UI 변경이 포함된 경우
+
+**Command**: `/design-review`
+
+### security-auditor (Recommended)
+**Success Rate**: 100% | **Grade**: S | **Model**: Sonnet
+
+**Use for**:
+- 보안 취약점 사전 검토
+- OWASP Top 10 체크
+- 의존성 취약점 스캔
+
+**Timing**: 코드 리뷰와 병렬 실행
 
 ---
 

@@ -6,12 +6,12 @@
 이 문서는 archive-analyzer와 연동 레포지토리 간 DB 스키마를 정의합니다.
 **스키마 변경 시 반드시 이 문서를 업데이트하고 관련 레포에 공유해야 합니다.**
 
-### 테이블 요약 (총 34개 구현 + 4개 설계 중)
+### 테이블 요약 (총 38개 구현)
 
 | 카테고리 | 테이블 | 설명 |
 |----------|--------|------|
 | **Core** | catalogs, subcatalogs, tournaments, events, files, hands, players, hand_players, hand_tags, id_mapping | 콘텐츠 계층 구조 + 정규화 |
-| **V3.0 ⏳** | series, contents, content_players, content_tags | **설계 중** - Video Card 중심 통합 스키마 (Section 12) |
+| **V3.0 ✅** | series, contents, content_players, content_tags, tags | Video Card 중심 통합 스키마 |
 | **User** | users, user_sessions, user_preferences, watch_progress, view_events | 사용자 및 시청 기록 |
 | **Recommendation** | recommendation_cache, trending_scores, home_rows, user_home_rows | 추천 시스템 |
 | **Artwork** | artwork_variants, artwork_selections | 썸네일 개인화 |
@@ -87,6 +87,60 @@
                      │ is_all_in   │
                      └─────────────┘
 ```
+
+### 1.1.1 V3.0 ERD (Video Card 스키마)
+
+```
+┌─────────────┐
+│  catalogs   │
+│─────────────│
+│ id (PK)     │
+│ name        │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐     ┌─────────────┐
+│   series    │     │    tags     │
+│─────────────│     │─────────────│
+│ id (PK)     │     │ id (PK)     │
+│ catalog_id  │     │ name        │
+│ title       │     │ type        │
+│ season_num  │     └──────┬──────┘
+└──────┬──────┘            │
+       │                   │
+       ▼                   │
+┌─────────────────┐        │
+│    contents     │        │
+│─────────────────│        │
+│ id (PK)         │        │
+│ series_id (FK)  │        │
+│ file_id (FK)    │────────│──→ files.id
+│ episode_num     │        │
+│ title           │        │
+│ duration_sec    │        │
+└────────┬────────┘        │
+         │                 │
+    ┌────┴────┐            │
+    ▼         ▼            │
+┌──────────────┐  ┌──────────────┐
+│content_players│ │ content_tags │
+│──────────────│  │──────────────│
+│ content_id   │  │ content_id   │
+│ player_id    │  │ tag_id ──────│──┘
+│ role         │  └──────────────┘
+└──────────────┘
+       │
+       ▼
+┌─────────────┐
+│   players   │
+│─────────────│
+│ id (PK)     │
+│ name        │
+│ display_name│
+└─────────────┘
+```
+
+**V3.0 데이터 현황**: series 12개, contents 2,938개, content_players 833개, content_tags 828개, tags 5개
 
 ### 1.2 테이블 상세
 

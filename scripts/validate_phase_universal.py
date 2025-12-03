@@ -3,19 +3,14 @@
 Universal Phase Validator (Cross-platform)
 
 Works on Windows, macOS, Linux
-Validates all phases (0, 0.5, 1, 2, 3, 4, 5, 6)
+Validates all phases (0, 0.5, 1, 2, 3, 5, 6)
 
 Usage:
-    python scripts/validate_phase_universal.py 0 NNNN       # PRD validation
-    python scripts/validate_phase_universal.py 0.5 NNNN    # Task list validation
-    python scripts/validate_phase_universal.py 1           # 1:1 test pairing
-    python scripts/validate_phase_universal.py 2 --coverage 80  # Tests & coverage
-    python scripts/validate_phase_universal.py 3           # Versioning & changelog
-    python scripts/validate_phase_universal.py 4           # Git ops
-    python scripts/validate_phase_universal.py 5           # E2E & security
-    python scripts/validate_phase_universal.py 6           # Deployment readiness
+    python scripts/validate_phase_universal.py 0 NNNN
+    python scripts/validate_phase_universal.py 1
+    python scripts/validate_phase_universal.py 2 --coverage 80
 
-Version: 1.1.0
+Version: 1.0.0
 Compatible with: claude-code-config >= 5.0.0
 """
 
@@ -362,74 +357,9 @@ Examples:
         validator = Phase2Validator(verbose=args.verbose)
         result = validator.validate(min_coverage=args.coverage)
 
-    elif args.phase == "2.5":
-        # Phase 2.5: Code Review Validation
-        print("\n🔍 Validating Phase 2.5 (Code Review)...")
-        validator = PhaseValidator(verbose=args.verbose)
-
-        # Check for pending changes
-        res = subprocess.run(["git", "diff", "--name-only", "origin/HEAD..."],
-                           capture_output=True, text=True)
-        if res.stdout.strip():
-            changed_files = len(res.stdout.strip().split('\n'))
-            validator.success(f"Found {changed_files} changed files for review")
-        else:
-            validator.warn("No changes detected for review")
-
-        # Check for critical markers (TODO, FIXME, HACK)
-        res = subprocess.run(["git", "diff", "origin/HEAD..."], capture_output=True, text=True)
-        diff_content = res.stdout
-
-        critical_markers = ["TODO:", "FIXME:", "HACK:", "XXX:"]
-        for marker in critical_markers:
-            if marker in diff_content:
-                validator.warn(f"Found '{marker}' in changes")
-
-        # Security check
-        security_patterns = [
-            (r"password\s*=\s*['\"]", "Hardcoded password"),
-            (r"api_key\s*=\s*['\"]", "Hardcoded API key"),
-            (r"secret\s*=\s*['\"]", "Hardcoded secret"),
-            (r"eval\(", "Dangerous eval()"),
-        ]
-
-        for pattern, name in security_patterns:
-            if re.search(pattern, diff_content, re.IGNORECASE):
-                validator.error(f"Security issue: {name}")
-
-        # Check tests directory exists
-        if pathlib.Path("tests").exists():
-            test_files = list(pathlib.Path("tests").rglob("*test*.py")) + \
-                        list(pathlib.Path("tests").rglob("*.test.*"))
-            if test_files:
-                validator.success(f"Test files exist ({len(test_files)} files)")
-            else:
-                validator.warn("No test files found in tests/")
-        else:
-            validator.warn("tests/ directory not found")
-
-        result = validator.result()
-
-    elif args.phase == "3":
-        # Phase 3: Versioning & Changelog
-        print("\n🔍 Validating Phase 3 (Versioning & Changelog)...")
-        validator = PhaseValidator(verbose=args.verbose)
-
-        # Check CHANGELOG.md exists and has recent entry
-        changelog = pathlib.Path("CHANGELOG.md")
-        if not changelog.exists():
-            validator.error("CHANGELOG.md not found")
-        else:
-            validator.success("CHANGELOG.md found")
-            with open(changelog, 'r', encoding='utf-8') as f:
-                content = f.read()
-            # Check for version pattern
-            if re.search(r"##\s*\[?\d+\.\d+\.\d+\]?", content):
-                validator.success("Version entry found in CHANGELOG")
-            else:
-                validator.warn("No semantic version found in CHANGELOG")
-
-        result = validator.result()
+    elif args.phase == "2":
+        validator = Phase2Validator(verbose=args.verbose)
+        result = validator.validate(min_coverage=args.coverage)
 
     elif args.phase == "4":
         # Phase 4: Git Ops (Delegated to PowerShell on Windows, or simple check here)
@@ -456,69 +386,9 @@ Examples:
                 print("✅ Working directory clean")
                 result = ValidationResult.PASS
 
-    elif args.phase == "5":
-        # Phase 5: E2E & Security
-        print("\n🔍 Validating Phase 5 (E2E & Security)...")
-        validator = PhaseValidator(verbose=args.verbose)
-
-        # Check for security scan results or run basic checks
-        try:
-            # Python: pip-audit
-            if pathlib.Path("requirements.txt").exists():
-                res = subprocess.run(["pip-audit", "--strict"], capture_output=True, text=True, timeout=120)
-                if res.returncode == 0:
-                    validator.success("pip-audit: No vulnerabilities found")
-                else:
-                    validator.error(f"pip-audit found vulnerabilities:\n{res.stdout}")
-
-            # Node.js: npm audit
-            if pathlib.Path("package.json").exists():
-                res = subprocess.run(["npm", "audit", "--audit-level=high"], capture_output=True, text=True, timeout=120)
-                if res.returncode == 0:
-                    validator.success("npm audit: No high/critical vulnerabilities")
-                else:
-                    validator.warn(f"npm audit found issues:\n{res.stdout}")
-
-        except FileNotFoundError as e:
-            validator.warn(f"Security tool not found: {e}")
-        except subprocess.TimeoutExpired:
-            validator.warn("Security scan timed out")
-
-        result = validator.result()
-
-    elif args.phase == "6":
-        # Phase 6: Deployment Readiness
-        print("\n🔍 Validating Phase 6 (Deployment Readiness)...")
-        validator = PhaseValidator(verbose=args.verbose)
-
-        # Check git tag exists
-        res = subprocess.run(["git", "tag", "-l", "v*"], capture_output=True, text=True)
-        if res.stdout.strip():
-            latest_tag = res.stdout.strip().split('\n')[-1]
-            validator.success(f"Git tag found: {latest_tag}")
-        else:
-            validator.warn("No version tags found (v* pattern)")
-
-        # Check branch is clean
-        res = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
-        if res.stdout.strip():
-            validator.error("Working directory has uncommitted changes")
-        else:
-            validator.success("Working directory clean")
-
-        # Check on main/master branch or has PR merged
-        res = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True)
-        branch = res.stdout.strip()
-        if branch in ["main", "master"]:
-            validator.success(f"On main branch: {branch}")
-        else:
-            validator.warn(f"Not on main branch: {branch}")
-
-        result = validator.result()
-
     else:
         print(f"❌ Phase {args.phase} validation not yet implemented")
-        print("   Available: 0, 0.5, 1, 2, 3, 4, 5, 6")
+        print("   Available: 0, 0.5, 1, 2, 4")
         sys.exit(1)
 
     # Print final result

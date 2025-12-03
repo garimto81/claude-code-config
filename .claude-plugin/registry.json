@@ -1,7 +1,7 @@
 {
   "$schema": "./registry-schema.json",
-  "version": "1.0.0",
-  "lastUpdated": "2025-01-19",
+  "version": "5.4.0",
+  "lastUpdated": "2025-12-03",
   "plugins": [
     {
       "id": "python-development",
@@ -126,51 +126,48 @@
     },
     {
       "id": "phase-0-planning",
-      "version": "4.0.0",
+      "version": "5.4.0",
       "source": {
         "type": "local",
-        "description": "Legacy phase-based plugin (planning)"
+        "description": "Phase 0 planning agents (PRD, requirements)"
       },
       "localPath": ".claude/plugins/phase-0-planning",
       "upstream": null,
       "localChanges": [],
       "autoUpdate": false,
       "installed": "2025-01-01",
-      "lastChecked": "2025-01-19",
-      "status": "active",
-      "notes": "Legacy plugin, consider migrating to core/"
+      "lastChecked": "2025-12-03",
+      "status": "active"
     },
     {
       "id": "phase-1-development",
-      "version": "4.0.0",
+      "version": "5.4.0",
       "source": {
         "type": "local",
-        "description": "Legacy phase-based plugin (development)"
+        "description": "Phase 1 development agents (implementation)"
       },
       "localPath": ".claude/plugins/phase-1-development",
       "upstream": null,
       "localChanges": [],
       "autoUpdate": false,
       "installed": "2025-01-01",
-      "lastChecked": "2025-01-19",
-      "status": "active",
-      "notes": "Legacy plugin, consider migrating to core/"
+      "lastChecked": "2025-12-03",
+      "status": "active"
     },
     {
       "id": "phase-2-testing",
-      "version": "4.0.0",
+      "version": "5.4.0",
       "source": {
         "type": "local",
-        "description": "Legacy phase-based plugin (testing)"
+        "description": "Phase 2 testing agents (unit, integration)"
       },
       "localPath": ".claude/plugins/phase-2-testing",
       "upstream": null,
       "localChanges": [],
       "autoUpdate": false,
       "installed": "2025-01-01",
-      "lastChecked": "2025-01-19",
-      "status": "active",
-      "notes": "Legacy plugin, consider migrating to core/"
+      "lastChecked": "2025-12-03",
+      "status": "active"
     }
   ],
   "remoteRepositories": [

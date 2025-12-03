@@ -15,20 +15,53 @@ Write-Host "=" * 60
 $errors = @()
 $warnings = @()
 
+# 0. 검사 제외 파일 패턴 (검증 스크립트 자체는 제외)
+$excludePatterns = @(
+    "validate-phase-.*\.ps1",
+    "validate_phase_universal\.py"
+)
+
 # 1. Git 변경사항 확인
 Write-Host ""
 Write-Host "📋 Checking pending changes..." -ForegroundColor Yellow
 
 $gitStatus = git status --porcelain 2>&1
-$gitDiff = git diff --name-only origin/HEAD... 2>&1
+$gitDiffFiles = git diff --name-only origin/HEAD... 2>&1
 
-if ($gitDiff) {
-    $changedFiles = ($gitDiff -split "`n").Count
+if ($gitDiffFiles) {
+    $changedFiles = ($gitDiffFiles -split "`n").Count
     Write-Host "✅ Found $changedFiles changed files for review" -ForegroundColor Green
 } else {
     $warnings += "No changes detected for review"
     Write-Host "⚠️  No changes detected for review" -ForegroundColor Yellow
 }
+
+# 제외 패턴을 적용한 diff 가져오기 (검증 스크립트 제외)
+function Get-FilteredDiff {
+    $diff = git diff origin/HEAD... 2>&1
+    $filteredLines = @()
+    $currentFile = ""
+    $skipFile = $false
+
+    foreach ($line in ($diff -split "`n")) {
+        if ($line -match "^diff --git a/(.+) b/") {
+            $currentFile = $Matches[1]
+            $skipFile = $false
+            foreach ($pattern in $excludePatterns) {
+                if ($currentFile -match $pattern) {
+                    $skipFile = $true
+                    break
+                }
+            }
+        }
+        if (-not $skipFile) {
+            $filteredLines += $line
+        }
+    }
+    return $filteredLines -join "`n"
+}
+
+$filteredDiff = Get-FilteredDiff
 
 # 2. 코드 리뷰 체크리스트 확인
 Write-Host ""
@@ -39,7 +72,7 @@ $criticalPatterns = @("TODO:", "FIXME:", "HACK:", "XXX:")
 $criticalFound = $false
 
 foreach ($pattern in $criticalPatterns) {
-    $matches = git diff origin/HEAD... 2>&1 | Select-String -Pattern $pattern
+    $matches = $filteredDiff | Select-String -Pattern $pattern
     if ($matches) {
         $criticalFound = $true
         $warnings += "Found '$pattern' in changes"
@@ -56,7 +89,7 @@ $debugPatterns = @("console\.log\(", "print\(.*debug", "debugger;")
 $debugFound = $false
 
 foreach ($pattern in $debugPatterns) {
-    $matches = git diff origin/HEAD... 2>&1 | Select-String -Pattern $pattern
+    $matches = $filteredDiff | Select-String -Pattern $pattern
     if ($matches) {
         $debugFound = $true
         $warnings += "Found debug statement: $pattern"
@@ -82,7 +115,7 @@ $securityPatterns = @(
 
 $securityIssues = $false
 foreach ($sec in $securityPatterns) {
-    $matches = git diff origin/HEAD... 2>&1 | Select-String -Pattern $sec.Pattern
+    $matches = $filteredDiff | Select-String -Pattern $sec.Pattern
     if ($matches) {
         $securityIssues = $true
         $errors += "Security issue: $($sec.Name)"

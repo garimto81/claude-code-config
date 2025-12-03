@@ -26,15 +26,17 @@
 
 | 레포지토리 | DB 파일 | 역할 |
 |-----------|---------|------|
-| `archive-analyzer` | `data/output/archive.db` | 아카이브 스캔/메타데이터 |
-| `qwen_hand_analysis` | `data/pokervod.db` | OTT 플랫폼 (마스터 DB) |
+| `archive-analyzer` | `archive.db` (로컬) | 아카이브 스캔/메타데이터 |
+| `shared-data` | `pokervod.db` | **통합 DB** (WAL 모드) |
+
+> 📌 통합 DB 상세: `qwen_hand_analysis/docs/DATABASE_UNIFICATION.md` 참조
 
 ---
 
-## 1. pokervod.db (OTT 마스터 DB)
+## 1. pokervod.db (통합 마스터 DB)
 
-**경로**: `d:/AI/claude01/qwen_hand_analysis/data/pokervod.db`
-**소유자**: `qwen_hand_analysis` 레포
+**경로**: `D:/AI/claude01/shared-data/pokervod.db`
+**관리**: 모든 프로젝트 공유 (WAL 모드)
 
 ### 1.1 ERD
 
@@ -393,8 +395,8 @@ archive-analyzer                              qwen_hand_analysis
 
 import sqlite3
 
-ARCHIVE_DB = "d:/AI/claude01/archive-analyzer/data/output/archive.db"
-POKERVOD_DB = "d:/AI/claude01/qwen_hand_analysis/data/pokervod.db"
+ARCHIVE_DB = "D:/AI/claude01/archive-analyzer/archive.db"
+POKERVOD_DB = "D:/AI/claude01/shared-data/pokervod.db"
 
 def sync_files():
     """files 테이블 동기화"""
